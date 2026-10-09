@@ -1,0 +1,64 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Tenor+Sans&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --rose: #be185d;
+  --blush: #fdf2f8;
+  --charcoal: #1f2937;
+  --cloud: #f3f4f6;
+  --white: #ffffff;
+  --light-blue: #5BCEFA;
+  --trans-pink: #F5A9B8;
+}
+
+/* Hide scrollbars smoothly across browsers */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none !important;
+}
+html, body, * {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  color: var(--charcoal);
+  background-color: var(--white);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: 'Tenor Sans', Georgia, serif;
+  font-weight: normal !important;
+}
+
+body, svg, button, h1, h2, h3, p, span {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input, textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+@media print {
+  @page {
+    size: letter;
+    margin: 0.5in 0.25in;
+  }
+  body {
+    background-color: white !important;
+    color: #1f2937 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Competency and Values Wheel</title>
+    
+    <!-- Google Fonts: Tenor Sans (Headings) & Open Sans (Body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Tenor+Sans&display=swap" rel="stylesheet">
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Open Sans"', 'system-ui', 'sans-serif'],
+                        heading: ['"Tenor Sans"', 'Georgia', 'serif'],
+                    },
+                    colors: {
+                        rose: {
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            200: '#fbcfe8',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be185d',
+                            800: '#9d174d',
+                            900: '#831843'
+                        },
+                        blush: '#fdf2f8',
+                        charcoal: '#1f2937',
+                        cloud: '#f3f4f6',
+                        lightBlue: '#5BCEFA',
+                        transPink: '#F5A9B8',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Load Babel to translate React JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Setup Module Imports for React and Lucide Icons -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+            "lucide-react": "https://esm.sh/lucide-react@0.344.0?external=react"
+        }
+    }
+    </script>
+    
+    <style>
+        :root {
+            --rose: #be185d;
+            --blush: #fdf2f8;
+            --charcoal: #1f2937;
+            --cloud: #f3f4f6;
+            --white: #ffffff;
+            --light-blue: #5BCEFA;
+            --trans-pink: #F5A9B8;
+        }
+
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar,
+        *::-webkit-scrollbar {
+            display: none !important;
+        }
+        html, body, * {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            color: var(--charcoal);
+            background-color: var(--white);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6, .font-heading {
+            font-family: 'Tenor Sans', sans-serif;
+            font-weight: normal !important;
+        }
+
+        @media print {
+            @page {
+                size: letter;
+                margin: 0.5in 0.25in;
+            }
+            body {
+                background-color: white !important;
+                color: #1f2937 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            .page-container {
+                margin: 0 !important;
+                padding: 0.25in !important;
+                box-shadow: none !important;
+                max-width: 100% !important;
+            }
+            .no-break {
+                break-inside: avoid;
+            }
+            h1, h3 {
+                break-after: avoid;
+            }
+            h2 {
+                page-break-before: auto;
+                break-after: avoid;
+            }
+        }
+
+        body, svg, button, h1, h2, h3, p, span {
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        input, textarea {
+            -webkit-user-select: text;
+            user-select: text;
+        }
+    </style>
+</head>
+<body class="bg-white min-h-screen text-charcoal selection:bg-rose-100 selection:text-rose-900">
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useMemo, useRef, useEffect } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { 
+            Award, Heart, Route, ArrowRight, ArrowLeft, Check, Plus, 
+            Trash2, Edit3, X, Copy, ExternalLink, FileText
+        } from 'lucide-react';
+
+        // =========================================================================
+        // SITE ICON: Three-Color Pie Chart
+        // =========================================================================
+
+        function ThreeColorPieIcon({ size = 26, className = "" }) {
+          return (
+            <svg width={size} height={size} viewBox="0 0 32 32" fill="none" className={className}>
+              <path d="M16 16 L16 2 A14 14 0 0 1 28.12 23 L16 16 Z" fill="#be185d" />
+              <path d="M16 16 L28.12 23 A14 14 0 0 1 3.88 23 L16 16 Z" fill="#5BCEFA" />
+              <path d="M16 16 L3.88 23 A14 14 0 0 1 16 2 L16 16 Z" fill="#1f2937" />
+              <circle cx="16" cy="16" r="14" stroke="#ffffff" strokeWidth="1.5" />
+            </svg>
+          );
+        }
+
+        // =========================================================================
+        // BANDED COLOR PALETTES (Blue, Green, Yellow, Lighter Grey Shades - No Dark Pink)
+        // =========================================================================
+
+        const PALETTES = {
+          blue: {
+            ring1: "#1d4ed8",      // Core (Blue 700)
+            ring2: "#3b82f6",      // Secondary (Blue 500)
+            ring3: "#60a5fa"       // Tertiary (Blue 400)
+          },
+          green: {
+            ring1: "#15803d",      // Core (Green 700)
+            ring2: "#22c55e",      // Secondary (Green 500)
+            ring3: "#4ade80"       // Tertiary (Green 400)
+          },
+          yellow: {
+            ring1: "#d97706",      // Core (Amber 600)
+            ring2: "#f59e0b",      // Secondary (Amber 500)
+            ring3: "#fbbf24"       // Tertiary (Amber 400)
+          },
+          slateGrey: {
+            ring1: "#475569",      // Core (Slate 600)
+            ring2: "#64748b",      // Secondary (Slate 500)
+            ring3: "#94a3b8"       // Tertiary (Slate 400)
+          },
+          lightGrey: {
+            ring1: "#52525b",      // Core (Zinc 600)
+            ring2: "#71717a",      // Secondary (Zinc 500)
+            ring3: "#a1a1aa"       // Tertiary (Zinc 400)
+          }
+        };
+
+        const defaultCompetencyFramework = [
+          {
+            name: "Individual Contributor",
+            shortName: "IC Tier",
+            palette: PALETTES.blue,
+            categories: [
+              {
+                name: "Action Orientation",
+                definition: "Delivering high-quality individual work efficiently and meeting project timelines reliably.",
+                children: [
+                  { name: "High-Quality Delivery", definition: "Consistently producing thorough, error-free deliverables that meet high standards." },
+                  { name: "Execution Efficiency", definition: "Working swiftly and eliminating unnecessary bottlenecks in daily tasks." },
+                  { name: "Timeline Reliability", definition: "Meeting deadlines dependably and proactively communicating milestones." }
+                ]
+              },
+              {
+                name: "Collaborative Communication",
+                definition: "Sharing ideas transparently, listening actively, and working constructively across immediate team circles.",
+                children: [
+                  { name: "Transparent Sharing", definition: "Openly conveying progress, insights, and roadblocks without withholding information." },
+                  { name: "Active Listening", definition: "Attentively processing peer perspectives before formulating responses or decisions." },
+                  { name: "Constructive Teaming", definition: "Fostering positive, supportive working relationships across immediate team circles." }
+                ]
+              },
+              {
+                name: "Problem Solving",
+                definition: "Identifying tactical roadblocks and implementing immediate, practical solutions within a defined scope.",
+                children: [
+                  { name: "Roadblock Diagnosis", definition: "Pinpointing root causes of tactical friction or system bottlenecks quickly." },
+                  { name: "Practical Solutions", definition: "Implementing lean, pragmatic fixes that address immediate challenges." },
+                  { name: "Scoped Execution", definition: "Resolving issues cleanly within agreed boundaries and operational parameters." }
+                ]
+              },
+              {
+                name: "Functional Expertise",
+                definition: "Demonstrating core technical or specialized skills required to execute day-to-day responsibilities.",
+                children: [
+                  { name: "Technical Mastery", definition: "Applying domain knowledge, specialized tools, and best practices with high precision." },
+                  { name: "Continuous Learning", definition: "Keeping technical capabilities current through continuous practice and research." },
+                  { name: "Quality Standards", definition: "Upholding specialized craft benchmarks and industry standards in all outputs." }
+                ]
+              },
+              {
+                name: "Personal Accountability",
+                definition: "Owning individual deliverables, mistakes, and personal professional development goals.",
+                children: [
+                  { name: "Ownership Mindset", definition: "Taking full end-to-end responsibility for task outcomes without finger-pointing." },
+                  { name: "Constructive Correction", definition: "Transparently acknowledging mistakes and turning missteps into improvements." },
+                  { name: "Growth Proactivity", definition: "Setting self-directed development objectives to continuously level up." }
+                ]
+              }
+            ]
+          },
+          {
+            name: "Manager",
+            shortName: "Manager Tier",
+            palette: PALETTES.green,
+            categories: [
+              {
+                name: "Performance Enablement",
+                definition: "Coaching direct reports, providing actionable feedback, and unblocking career growth paths.",
+                children: [
+                  { name: "Development Coaching", definition: "Guiding team members with inquiring questions rather than direct commands." },
+                  { name: "Actionable Feedback", definition: "Delivering timely, constructive, and growth-oriented performance reviews." },
+                  { name: "Pathway Unblocking", definition: "Creating visibility and opportunities for direct reports' career advancement." }
+                ]
+              },
+              {
+                name: "Resource Optimization",
+                definition: "Allocating time, budget, and tools effectively to maximize team output without burnout.",
+                children: [
+                  { name: "Workload Balancing", definition: "Distributing responsibilities fairly to sustain peak team energy without burnout." },
+                  { name: "Resource Stewardship", definition: "Investing resources prudently in high-leverage tools and processes." },
+                  { name: "Capacity Forecasting", definition: "Accurately sizing team bandwidth against quarterly and annual project loads." }
+                ]
+              },
+              {
+                name: "Conflict Resolution",
+                definition: "Identifying, addressing, and resolving interpersonal or operational friction within the team early.",
+                children: [
+                  { name: "Friction Detection", definition: "Sensing early interpersonal tension before it escalates into productivity loss." },
+                  { name: "Neutral Mediation", definition: "Facilitating open dialogue and mutual understanding between opposing views." },
+                  { name: "Norms Alignment", definition: "Securing durable commitments and shared ground on team working agreements." }
+                ]
+              },
+              {
+                name: "Operational Execution",
+                definition: "Translating high-level company strategies into clear, measurable milestones for the team.",
+                children: [
+                  { name: "Milestone Translation", definition: "Deconstructing company vision into concrete, trackable team deliverables." },
+                  { name: "Metric Alignment", definition: "Establishing unambiguous KPIs and progress indicators for the department." },
+                  { name: "Execution Cadence", definition: "Running productive standups, reviews, and syncs that sustain steady velocity." }
+                ]
+              },
+              {
+                name: "Empathetic Leadership",
+                definition: "Prioritizing team psychological safety, active listening, and individual well-being.",
+                children: [
+                  { name: "Psychological Safety", definition: "Building an environment where team members share bold ideas without fear." },
+                  { name: "Empathetic Attunement", definition: "Demonstrating genuine care for individuals' well-being and personal situations." },
+                  { name: "Inclusive Decisions", definition: "Ensuring all voices and perspectives are actively considered in team decisions." }
+                ]
+              }
+            ]
+          },
+          {
+            name: "Director",
+            shortName: "Director Tier",
+            palette: PALETTES.slateGrey,
+            categories: [
+              {
+                name: "Strategic Foresight",
+                definition: "Anticipating industry shifts, market trends, and long-term organizational opportunities to set vision.",
+                children: [
+                  { name: "Horizon Scanning", definition: "Identifying technological and competitive disruptions well ahead of the curve." },
+                  { name: "Vision Articulation", definition: "Painting an inspiring, actionable multi-year vision for the division." },
+                  { name: "Strategic Bets", definition: "Making disciplined bets on transformative long-term opportunities." }
+                ]
+              },
+              {
+                name: "Stakeholder<br>Influence",
+                definition: "Aligning cross-functional executive peers and driving consensus on major organizational initiatives.",
+                children: [
+                  { name: "Executive Consensus", definition: "Rallying peer department heads behind shared enterprise initiatives." },
+                  { name: "Narrative Framing", definition: "Communicating business cases compellingly to executive leadership." },
+                  { name: "Cross-Silo Coalition", definition: "Dismantling organizational silos through mutual incentives and shared goals." }
+                ]
+              },
+              {
+                name: "Change Management",
+                definition: "Leading large-scale structural, technical, or cultural transformations smoothly across departments.",
+                children: [
+                  { name: "Transformation Design", definition: "Designing phased transition roadmaps that maintain business continuity." },
+                  { name: "Cultural Stewardship", definition: "Championing organizational values and morale through periods of uncertainty." },
+                  { name: "Change Narrative", definition: "Proactively answering concerns and aligning company narrative across departments." }
+                ]
+              },
+              {
+                name: "Talent Architecture",
+                definition: "Designing long-term workforce capabilities, succession plans, and organizational structures.",
+                children: [
+                  { name: "Org Design", definition: "Structuring departments and reporting lines for agility and minimal bureaucracy." },
+                  { name: "Succession Bench", definition: "Cultivating a deep bench of future leaders and high-potential contributors." },
+                  { name: "Capability Modeling", definition: "Anticipating organizational skills needed 2-3 years into the future." }
+                ]
+              },
+              {
+                name: "Fiscal Governance",
+                definition: "Managing macro budgets, evaluating ROI on large initiatives, and ensuring long-term financial health.",
+                children: [
+                  { name: "Budget Allocation", definition: "Allocating multi-million dollar departmental budgets responsibly." },
+                  { name: "ROI Evaluation", definition: "Measuring quantitative and qualitative return on major capital investments." },
+                  { name: "Risk Governance", definition: "Ensuring long-term organizational solvency, risk mitigation, and compliance." }
+                ]
+              }
+            ]
+          }
+        ];
+
+        const defaultValuesFramework = [
+          {
+            name: "Teamwork",
+            palette: PALETTES.blue,
+            definition: "Prioritizing collective success over individual praise and actively breaking down organizational silos.",
+            children: [
+              { name: "Cross-Functional Teaming", definition: "Actively reaching across departmental boundaries to share knowledge, unblock peers, and solve problems together." },
+              { name: "Win-Together Culture", definition: "Celebrating group achievements and elevating teammates' contributions rather than seeking individual spotlight." },
+              { name: "Team Charters & Norms", definition: "Co-creating explicit group agreements on communication cadences, psychological safety, and mutual accountability." }
+            ]
+          },
+          {
+            name: "Empathy",
+            palette: PALETTES.green,
+            definition: "Practicing active perspective-taking, psychological attunement, and treating everyone with fundamental dignity.",
+            children: [
+              { name: "Active Perspective-Taking", definition: "Consciously viewing decisions, conflicts, and workloads through the lived experiences of colleagues and clients." },
+              { name: "Supportive Presence", definition: "Offering compassion and practical assistance during personal or professional hardship without judgment." },
+              { name: "Dignity in Discourse", definition: "Upholding mutual respect and constructive regard even during intense debate or difficult performance conversations." }
+            ]
+          },
+          {
+            name: "Agility",
+            palette: PALETTES.yellow,
+            definition: "Adapting quickly to shifting business environments and viewing unexpected change as a strategic opportunity.",
+            children: [
+              { name: "Rapid Iteration", definition: "Testing hypotheses with small, low-risk experiments and gathering real-world feedback before scaling." },
+              { name: "Embracing Ambiguity", definition: "Maintaining focus, enthusiasm, and decision momentum when specifications or roadmaps are incomplete." },
+              { name: "Fast Pivot Execution", definition: "Courageously discontinuing ineffective initiatives and redirecting resources toward newly emergent priorities." }
+            ]
+          },
+          {
+            name: "Integrity",
+            palette: PALETTES.lightGrey,
+            definition: "Maintaining unwavering ethical standards, transparency, and honesty in all business dealings and interactions.",
+            children: [
+              { name: "Radical Transparency", definition: "Communicating hard truths, operational challenges, and performance realities openly without spin." },
+              { name: "Commitment Honesty", definition: "Doing what you said you would do, and proactively raising flags early if commitments cannot be honored." },
+              { name: "Ethical Safeguarding", definition: "Standing up for fairness, privacy, and compliance even when facing intense pressure to take shortcuts." }
+            ]
+          }
+        ];
+
+        function buildDefinitionMap() {
+          const map = {};
+          defaultCompetencyFramework.forEach(lvl => {
+            map[lvl.name] = lvl.definition;
+            lvl.categories.forEach(cat => {
+              map[cat.name] = cat.definition;
+              cat.children.forEach(sub => {
+                map[sub.name] = sub.definition;
+              });
+            });
+          });
+          defaultValuesFramework.forEach(val => {
+            map[val.name] = val.definition;
+            val.children.forEach(beh => {
+              map[beh.name] = beh.definition;
+            });
+          });
+          return map;
+        }
+        const allDefinitions = buildDefinitionMap();
+
+        // =========================================================================
+        // MATH & GEOMETRY HELPERS
+        // =========================================================================
+
+        function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+          const angleInRadians = (angleInDegrees - 90) * (Math.PI / 180.0);
+          return {
+            x: centerX + (radius * Math.cos(angleInRadians)),
+            y: centerY + (radius * Math.sin(angleInRadians)),
+          };
+        }
+
+        function describeArc(x, y, innerRadius, outerRadius, startAngle, endAngle) {
+          const angleDiff = endAngle - startAngle;
+          if (angleDiff >= 360) {
+            const mid = startAngle + 180;
+            return `${describeArc(x, y, innerRadius, outerRadius, startAngle, mid)} ${describeArc(x, y, innerRadius, outerRadius, mid, endAngle)}`;
+          }
+
+          const startInner = polarToCartesian(x, y, innerRadius, endAngle);
+          const endInner = polarToCartesian(x, y, innerRadius, startAngle);
+          const startOuter = polarToCartesian(x, y, outerRadius, endAngle);
+          const endOuter = polarToCartesian(x, y, outerRadius, startAngle);
+          const largeArcFlag = angleDiff <= 180 ? '0' : '1';
+
+          return [
+            'M', startOuter.x, startOuter.y,
+            'A', outerRadius, outerRadius, 0, largeArcFlag, 0, endOuter.x, endOuter.y,
+            'L', endInner.x, endInner.y,
+            'A', innerRadius, innerRadius, 0, largeArcFlag, 1, startInner.x, startInner.y,
+            'Z'
+          ].join(' ');
+        }
+
+        function describeCurvedTextArc(centerX, centerY, radius, startAngle, endAngle) {
+          const midAngle = startAngle + (endAngle - startAngle) / 2;
+          const isBottom = midAngle > 90 && midAngle < 270;
+
+          if (isBottom) {
+            const start = polarToCartesian(centerX, centerY, radius, endAngle);
+            const end = polarToCartesian(centerX, centerY, radius, startAngle);
+            const largeArc = (endAngle - startAngle) <= 180 ? 0 : 1;
+            return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 0 ${end.x} ${end.y}`;
+          } else {
+            const start = polarToCartesian(centerX, centerY, radius, startAngle);
+            const end = polarToCartesian(centerX, centerY, radius, endAngle);
+            const largeArc = (endAngle - startAngle) <= 180 ? 0 : 1;
+            return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y}`;
+          }
+        }
+
+        function getSegmentThemeColor(path, levelIndex, isValues) {
+          if (!path || path.length === 0) return '#1d4ed8';
+          const rootName = path[0];
+          const framework = isValues ? defaultValuesFramework : defaultCompetencyFramework;
+          const rootNode = framework.find(n => n.name === rootName);
+          if (!rootNode) return '#1d4ed8';
+          if (levelIndex === 0) return rootNode.palette.ring1;
+          if (levelIndex === 1) return rootNode.palette.ring2;
+          return rootNode.palette.ring3;
+        }
+
+        // =========================================================================
+        // LOCAL STORAGE
+        // =========================================================================
+
+        const STORAGE_KEY_SESSIONS = 'lily_comp_values_sessions';
+        const STORAGE_KEY_USER = 'lily_comp_values_user';
+
+        function loadSessions() {
+          try {
+            const data = localStorage.getItem(STORAGE_KEY_SESSIONS);
+            return data ? JSON.parse(data) : [];
+          } catch {
+            return [];
+          }
+        }
+
+        function saveSessions(sessions) {
+          try {
+            localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions));
+          } catch(e) {}
+        }
+
+        function generatePromptText({ level, competencies = [], values = [] }) {
+          const roleTitle = level || "professional";
+          const compNames = competencies.map(c => c[c.length - 1]).filter(Boolean);
+          const valNames = values.map(v => v[v.length - 1]).filter(Boolean);
+
+          const compStr = compNames.length > 0 ? compNames.map(s => `[${s}]`).join(', ') : '[Cross-functional execution & communication]';
+          const valStr = valNames.length > 0 ? valNames.map(s => `[${s}]`).join(', ') : '[Teamwork & Empathy]';
+
+          return `I am currently a ${roleTitle} looking to improve my capabilities and alignment with our organizational values.
+
+Target Focus Areas:
+• Competencies & Observable Skills: ${compStr}
+• Core Values & Workplace Behaviors: ${valStr}
+
+Please create a tailored, pragmatic 70-20-10 Professional Development Plan for me:
+1. 70% Experiential (On-the-Job): 3 concrete, high-impact stretch assignments or workplace experiments I can start this week.
+2. 20% Social (Exposure & Mentoring): 2 structured conversations, mentorship exercises, or shadowing opportunities.
+3. 10% Formal (Education): 2 curated book chapters, foundational models, or skill frameworks to study.
+
+Also include 3 reflective self-coaching questions for my 30-day review.`;
+        }
+
+        // =========================================================================
+        // COMPONENT: ConfirmationModal
+        // =========================================================================
+
+        function ConfirmationModal({ isOpen, title, message, confirmText = "Confirm", confirmColor = "bg-rose-700", onConfirm, onCancel }) {
+          if (!isOpen) return null;
+
+          return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/60 backdrop-blur-sm animate-in fade-in">
+              <div className="bg-white w-full max-w-md rounded-3xl border border-slate-200 p-6 shadow-2xl flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-heading text-xl text-charcoal">{title}</h3>
+                  <button onClick={onCancel} className="p-1 text-slate-400 hover:text-slate-600">
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  {message}
+                </p>
+
+                <div className="flex items-center justify-end gap-2 pt-3">
+                  <button
+                    onClick={onCancel}
+                    className="py-2.5 px-4 rounded-xl bg-cloud hover:bg-slate-200 text-charcoal font-bold text-xs transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={onConfirm}
+                    className={`py-2.5 px-5 rounded-xl ${confirmColor} hover:opacity-90 text-white font-bold text-xs shadow-sm transition-colors`}
+                  >
+                    {confirmText}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        // =========================================================================
+        // COMPONENT: WheelContainer (Maximized 2-Ring Full View & ~52% Visible Focused View)
+        // =========================================================================
+
+        function WheelContainer({
+          activeMode,
+          setActiveMode,
+          competencyPaths,
+          setCompetencyPaths,
+          valuesPaths,
+          setValuesPaths,
+          isMultiSelect
+        }) {
+          const [isZoomedOut, setIsZoomedOut] = useState(true);
+          const [rotation, setRotation] = useState(0);
+          const [isManual, setIsManual] = useState(false);
+
+          const dragRef = useRef({ isDown: false, hasMoved: false, lastAtan: 0 });
+          const velocityRef = useRef(0);
+          const lastAngleRef = useRef(0);
+          const lastTimeRef = useRef(0);
+          const rafRef = useRef(null);
+          const clickStartRef = useRef({ x: 0, y: 0 });
+          const lastClickTimeRef = useRef(0);
+          const pendingSliceRef = useRef(null);
+          const svgRef = useRef(null);
+
+          const viewBoxSize = 1000;
+          const center = viewBoxSize / 2;
+          const centerRadius = 82;
+
+          // RADIUS CONFIGURATION:
+          // IN FULL VIEW: Two-ring format for both wheels! Center ring is expanded even more!
+          // IN FOCUSED VIEW: Competencies shows all 3 rings; Values shows 2 rings.
+          const rRing1_Full = 295; // Expanded center ring! (width = 213px)
+          const rRing2_Full = 465; // Outer ring (width = 170px)
+
+          const rRing1_Focus = 215;
+          const rRing2_Focus = activeMode === 'values' ? 465 : 340;
+          const rRing3_Focus = 465;
+
+          const baseSlices = useMemo(() => {
+            const result = [];
+
+            if (activeMode === 'competencies') {
+              const sectorAngle = 360 / defaultCompetencyFramework.length;
+
+              defaultCompetencyFramework.forEach((lvl, lvlIdx) => {
+                const lvlStart = lvlIdx * sectorAngle;
+                const lvlEnd = lvlStart + sectorAngle;
+                const lvlPath = [lvl.name];
+
+                // RING 1: Core Leadership Level
+                result.push({
+                  id: lvlPath.join('---'),
+                  name: lvl.name,
+                  level: 0,
+                  path: lvlPath,
+                  startAngle: lvlStart,
+                  endAngle: lvlEnd,
+                  innerRadius: centerRadius,
+                  outerRadius: isZoomedOut ? rRing1_Full : rRing1_Focus,
+                  color: lvl.palette.ring1
+                });
+
+                const catSpan = sectorAngle / lvl.categories.length;
+                lvl.categories.forEach((cat, catIdx) => {
+                  const catStart = lvlStart + (catIdx * catSpan);
+                  const catEnd = catStart + catSpan;
+                  const catPath = [...lvlPath, cat.name];
+
+                  // RING 2: Competency Category
+                  result.push({
+                    id: catPath.join('---'),
+                    name: cat.name,
+                    level: 1,
+                    path: catPath,
+                    startAngle: catStart,
+                    endAngle: catEnd,
+                    innerRadius: isZoomedOut ? rRing1_Full : rRing1_Focus,
+                    outerRadius: isZoomedOut ? rRing2_Full : rRing2_Focus,
+                    color: lvl.palette.ring2
+                  });
+
+                  // RING 3: Sub-competencies (ONLY IN FOCUSED VIEW!)
+                  if (!isZoomedOut) {
+                    const subSpan = catSpan / cat.children.length;
+                    cat.children.forEach((sub, subIdx) => {
+                      const subStart = catStart + (subIdx * subSpan);
+                      const subEnd = subStart + subSpan;
+                      const subPath = [...catPath, sub.name];
+
+                      result.push({
+                        id: subPath.join('---'),
+                        name: sub.name,
+                        level: 2,
+                        path: subPath,
+                        startAngle: subStart,
+                        endAngle: subEnd,
+                        innerRadius: rRing2_Focus,
+                        outerRadius: rRing3_Focus,
+                        color: lvl.palette.ring3
+                      });
+                    });
+                  }
+                });
+              });
+            } else {
+              // VALUES: 2 Rings for both Full View and Focused View
+              const sectorAngle = 360 / defaultValuesFramework.length;
+              defaultValuesFramework.forEach((val, valIdx) => {
+                const valStart = valIdx * sectorAngle;
+                const valEnd = valStart + sectorAngle;
+                const valPath = [val.name];
+
+                // RING 1: Core Value
+                result.push({
+                  id: valPath.join('---'),
+                  name: val.name,
+                  level: 0,
+                  path: valPath,
+                  startAngle: valStart,
+                  endAngle: valEnd,
+                  innerRadius: centerRadius,
+                  outerRadius: isZoomedOut ? rRing1_Full : rRing1_Focus,
+                  color: val.palette.ring1
+                });
+
+                const behSpan = sectorAngle / val.children.length;
+                val.children.forEach((beh, behIdx) => {
+                  const behStart = valStart + (behIdx * behSpan);
+                  const behEnd = behStart + behSpan;
+                  const behPath = [...valPath, beh.name];
+
+                  // RING 2: Behavior
+                  result.push({
+                    id: behPath.join('---'),
+                    name: beh.name,
+                    level: 1,
+                    path: behPath,
+                    startAngle: behStart,
+                    endAngle: behEnd,
+                    innerRadius: isZoomedOut ? rRing1_Full : rRing1_Focus,
+                    outerRadius: isZoomedOut ? rRing2_Full : rRing2_Focus,
+                    color: val.palette.ring2
+                  });
+                });
+              });
+            }
+
+            return result;
+          }, [activeMode, isZoomedOut]);
+
+          // Snapping logic
+          const focusOnPath = (path) => {
+            if (!path || path.length === 0) return;
+            const targetName = path[path.length - 1];
+            const activeSlice = baseSlices.find(s => s.name === targetName);
+            if (!activeSlice) return;
+
+            const midAngle = activeSlice.startAngle + (activeSlice.endAngle - activeSlice.startAngle) / 2;
+            let targetRotation = 90 - midAngle;
+            let delta = targetRotation - rotation;
+            delta = ((delta + 180) % 360 + 360) % 360 - 180;
+
+            setIsManual(false);
+            setRotation(rotation + delta);
+          };
+
+          const handleSliceClick = (slice) => {
+            const isValues = activeMode === 'values';
+            const selectedPaths = isValues ? valuesPaths : competencyPaths;
+            const setSelectedPaths = isValues ? setValuesPaths : setCompetencyPaths;
+
+            const sliceKey = slice.path.join('---');
+            const existingIdx = selectedPaths.findIndex(p => p.join('---') === sliceKey);
+            let updated = [...selectedPaths];
+
+            if (isMultiSelect) {
+              if (existingIdx !== -1) {
+                updated = updated.filter((_, i) => i !== existingIdx);
+              } else {
+                const filtered = updated.filter(p => !p.join('---').startsWith(sliceKey) && !sliceKey.startsWith(p.join('---')));
+                updated = [...filtered, slice.path];
+              }
+            } else {
+              updated = existingIdx !== -1 ? [] : [slice.path];
+            }
+
+            setSelectedPaths(updated);
+
+            if (updated.length > 0) {
+              // Automatically switch to focused view on sector selection!
+              if (isZoomedOut) setIsZoomedOut(false);
+              setTimeout(() => focusOnPath(slice.path), 40);
+            }
+          };
+
+          const selectSlice = (slice) => {
+            if (!slice) return;
+            const now = performance.now();
+            if (now - lastClickTimeRef.current < 200) return;
+            lastClickTimeRef.current = now;
+            handleSliceClick(slice);
+          };
+
+          const handlePointerDown = (e) => {
+            clickStartRef.current = { x: e.clientX, y: e.clientY };
+            if (e.button !== 0 && e.type !== 'touchstart' && e.pointerType !== 'touch') return;
+
+            if (rafRef.current) cancelAnimationFrame(rafRef.current);
+            velocityRef.current = 0;
+
+            const rect = svgRef.current.getBoundingClientRect();
+            const centerX = rect.left + (rect.width / 2);
+            const centerY = rect.top + (rect.height / 2);
+            const atan = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI;
+
+            dragRef.current = { isDown: true, hasMoved: false, lastAtan: atan };
+            lastAngleRef.current = atan;
+            lastTimeRef.current = performance.now();
+          };
+
+          const handlePointerMove = (e) => {
+            if (!dragRef.current.isDown) return;
+            const dist = Math.hypot(e.clientX - clickStartRef.current.x, e.clientY - clickStartRef.current.y);
+            if (dist > 6 && !dragRef.current.hasMoved) {
+              dragRef.current.hasMoved = true;
+              setIsManual(true);
+              if (svgRef.current && svgRef.current.setPointerCapture && e.pointerId) {
+                try { svgRef.current.setPointerCapture(e.pointerId); } catch(err) {}
+              }
+            }
+
+            if (!dragRef.current.hasMoved) return;
+            const rect = svgRef.current.getBoundingClientRect();
+            const centerX = rect.left + (rect.width / 2);
+            const centerY = rect.top + (rect.height / 2);
+            let currentAtan = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI;
+            let stepDelta = currentAtan - dragRef.current.lastAtan;
+
+            if (stepDelta > 180) stepDelta -= 360;
+            if (stepDelta < -180) stepDelta += 360;
+
+            dragRef.current.lastAtan = currentAtan;
+            const now = performance.now();
+            const dt = Math.max(now - lastTimeRef.current, 1);
+            const instantVel = stepDelta / dt;
+            velocityRef.current = velocityRef.current * 0.3 + instantVel * 0.7;
+            lastAngleRef.current = currentAtan;
+            lastTimeRef.current = now;
+
+            setRotation(prev => prev + stepDelta);
+          };
+
+          const handlePointerUp = (e) => {
+            if (!dragRef.current.isDown) return;
+            const hadMoved = dragRef.current.hasMoved;
+            dragRef.current.isDown = false;
+
+            if (e && svgRef.current && svgRef.current.releasePointerCapture && e.pointerId) {
+              try { svgRef.current.releasePointerCapture(e.pointerId); } catch(err) {}
+            }
+
+            const dtSinceMove = performance.now() - lastTimeRef.current;
+            if (dtSinceMove > 90) velocityRef.current = 0;
+
+            if (hadMoved && Math.abs(velocityRef.current) > 0.04) {
+              let currentVel = velocityRef.current * 16;
+              const momentumLoop = () => {
+                if (Math.abs(currentVel) < 0.04) return;
+                setRotation(prev => prev + currentVel);
+                currentVel *= 0.95;
+                rafRef.current = requestAnimationFrame(momentumLoop);
+              };
+              rafRef.current = requestAnimationFrame(momentumLoop);
+            } else if (!hadMoved && pendingSliceRef.current) {
+              selectSlice(pendingSliceRef.current);
+            }
+            pendingSliceRef.current = null;
+          };
+
+          const currentSelected = activeMode === 'values' ? valuesPaths : competencyPaths;
+
+          const handleFullView = () => {
+            setIsZoomedOut(true);
+            setRotation(0);
+          };
+
+          const handleFocusedView = () => {
+            setIsZoomedOut(false);
+            if (currentSelected.length > 0) {
+              focusOnPath(currentSelected[currentSelected.length - 1]);
+            }
+          };
+
+          return (
+            <div className="relative w-full h-full min-h-[640px] max-h-[85vh] bg-white rounded-3xl border border-slate-200 shadow-sm flex items-center overflow-hidden p-0">
+              
+              {/* OVERLAY: Upper-Right (Mode Toggle) */}
+              <div className="absolute top-4 right-4 z-20">
+                <div className="inline-flex rounded-xl p-1 bg-white/95 border border-slate-200 shadow-md backdrop-blur-md">
+                  <button
+                    onClick={() => setActiveMode('competencies')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeMode === 'competencies' ? 'bg-rose-700 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+                  >
+                    <Award size={14} /> Competencies
+                  </button>
+                  <button
+                    onClick={() => setActiveMode('values')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeMode === 'values' ? 'bg-rose-700 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+                  >
+                    <Heart size={14} /> Values
+                  </button>
+                </div>
+              </div>
+
+              {/* OVERLAY: Lower-Right (Full View & Focused View Only) */}
+              <div className="absolute bottom-4 right-4 z-20 flex items-center gap-2">
+                <div className="inline-flex rounded-xl p-1 bg-white/95 border border-slate-200 shadow-md backdrop-blur-md">
+                  <button
+                    onClick={handleFullView}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isZoomedOut ? 'bg-charcoal text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                    title="Full View (Resets Rotation)"
+                  >
+                    Full View
+                  </button>
+                  <button
+                    onClick={handleFocusedView}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${!isZoomedOut ? 'bg-charcoal text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                    title="Focused View (Snaps to Selection)"
+                  >
+                    Focused View
+                  </button>
+                </div>
+              </div>
+
+              {/* THE SVG WHEEL:
+                  - In Full View: centered, fitting cleanly inside the container.
+                  - In Focused View: translated significantly to the left (center near left edge, showing ~52% of wheel),
+                    and scaled to fill vertical space as illustrated in user screenshot!
+              */}
+              <svg
+                ref={svgRef}
+                viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}
+                className={`drop-shadow-xl transition-all duration-700 ease-in-out select-none ${
+                  isZoomedOut 
+                    ? 'relative mx-auto w-[92%] max-w-[600px] max-h-[90%]' 
+                    : 'absolute left-0 top-1/2 -translate-y-1/2 -translate-x-[48%] h-[125%] sm:h-[135%] w-auto max-w-none'
+                }`}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
+                style={{ touchAction: 'none' }}
+              >
+                <defs>
+                  {/* Curved text baseline paths for Ring 1 */}
+                  {baseSlices.filter(s => s.level === 0).map(slice => {
+                    const textRadius = slice.innerRadius + (slice.outerRadius - slice.innerRadius) / 2;
+                    return (
+                      <path
+                        key={`text-path-${slice.id}`}
+                        id={`text-path-${slice.id}`}
+                        d={describeCurvedTextArc(center, center, textRadius, slice.startAngle, slice.endAngle)}
+                        fill="none"
+                      />
+                    );
+                  })}
+                </defs>
+
+                <g style={{
+                  transform: `rotate(${rotation}deg)`,
+                  transformOrigin: `${center}px ${center}px`,
+                  transition: isManual ? 'none' : 'transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1)'
+                }}>
+                  {/* Wheel Slices */}
+                  {baseSlices.map(slice => {
+                    const isSelected = currentSelected.some(p => 
+                      p.join('---') === slice.path.join('---') || p.join('---').startsWith(slice.path.join('---') + '---')
+                    );
+
+                    // Simplified Selection: Clean White Fill with Charcoal Text
+                    const fill = isSelected ? "#ffffff" : slice.color;
+                    const textFill = isSelected ? "#1f2937" : "#ffffff";
+                    const strokeColor = "#ffffff";
+                    const strokeWidth = "1.5";
+
+                    const midAngle = slice.startAngle + (slice.endAngle - slice.startAngle) / 2;
+                    const textPos = polarToCartesian(
+                      center, center, 
+                      slice.innerRadius + (slice.outerRadius - slice.innerRadius) / 2, 
+                      midAngle
+                    );
+                    const textRotation = midAngle - 90;
+
+                    // Text display rule:
+                    // In Full View: ONLY Core Ring (Ring 1) text is shown! Outer ring text is hidden until focused or selected!
+                    const shouldShowLabel = slice.level === 0 || !isZoomedOut || isSelected;
+
+                    // --- NEW: TEXT SPLITTING LOGIC --- //
+                    let displayName = slice.name.length > 21 && slice.level === 2 ? slice.name.slice(0, 19) + '…' : slice.name;
+                    let lines = [displayName];
+                    
+                    // Split by explicit <br> tags, or auto-split long text with spaces
+                    if (displayName.includes('<br>')) {
+                      lines = displayName.split('<br>');
+                    } else if (displayName.includes(' ') && displayName.length > 11) {
+                      const words = displayName.split(' ');
+                      const mid = Math.ceil(words.length / 2);
+                      lines = [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
+                    }
+
+                    return (
+                      <g
+                        key={slice.id}
+                        className="cursor-pointer"
+                        onPointerDown={() => { pendingSliceRef.current = slice; }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (dragRef.current && dragRef.current.hasMoved) return;
+                          selectSlice(slice);
+                        }}
+                      >
+                        <path
+                          d={describeArc(center, center, slice.innerRadius, slice.outerRadius, slice.startAngle, slice.endAngle)}
+                          fill={fill}
+                          stroke={strokeColor}
+                          strokeWidth={strokeWidth}
+                          className="transition-colors duration-200 pointer-events-auto"
+                        />
+
+                        {/* Core Ring (Ring 1): Curved baseline text anchored to center */}
+                        {slice.level === 0 ? (
+                          <text
+                            fill={textFill}
+                            fontSize={isZoomedOut ? "24" : "19"}
+                            fontFamily="Tenor Sans, sans-serif"
+                            fontWeight="normal"
+                            className="pointer-events-none select-none transition-colors"
+                          >
+                            <textPath
+                              href={`#text-path-${slice.id}`}
+                              startOffset="50%"
+                              textAnchor="middle"
+                            >
+                              {slice.name}
+                            </textPath>
+                          </text>
+                        ) : (
+                          /* Secondary & Tertiary Rings: Shown in Focused View or when selected */
+                          shouldShowLabel && (
+                            <text
+                              x={textPos.x} y={textPos.y}
+                              fill={textFill}
+                              fontSize={slice.level === 1 ? "12" : "9.5"}
+                              fontFamily="Open Sans, sans-serif"
+                              fontWeight={isSelected ? "700" : "600"}
+                              textAnchor="middle"
+                              alignmentBaseline="middle"
+                              pointerEvents="none"
+                              transform={`rotate(${textRotation}, ${textPos.x}, ${textPos.y})`}
+                              className="pointer-events-none select-none drop-shadow-sm transition-colors"
+                            >
+                              {slice.name.length > 21 && slice.level === 2 ? slice.name.slice(0, 19) + '…' : slice.name}
+                            </text>
+                          )
+                        )}
+                      </g>
+                    );
+                  })}
+
+                  {/* CENTER CIRCLE: Clean icon-only, no hover/zoom scaling */}
+                  <g
+                    className="cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveMode(prev => prev === 'competencies' ? 'values' : 'competencies');
+                    }}
+                  >
+                    {activeMode === 'competencies' ? (
+                      <>
+                        <circle
+                          cx={center} cy={center} r={centerRadius}
+                          fill="#be185d"
+                          className="drop-shadow-sm"
+                        />
+                        <foreignObject x={center - 20} y={center - 20} width="40" height="40" className="pointer-events-none">
+                          <div className="w-full h-full flex items-center justify-center text-white">
+                            <Award size={32} strokeWidth={2.2} />
+                          </div>
+                        </foreignObject>
+                      </>
+                    ) : (
+                      <>
+                        <circle
+                          cx={center} cy={center} r={centerRadius}
+                          fill="#ffffff"
+                          stroke="#be185d"
+                          strokeWidth="3.5"
+                          className="drop-shadow-sm"
+                        />
+                        <foreignObject x={center - 20} y={center - 20} width="40" height="40" className="pointer-events-none">
+                          <div className="w-full h-full flex items-center justify-center text-rose-700">
+                            <Heart size={32} strokeWidth={2.2} fill="#be185d" />
+                          </div>
+                        </foreignObject>
+                      </>
+                    )}
+                  </g>
+                </g>
+              </svg>
+            </div>
+          );
+        }
+
+        // =========================================================================
+        // COMPONENT: DefinitionsPanel (Right 50% Pane)
+        // =========================================================================
+
+        function DefinitionsPanel({
+          activeMode,
+          setActiveMode,
+          competencyPaths,
+          setCompetencyPaths,
+          valuesPaths,
+          setValuesPaths,
+          isMultiSelect,
+          setIsMultiSelect,
+          onExploreLearningPath,
+          onRequestClearAll
+        }) {
+          const isValues = activeMode === 'values';
+          const activePaths = isValues ? valuesPaths : competencyPaths;
+          const setActivePaths = isValues ? setValuesPaths : setCompetencyPaths;
+
+          const truncatePath = (pathIndex, levelIndex) => {
+            setActivePaths(prev => {
+              const newPaths = [...prev];
+              if (levelIndex === 0) newPaths.splice(pathIndex, 1);
+              else newPaths[pathIndex] = newPaths[pathIndex].slice(0, levelIndex);
+              const unique = [];
+              newPaths.forEach(p => {
+                if (!unique.some(u => u.join('---') === p.join('---'))) unique.push(p);
+              });
+              return unique;
+            });
+          };
+
+          const removeWholePath = (pathIndex) => {
+            setActivePaths(prev => prev.filter((_, i) => i !== pathIndex));
+          };
+
+          const totalSelected = competencyPaths.length + valuesPaths.length;
+
+          return (
+            <div className="flex flex-col justify-between h-full bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+              
+              {/* Header */}
+              <div className="flex flex-col gap-3 pb-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-heading text-charcoal tracking-tight">
+                    {isValues ? 'Your Selected Values' : 'Your Selected Competencies'}
+                  </h2>
+
+                  {/* CLEAR ALL BUTTON */}
+                  {totalSelected > 0 && (
+                    <button
+                      onClick={onRequestClearAll}
+                      className="py-1 px-3 rounded-lg text-xs font-bold text-rose-700 hover:bg-blush border border-rose-200 transition-colors flex items-center gap-1"
+                    >
+                      <Trash2 size={13} /> Clear All
+                    </button>
+                  )}
+                </div>
+
+                {/* Sub-tab navigation & Multi-select checkbox */}
+                <div className="flex items-center justify-between pt-1 border-b border-slate-100 pb-3">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setActiveMode('competencies')}
+                      className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-colors ${!isValues ? 'bg-rose-700 text-white' : 'bg-cloud text-slate-600 hover:bg-slate-200'}`}
+                    >
+                      <Award size={13} /> Competencies ({competencyPaths.length})
+                    </button>
+                    <button
+                      onClick={() => setActiveMode('values')}
+                      className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-colors ${isValues ? 'bg-rose-700 text-white' : 'bg-cloud text-slate-600 hover:bg-slate-200'}`}
+                    >
+                      <Heart size={13} /> Values ({valuesPaths.length})
+                    </button>
+                  </div>
+
+                  {/* MULTI-SELECT CHECKBOX EXACT LABEL */}
+                  <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-medium text-slate-600">
+                    <input
+                      type="checkbox"
+                      checked={isMultiSelect}
+                      onChange={(e) => setIsMultiSelect(e.target.checked)}
+                      className="w-3.5 h-3.5 rounded text-rose-700 focus:ring-rose-500 border-gray-300"
+                    />
+                    <span>Select multiple paths</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Scrollable Definition Cards */}
+              <div className="flex-1 overflow-y-auto py-2 pr-1 flex flex-col gap-4">
+                {activePaths.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-100 rounded-2xl my-auto">
+                    <div className="w-12 h-12 rounded-2xl bg-blush text-rose-700 flex items-center justify-center mb-3">
+                      {isValues ? <Heart size={24} /> : <Award size={24} />}
+                    </div>
+                    <h3 className="font-heading text-lg text-charcoal mb-1">
+                      No {isValues ? 'Values' : 'Competencies'} Selected
+                    </h3>
+                    <p className="text-xs text-slate-500 max-w-[280px] leading-relaxed">
+                      Select segments on the wheel to inspect definitions, leadership tiers, and behavioral indicators.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {activePaths.map((path, pathIndex) => (
+                      <div 
+                        key={path.join('---')} 
+                        className="bg-cloud rounded-2xl border border-slate-200/80 p-4 flex flex-col gap-3 shadow-sm"
+                      >
+                        {/* Linear Breadcrumbs */}
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-200/70">
+                          <div className="flex flex-wrap items-center gap-1 text-[11px] font-bold text-rose-700">
+                            {path.map((segment, idx) => (
+                              <React.Fragment key={segment}>
+                                <span>{segment}</span>
+                                {idx < path.length - 1 && <span className="text-slate-400">→</span>}
+                              </React.Fragment>
+                            ))}
+                          </div>
+
+                          <button
+                            onClick={() => removeWholePath(pathIndex)}
+                            className="text-xs text-slate-400 hover:text-rose-700 p-1 transition-colors"
+                            title="Remove entire path"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+
+                        {/* Hierarchical definitions stack */}
+                        {path.map((segmentName, levelIndex) => {
+                          const segmentColor = getSegmentThemeColor(path, levelIndex, isValues);
+                          const defText = allDefinitions[segmentName] || "Core organizational competency benchmark.";
+                          
+                          // SIMPLIFIED TIER LABELS
+                          let tierLabel = "Skill";
+                          if (isValues) {
+                            tierLabel = levelIndex === 0 ? "Value" : "Behavior";
+                          } else {
+                            tierLabel = levelIndex === 0 ? "Level" : (levelIndex === 1 ? "Competency" : "Skill");
+                          }
+
+                          return (
+                            <div key={segmentName} className="flex items-start gap-3 relative group">
+                              <div 
+                                className="w-6 h-6 rounded-md flex items-center justify-center font-bold text-white text-xs shrink-0 shadow-sm"
+                                style={{ backgroundColor: segmentColor }}
+                              >
+                                {levelIndex + 1}
+                              </div>
+
+                              <div className="flex-1 pr-6">
+                                <div className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-0.5">
+                                  {tierLabel}
+                                </div>
+                                <div className="text-sm font-bold text-charcoal leading-snug mb-1">
+                                  {segmentName}
+                                </div>
+                                <div className="text-xs text-slate-600 leading-relaxed">
+                                  {defText}
+                                </div>
+                              </div>
+
+                              <button
+                                onClick={() => truncatePath(pathIndex, levelIndex)}
+                                className="absolute right-0 top-0 w-6 h-6 rounded-md bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-700 flex items-center justify-center transition-colors"
+                                title="Remove segment"
+                              >
+                                <X size={13} strokeWidth={2.5} />
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Bottom CTA Button */}
+              <div className="pt-3">
+                <button
+                  disabled={totalSelected === 0}
+                  onClick={onExploreLearningPath}
+                  className="w-full py-4 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2.5 transition-all shadow-md bg-rose-700 hover:bg-rose-800 text-white disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed hover:shadow-lg active:scale-[0.99]"
+                >
+                  <Route size={18} />
+                  <span>Explore Learning Path ({totalSelected})</span>
+                  <ArrowRight size={17} />
+                </button>
+              </div>
+
+            </div>
+          );
+        }
+
+        // =========================================================================
+        // COMPONENT: WelcomeScreen (Stage 1: 0 Saved Paths)
+        // =========================================================================
+
+        function WelcomeScreen({ onContinueAsGuest, onLogin }) {
+          const [isSignup, setIsSignup] = useState(false);
+          const [email, setEmail] = useState('');
+          const [password, setPassword] = useState('');
+
+          const handleSubmit = (e) => {
+            e.preventDefault();
+            if (!email) return;
+            onLogin({ email });
+          };
+
+          return (
+            <div className="max-w-5xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-10 py-6 sm:py-12 items-center animate-in fade-in duration-300">
+              
+              {/* Left Column: Overview Details & Restructured 3-Pillar List */}
+              <div className="flex flex-col gap-6">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blush text-rose-700 text-xs font-bold border border-rose-200 mb-3">
+                    <ThreeColorPieIcon size={16} /> 360° Career Navigation
+                  </div>
+                  <h1 className="text-3xl sm:text-5xl font-heading text-charcoal leading-tight">
+                    Competency and Values Wheel
+                  </h1>
+                  <p className="text-sm text-slate-600 mt-2 leading-relaxed">
+                    A tactile self-assessment framework designed to chart leadership capabilities, anchor day-to-day work in core organizational values, and construct tailored 70-20-10 growth pathways.
+                  </p>
+                </div>
+
+                {/* Restructured List */}
+                <div className="flex flex-col gap-4 border-t border-slate-200 pt-4">
+                  <div className="flex items-start gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-blush text-rose-700 flex items-center justify-center shrink-0 shadow-sm border border-rose-100">
+                      <Award size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-heading text-base text-charcoal">Three-Tier Competency Wheel</h3>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        Concentric rings covering Individual Contributor, Manager, and Director tiers across 15 core categories and 45 observable skills.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-blush text-rose-700 flex items-center justify-center shrink-0 shadow-sm border border-rose-100">
+                      <Heart size={20} fill="#be185d" />
+                    </div>
+                    <div>
+                      <h3 className="font-heading text-base text-charcoal">Core Values Alignment</h3>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        Flip seamlessly to examine company core values (Teamwork, Empathy, Agility, Integrity) and actionable workplace behaviors.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* ROUTE ICON CONTAINER: bg-blush text-rose-700 */}
+                  <div className="flex items-start gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-blush text-rose-700 flex items-center justify-center shrink-0 shadow-sm border border-rose-100">
+                      <Route size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-heading text-base text-charcoal">70-20-10 & AI Coaching</h3>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        Transform selections into experiential stretch goals, peer mentorship, and dynamic Gemini prompts ready for bespoke coaching.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Clean Login / Create Account / Continue as Guest */}
+              <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl flex flex-col gap-5">
+                <div>
+                  <h2 className="text-2xl font-heading text-charcoal">
+                    {isSignup ? 'Create Your Account' : 'Welcome Back'}
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Sign in to sync your assessments, or explore immediately as a guest.
+                  </p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-slate-600">Email Address</label>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@company.com"
+                      className="p-3 rounded-xl bg-cloud border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-rose-600 outline-none"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-slate-600">Password</label>
+                    <input
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="p-3 rounded-xl bg-cloud border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-rose-600 outline-none"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full mt-1 py-3.5 rounded-xl bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs shadow-md transition-colors"
+                  >
+                    {isSignup ? 'Create Account & Start' : 'Sign In'}
+                  </button>
+                </form>
+
+                <div className="flex items-center justify-between text-xs pt-1">
+                  <button
+                    onClick={() => setIsSignup(!isSignup)}
+                    className="text-rose-700 font-bold hover:underline"
+                  >
+                    {isSignup ? 'Already have an account? Log in' : 'Create an account'}
+                  </button>
+                </div>
+
+                <div className="relative my-1">
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
+                  <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-3 text-slate-400 font-bold text-[10px]">or</span></div>
+                </div>
+
+                {/* Continue as Guest */}
+                <button
+                  onClick={onContinueAsGuest}
+                  className="w-full py-3.5 rounded-xl border-2 border-charcoal hover:bg-charcoal hover:text-white text-charcoal font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
+                >
+                  <span>Continue as Guest</span>
+                  <ArrowRight size={14} />
+                </button>
+              </div>
+
+            </div>
+          );
+        }
+
+        // =========================================================================
+        // COMPONENT: MultiPathDashboard (Stage 3: 2+ Saved Paths)
+        // =========================================================================
+
+        function MultiPathDashboard({ savedSessions, onEditSession, onRequestDeleteSession, onCreateNewPath }) {
+          return (
+            <div className="max-w-3xl mx-auto w-full flex flex-col gap-6 py-6 sm:py-10 animate-in fade-in duration-300">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div>
+                  <h1 className="text-3xl font-heading text-charcoal">Your Development Pathways</h1>
+                  <p className="text-xs text-slate-500 mt-1">Review, refine, or construct new 70-20-10 action plans.</p>
+                </div>
+                <button
+                  onClick={onCreateNewPath}
+                  className="py-2.5 px-4 rounded-xl bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-md"
+                >
+                  <Plus size={15} /> New Pathway
+                </button>
+              </div>
+
+              {/* Single Column Dashboard Cards */}
+              <div className="flex flex-col gap-4">
+                {savedSessions.map(session => (
+                  <div 
+                    key={session.id}
+                    className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  >
+                    <div className="flex flex-col gap-2">
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
+                        {new Date(session.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                      <h3 className="text-xl font-heading text-charcoal">{session.title}</h3>
+                      <div className="flex flex-wrap gap-2 text-xs font-semibold">
+                        <span className="px-2.5 py-0.5 rounded-full bg-blush text-rose-700 border border-rose-200 flex items-center gap-1">
+                          <Award size={12} /> {session.competencies.length} Competencies
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full bg-cloud text-charcoal border border-slate-200 flex items-center gap-1">
+                          <Heart size={12} /> {session.values.length} Values
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-center">
+                      <button
+                        onClick={() => onEditSession(session)}
+                        className="py-2 px-4 rounded-xl bg-cloud hover:bg-slate-200 text-charcoal font-bold text-xs flex items-center gap-1.5 transition-colors"
+                      >
+                        <Edit3 size={14} /> Edit
+                      </button>
+                      <button
+                        onClick={() => onRequestDeleteSession(session.id)}
+                        className="p-2 rounded-xl text-slate-400 hover:text-rose-700 hover:bg-blush transition-colors"
+                        title="Delete path"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-4 flex justify-center">
+                <button
+                  onClick={onCreateNewPath}
+                  className="py-4 px-8 rounded-2xl bg-charcoal hover:bg-slate-800 text-white font-bold text-sm flex items-center gap-2 shadow-lg transition-transform hover:scale-105"
+                >
+                  <Route size={18} />
+                  <span>Create New Learning Path</span>
+                </button>
+              </div>
+            </div>
+          );
+        }
+
+        // =========================================================================
+        // COMPONENT: LearningPathView (70-20-10 & Brand PDF Without Prompt)
+        // =========================================================================
+
+        function LearningPathView({
+          session,
+          competencies,
+          values,
+          onBackToExplorer,
+          onNewLearningPathModal,
+          user
+        }) {
+          const [hasCopied, setHasCopied] = useState(false);
+          const [promptText, setPromptText] = useState(() => {
+            if (session && session.prompt) return session.prompt;
+            const primaryLevel = competencies.length > 0 ? competencies[0][0] : "Professional";
+            return generatePromptText({ level: primaryLevel, competencies, values });
+          });
+
+          const primaryLevel = competencies.length > 0 ? competencies[0][0] : (session?.title?.split(' ')[0] || "Professional");
+
+          const handleCopy = () => {
+            navigator.clipboard.writeText(promptText);
+            setHasCopied(true);
+          };
+
+          const handleOpenGemini = () => {
+            if (!hasCopied) return;
+            window.open('https://gemini.google.com/app', '_blank');
+          };
+
+          return (
+            <div className="max-w-4xl mx-auto w-full flex flex-col gap-8 pb-16 animate-in fade-in duration-300">
+              
+              {/* TOP ACTIONS BAR (Hidden in Print) */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-2 no-print">
+                <button
+                  onClick={onBackToExplorer}
+                  className="flex items-center gap-2 py-2 px-4 rounded-xl bg-cloud hover:bg-slate-200 text-charcoal font-bold text-xs sm:text-sm transition-colors"
+                >
+                  <ArrowLeft size={16} /> Back to Wheel
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => window.print()}
+                    className="flex items-center gap-1.5 py-2 px-4 rounded-xl bg-white border border-slate-200 text-charcoal font-bold text-xs hover:bg-cloud transition-colors shadow-sm"
+                  >
+                    <FileText size={14} /> Export PDF
+                  </button>
+
+                  <button
+                    onClick={onNewLearningPathModal}
+                    className="flex items-center gap-1.5 py-2 px-4 rounded-xl bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs shadow-md transition-colors"
+                  >
+                    <Plus size={14} /> New Learning Path
+                  </button>
+                </div>
+              </div>
+
+              {/* PRINT & SCREEN CONTAINER */}
+              <div className="page-container bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm flex flex-col gap-8">
+                
+                {/* Brand Letterhead */}
+                <header className="border-b-4 border-rose-700 pb-5">
+                  <h1 className="text-3xl sm:text-4xl font-heading text-charcoal mb-1">
+                    Career Development Pathway
+                  </h1>
+                  <p className="text-xs sm:text-sm text-rose-700 font-bold uppercase tracking-widest mb-4">
+                    70-20-10 Professional Growth Blueprint • {primaryLevel} Focus
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Presented by Lily McKay, Transformation Architect • Career Navigation Framework
+                  </p>
+                </header>
+
+                {/* Focus Badges Summary */}
+                <div className="no-break flex flex-col gap-2">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Identified Focus Areas</span>
+                  <div className="flex flex-wrap gap-2">
+                    {competencies.map(c => (
+                      <span key={c.join('---')} className="px-3 py-1 rounded-full text-xs font-semibold bg-blush text-rose-700 border border-rose-200 flex items-center gap-1.5">
+                        <Award size={12} /> {c.join(' → ')}
+                      </span>
+                    ))}
+                    {values.map(v => (
+                      <span key={v.join('---')} className="px-3 py-1 rounded-full text-xs font-semibold bg-cloud text-charcoal border border-slate-200 flex items-center gap-1.5">
+                        <Heart size={12} /> {v.join(' → ')}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 70-20-10 ACTION SECTIONS */}
+                <div className="flex flex-col gap-6">
+                  
+                  {/* 70% Experiential */}
+                  <div className="no-break p-5 rounded-2xl bg-cloud border border-slate-200 flex flex-col gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-8 h-8 rounded-lg bg-rose-700 text-white font-bold text-xs flex items-center justify-center">70%</span>
+                      <div>
+                        <h2 className="text-lg font-heading text-charcoal">Experiential Learning (On-the-Job)</h2>
+                        <span className="text-xs text-slate-500">Practice through stretch assignments and high-leverage deliverables.</span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                      <div className="p-3.5 rounded-xl bg-white border border-slate-200 flex flex-col gap-1">
+                        <h4 className="font-bold text-xs text-charcoal">The "Listen-Only" Intake Meeting</h4>
+                        <p className="text-xs text-slate-600">Host an employee review or project post-mortem where your primary task is active listening. Synthesize action takeaways within 24 hours.</p>
+                      </div>
+                      <div className="p-3.5 rounded-xl bg-white border border-slate-200 flex flex-col gap-1">
+                        <h4 className="font-bold text-xs text-charcoal">Workflow Simplification Audit</h4>
+                        <p className="text-xs text-slate-600">Identify two operational friction points in team deliverable handoffs. Implement a lean, agreed-upon simplification this month.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 20% Social */}
+                  <div className="no-break p-5 rounded-2xl bg-cloud border border-slate-200 flex flex-col gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-8 h-8 rounded-lg bg-charcoal text-white font-bold text-xs flex items-center justify-center">20%</span>
+                      <div>
+                        <h2 className="text-lg font-heading text-charcoal">Social Learning (Exposure & Feedback)</h2>
+                        <span className="text-xs text-slate-500">Accelerate through peer shadowing and structured mentoring.</span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                      <div className="p-3.5 rounded-xl bg-white border border-slate-200 flex flex-col gap-1">
+                        <h4 className="font-bold text-xs text-charcoal">Senior Peer Playbook Interview</h4>
+                        <p className="text-xs text-slate-600">Conduct a 30-minute structured inquiry with a colleague recognized for exemplary execution to learn how they navigate difficult trade-offs.</p>
+                      </div>
+                      <div className="p-3.5 rounded-xl bg-white border border-slate-200 flex flex-col gap-1">
+                        <h4 className="font-bold text-xs text-charcoal">Start / Stop / Continue Feedback</h4>
+                        <p className="text-xs text-slate-600">Ask two peers: "What is one specific communication behavior I could start or adjust to make our cross-functional teaming smoother?"</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 10% Formal */}
+                  <div className="no-break p-5 rounded-2xl bg-cloud border border-slate-200 flex flex-col gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-8 h-8 rounded-lg bg-slate-300 text-charcoal font-bold text-xs flex items-center justify-center">10%</span>
+                      <div>
+                        <h2 className="text-lg font-heading text-charcoal">Formal Learning (Frameworks & Models)</h2>
+                        <span className="text-xs text-slate-500">Anchor practice in established behavioral and organizational research.</span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                      <div className="p-3.5 rounded-xl bg-white border border-slate-200 flex flex-col gap-1">
+                        <h4 className="font-bold text-xs text-charcoal">Psychological Safety in Teams</h4>
+                        <p className="text-xs text-slate-600">Study Amy Edmondson's research on psychological safety and Radical Candor's balance between personal care and direct challenge.</p>
+                      </div>
+                      <div className="p-3.5 rounded-xl bg-white border border-slate-200 flex flex-col gap-1">
+                        <h4 className="font-bold text-xs text-charcoal">The 4 Disciplines of Execution</h4>
+                        <p className="text-xs text-slate-600">Focus on Wildly Important Goals, act on leading measures, maintain a compelling team scoreboard, and hold weekly cadences.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* AI COACHING PROMPT SECTION: MARKED 'no-print' SO IT'S OMITTED FROM PDF EXPORT */}
+                <div className="no-print p-6 rounded-2xl bg-blush border-2 border-rose-200 flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-heading text-base text-rose-700">Executive AI Coaching Prompt</h3>
+                      <p className="text-xs text-slate-500">Structured prompt synthesized from your wheel selections.</p>
+                    </div>
+                    <span className="text-[10px] font-bold text-rose-700 bg-white px-2.5 py-1 rounded-full border border-rose-200">
+                      Google Gemini Ready
+                    </span>
+                  </div>
+
+                  <textarea
+                    value={promptText}
+                    onChange={(e) => setPromptText(e.target.value)}
+                    rows={7}
+                    className="w-full p-4 rounded-xl bg-white border border-rose-200 text-xs font-mono text-charcoal outline-none resize-y leading-relaxed shadow-inner"
+                  />
+
+                  {/* Actions Bar */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                    <p className="text-xs text-slate-500">
+                      💡 Tip: Copy the prompt and paste it into Gemini or your preferred AI chat tool to explore customized development plans.
+                    </p>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleCopy}
+                        className="flex items-center gap-1.5 py-2 px-4 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-charcoal font-bold text-xs shadow-sm transition-colors"
+                      >
+                        {hasCopied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                        <span>{hasCopied ? 'Prompt Copied!' : 'Copy Prompt'}</span>
+                      </button>
+
+                      {/* INACTIVE UNTIL USER CLICKS COPY PROMPT */}
+                      <button
+                        disabled={!hasCopied}
+                        onClick={handleOpenGemini}
+                        className={`flex items-center gap-1.5 py-2 px-4 rounded-xl font-bold text-xs transition-all shadow-sm ${hasCopied ? 'bg-rose-700 hover:bg-rose-800 text-white cursor-pointer' : 'bg-slate-200 text-slate-400 cursor-not-allowed opacity-60'}`}
+                        title={hasCopied ? 'Open Gemini with prompt copied' : 'Click Copy Prompt first to activate'}
+                      >
+                        <span>Open Gemini</span>
+                        <ExternalLink size={13} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          );
+        }
+
+        // =========================================================================
+        // COMPONENT: NewLearningPathModal
+        // =========================================================================
+
+        function NewLearningPathModal({ isOpen, onClose, onSaveToAccount, onDiscardAndStartNew }) {
+          if (!isOpen) return null;
+
+          return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/60 backdrop-blur-sm animate-in fade-in">
+              <div className="bg-white w-full max-w-md rounded-3xl border border-slate-200 p-6 shadow-2xl flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-heading text-xl text-charcoal">New Learning Path</h3>
+                  <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600">
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Before creating a new learning path, create an account to save this one. To save it without creating an account, click Cancel and then click Export PDF.
+                </p>
+
+                <div className="flex flex-col gap-2 pt-2">
+                  <button
+                    onClick={onSaveToAccount}
+                    className="w-full py-3 px-4 rounded-xl bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    <Award size={15} /> Save to Account
+                  </button>
+
+                  <button
+                    onClick={onClose}
+                    className="w-full py-3 px-4 rounded-xl bg-cloud hover:bg-slate-200 text-charcoal font-bold text-xs flex items-center justify-center gap-2 transition-colors"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={onDiscardAndStartNew}
+                    className="w-full py-3 px-4 rounded-xl border border-slate-200 hover:bg-red-50 text-red-600 font-bold text-xs flex items-center justify-center gap-2 transition-colors mt-2"
+                  >
+                    <Trash2 size={15} /> Discard & Start New Path
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        // =========================================================================
+        // COMPONENT: Footer
+        // =========================================================================
+
+        function BrandFooter() {
+          return (
+            <footer className="w-full border-t border-slate-200 py-6 mt-auto bg-white no-print">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+                <span>© 2026 Lily McKay</span>
+                <a 
+                  href="https://www.mslilymckay.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="font-bold text-rose-700 hover:underline"
+                >
+                  www.mslilymckay.com
+                </a>
+              </div>
+            </footer>
+          );
+        }
+
+        // =========================================================================
+        // MAIN APPLICATION ROOT
+        // =========================================================================
+
+        function App() {
+          const [savedSessions, setSavedSessions] = useState(() => loadSessions());
+          const [user, setUser] = useState(() => {
+            try {
+              const u = localStorage.getItem(STORAGE_KEY_USER);
+              return u ? JSON.parse(u) : null;
+            } catch {
+              return null;
+            }
+          });
+
+          const [competencyPaths, setCompetencyPaths] = useState([]);
+          const [valuesPaths, setValuesPaths] = useState([]);
+          const [activeMode, setActiveMode] = useState('competencies');
+          const [isMultiSelect, setIsMultiSelect] = useState(true);
+          const [currentView, setCurrentView] = useState('auto'); // 'welcome' | 'explorer' | 'learning-path' | 'dashboard' | 'auto'
+
+          const [activeSession, setActiveSession] = useState(null);
+          const [isNewPathModalOpen, setIsNewPathModalOpen] = useState(false);
+
+          // Confirmation Modal State
+          const [confirmModal, setConfirmModal] = useState({
+            isOpen: false,
+            title: '',
+            message: '',
+            confirmText: 'Confirm',
+            confirmColor: 'bg-rose-700',
+            onConfirm: () => {}
+          });
+
+          // Determine initial effective view based on 3-stage user lifecycle
+          const effectiveView = useMemo(() => {
+            if (currentView !== 'auto') return currentView;
+            if (savedSessions.length === 0) return 'welcome';
+            if (savedSessions.length === 1) return 'learning-path';
+            return 'dashboard';
+          }, [currentView, savedSessions.length]);
+
+          const handleContinueAsGuest = () => {
+            setCompetencyPaths([]);
+            setValuesPaths([]);
+            setActiveSession(null);
+            setCurrentView('explorer');
+          };
+
+          const handleLogin = (userData) => {
+            setUser(userData);
+            localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(userData));
+            setCompetencyPaths([]);
+            setValuesPaths([]);
+            setCurrentView('explorer');
+          };
+
+          const handleEditSession = (session) => {
+            setActiveSession(session);
+            setCompetencyPaths(session.competencies || []);
+            setValuesPaths(session.values || []);
+            setCurrentView('explorer');
+          };
+
+          const handleRequestDeleteSession = (sessionId) => {
+            setConfirmModal({
+              isOpen: true,
+              title: "Delete Learning Path",
+              message: "Are you sure you want to delete this learning path? This action cannot be undone.",
+              confirmText: "Delete",
+              confirmColor: "bg-red-600",
+              onConfirm: () => {
+                const updated = savedSessions.filter(s => s.id !== sessionId);
+                setSavedSessions(updated);
+                saveSessions(updated);
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+              }
+            });
+          };
+
+          const handleCreateNewPath = () => {
+            setCompetencyPaths([]);
+            setValuesPaths([]);
+            setActiveSession(null);
+            setCurrentView('explorer');
+          };
+
+          // Save to Account from Modal -> Automatically launch fresh blank wheel!
+          const handleSaveToAccountAndStartNew = () => {
+            const primaryLevel = competencyPaths.length > 0 ? competencyPaths[0][0] : "Professional";
+            const newSession = {
+              id: activeSession ? activeSession.id : Date.now().toString(),
+              date: new Date().toISOString(),
+              title: `${primaryLevel} Development Plan`,
+              competencies: competencyPaths,
+              values: valuesPaths
+            };
+
+            const updated = [newSession, ...savedSessions.filter(s => s.id !== newSession.id)];
+            setSavedSessions(updated);
+            saveSessions(updated);
+
+            // Automatically open fresh blank wheel!
+            setIsNewPathModalOpen(false);
+            setCompetencyPaths([]);
+            setValuesPaths([]);
+            setActiveSession(null);
+            setCurrentView('explorer');
+          };
+
+          const handleDiscardAndStartNew = () => {
+            setIsNewPathModalOpen(false);
+            setCompetencyPaths([]);
+            setValuesPaths([]);
+            setActiveSession(null);
+            setCurrentView('explorer');
+          };
+
+          const handleRequestClearAll = () => {
+            setConfirmModal({
+              isOpen: true,
+              title: "Clear All Selections",
+              message: "Are you sure you want to clear all selected competencies and values?",
+              confirmText: "Clear All",
+              confirmColor: "bg-rose-700",
+              onConfirm: () => {
+                setCompetencyPaths([]);
+                setValuesPaths([]);
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+              }
+            });
+          };
+
+          return (
+            <div className="min-h-screen flex flex-col bg-white text-charcoal">
+              
+              {/* GLOBAL HEADER: NO AUTHOR NAME, TOOL TITLE IS "Competency and Values Wheel", ONLY PRIMARY CONTACT ME BUTTON */}
+              <header className="w-full bg-white/95 border-b border-slate-200 sticky top-0 z-40 no-print">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+                  
+                  {/* Logo & Tool Title */}
+                  <div 
+                    className="flex items-center gap-2.5 cursor-pointer select-none"
+                    onClick={() => setCurrentView('auto')}
+                  >
+                    <ThreeColorPieIcon size={26} />
+                    <h1 className="text-base sm:text-lg font-heading text-charcoal leading-none tracking-tight">
+                      Competency and Values Wheel
+                    </h1>
+                  </div>
+
+                  {/* Right Side: Primary "Contact Me" Button going to www.mslilymckay.com */}
+                  <div className="flex items-center gap-3">
+                    <a
+                      href="https://www.mslilymckay.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="py-2 px-5 rounded-xl bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs sm:text-sm shadow-md transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5"
+                    >
+                      <span>Contact Me</span>
+                      <ExternalLink size={14} />
+                    </a>
+                  </div>
+
+                </div>
+              </header>
+
+              {/* MAIN BODY VIEW */}
+              <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col">
+                
+                {/* STAGE 1: WELCOME SCREEN */}
+                {effectiveView === 'welcome' && (
+                  <WelcomeScreen
+                    onContinueAsGuest={handleContinueAsGuest}
+                    onLogin={handleLogin}
+                  />
+                )}
+
+                {/* STAGE 3: MULTI-PATH DASHBOARD */}
+                {effectiveView === 'dashboard' && (
+                  <MultiPathDashboard
+                    savedSessions={savedSessions}
+                    onEditSession={handleEditSession}
+                    onRequestDeleteSession={handleRequestDeleteSession}
+                    onCreateNewPath={handleCreateNewPath}
+                  />
+                )}
+
+                {/* EXPLORER (WHEEL + DEFINITIONS) */}
+                {effectiveView === 'explorer' && (
+                  <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch animate-in fade-in duration-300">
+                    <WheelContainer
+                      activeMode={activeMode}
+                      setActiveMode={setActiveMode}
+                      competencyPaths={competencyPaths}
+                      setCompetencyPaths={setCompetencyPaths}
+                      valuesPaths={valuesPaths}
+                      setValuesPaths={setValuesPaths}
+                      isMultiSelect={isMultiSelect}
+                    />
+
+                    <DefinitionsPanel
+                      activeMode={activeMode}
+                      setActiveMode={setActiveMode}
+                      competencyPaths={competencyPaths}
+                      setCompetencyPaths={setCompetencyPaths}
+                      valuesPaths={valuesPaths}
+                      setValuesPaths={setValuesPaths}
+                      isMultiSelect={isMultiSelect}
+                      setIsMultiSelect={setIsMultiSelect}
+                      onExploreLearningPath={() => setCurrentView('learning-path')}
+                      onRequestClearAll={handleRequestClearAll}
+                    />
+                  </div>
+                )}
+
+                {/* STAGE 2 / LEARNING PATH VIEW */}
+                {effectiveView === 'learning-path' && (
+                  <LearningPathView
+                    session={activeSession || savedSessions[0]}
+                    competencies={competencyPaths.length > 0 ? competencyPaths : (savedSessions[0]?.competencies || [])}
+                    values={valuesPaths.length > 0 ? valuesPaths : (savedSessions[0]?.values || [])}
+                    onBackToExplorer={() => setCurrentView('explorer')}
+                    onNewLearningPathModal={() => setIsNewPathModalOpen(true)}
+                    user={user}
+                  />
+                )}
+
+              </main>
+
+              {/* FOOTER: DISPLAYED ON ALL "HOMEPAGE" STAGES (1-3), NOT ON WHEEL EXPLORER */}
+              {effectiveView !== 'explorer' && <BrandFooter />}
+
+              {/* MODALS */}
+              <NewLearningPathModal
+                isOpen={isNewPathModalOpen}
+                onClose={() => setIsNewPathModalOpen(false)}
+                onSaveToAccount={handleSaveToAccountAndStartNew}
+                onDiscardAndStartNew={handleDiscardAndStartNew}
+              />
+
+              <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                confirmText={confirmModal.confirmText}
+                confirmColor={confirmModal.confirmColor}
+                onConfirm={confirmModal.onConfirm}
+                onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+              />
+
+            </div>
+          );
+        }
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
