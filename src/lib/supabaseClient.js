@@ -74,6 +74,8 @@ export const localStore = {
   }
 };
 
+import { assessmentData } from '../data/assessmentData.js';
+
 /**
  * Fetch assessment questions by tier ('ic', 'manager', 'director', 'values')
  */
@@ -94,7 +96,7 @@ export async function fetchAssessments(tier = 'ic') {
       console.warn('Error querying Supabase assessments:', err);
     }
   }
-  return null;
+  return assessmentData[tier] || [];
 }
 
 /**

@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { ExternalLink, ArrowLeft, RotateCcw } from 'lucide-react';
 import { ThreeColorPieIcon } from './components/ThreeColorPieIcon.jsx';
 import { WelcomeScreen } from './components/WelcomeScreen.jsx';
@@ -112,7 +112,7 @@ export default function App() {
             {screen === 'WHEEL' && (
               <button
                 onClick={() => setScreen('TIER_SELECT')}
-                className="py-1.5 px-3 rounded-lg text-xs font-bold text-slate-600 hover:text-charcoal bg-cloud hover:bg-slate-200 transition-colors flex items-center gap-1.5"
+                className="btn-secondary py-1.5 px-3 text-xs flex items-center gap-1.5"
               >
                 <RotateCcw size={13} />
                 <span>Change Tier</span>
@@ -123,7 +123,7 @@ export default function App() {
               href="https://www.mslilymckay.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="py-2 px-5 rounded-xl bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs sm:text-sm shadow-md transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5"
+              className="btn-primary py-2 px-4 flex items-center gap-1.5"
             >
               <span>Contact Me</span>
               <ExternalLink size={14} />

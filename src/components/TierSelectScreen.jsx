@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Award, Users, Compass, Heart, ArrowRight, Compass as ExploreIcon, CheckCircle2, ArrowLeft } from 'lucide-react';
 
 const TIERS = [
@@ -138,7 +138,7 @@ export function TierSelectScreen({ onSelectTier, onStartAssessment, onExploreWhe
               if (onSelectTier) onSelectTier(selectedTier);
               onExploreWheel();
             }}
-            className="w-full sm:w-auto py-3 px-5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-charcoal font-bold text-xs flex items-center justify-center gap-2 transition-all"
+            className="w-full sm:w-auto py-3 px-5 btn-secondary flex items-center justify-center gap-2"
           >
             <ExploreIcon size={14} />
             <span>Explore Wheel Directly</span>
@@ -150,7 +150,7 @@ export function TierSelectScreen({ onSelectTier, onStartAssessment, onExploreWhe
               if (onSelectTier) onSelectTier(selectedTier);
               onStartAssessment();
             }}
-            className="w-full sm:w-auto py-3 px-6 rounded-xl bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95"
+            className="w-full sm:w-auto py-3 px-6 btn-primary flex items-center justify-center gap-2"
           >
             <span>Take Ipsative Assessment</span>
             <ArrowRight size={14} />

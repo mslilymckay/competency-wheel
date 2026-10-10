@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { ArrowLeft, ArrowRight, Award, Compass, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
@@ -84,13 +84,13 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
         <div className="flex items-center gap-3">
           <button
             onClick={onRetake}
-            className="py-3 px-5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-charcoal font-bold text-xs transition-colors"
+            className="btn-secondary py-3 px-5 text-xs"
           >
-            Retake
+            Retake Assessment
           </button>
           <button
             onClick={onContinueToWheel}
-            className="py-3 px-6 rounded-xl bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
+            className="btn-primary py-3 px-6 text-xs flex items-center gap-2"
           >
             <span>Continue to Wheel</span>
             <ArrowRight size={14} />

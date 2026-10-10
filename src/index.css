@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Tenor+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Tenor+Sans&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -61,4 +61,117 @@ input, textarea {
   .no-print {
     display: none !important;
   }
+}
+
+/* -------------------------------------------------------------
+   STANDARDIZED DESIGN SYSTEM BUTTONS & SURFACES
+------------------------------------------------------------- */
+.btn-primary {
+  background-color: var(--rose);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.8125rem; /* 13px */
+  border-radius: 0.75rem; /* 12px */
+  box-shadow: 0 2px 8px -1px rgba(190, 24, 93, 0.25);
+  transition: all 0.15s ease-in-out;
+}
+.btn-primary:hover {
+  background-color: #9d174d;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px -2px rgba(190, 24, 93, 0.35);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  border-radius: 0.75rem;
+  transition: all 0.15s ease-in-out;
+}
+.btn-secondary:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+.btn-secondary:active {
+  transform: translateY(0);
+}
+
+/* -------------------------------------------------------------
+   ASSESSMENT CARDS — FIXED DIMENSION, CENTERED & INVERTED
+------------------------------------------------------------- */
+.assessment-card {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1.5px solid #fce7f3;
+  background-color: #ffffff;
+}
+.assessment-card:hover, .assessment-card.active-state {
+  background-color: var(--rose) !important;
+  border-color: var(--rose) !important;
+  transform: translateY(-4px);
+  box-shadow: 0 20px 35px -10px rgba(190, 24, 93, 0.25);
+}
+.assessment-card:hover .behavior-text, .assessment-card.active-state .behavior-text {
+  color: #ffffff !important;
+}
+
+/* -------------------------------------------------------------
+   CINEMATIC QUESTION TRANSITION CHOREOGRAPHY
+------------------------------------------------------------- */
+.prompt-box {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+  will-change: transform, opacity;
+}
+.cards-box {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+  will-change: transform, opacity;
+}
+
+/* Phase 1: Fade out both situation and cards */
+.stage-dissolve .prompt-box,
+.stage-dissolve .cards-box {
+  opacity: 0 !important;
+  transform: scale(0.97);
+  pointer-events: none;
+}
+
+/* Phase 2: Situation appears in center where cards were */
+.stage-center-situation .prompt-box {
+  opacity: 1 !important;
+  transform: translateY(210px);
+  transition: none;
+}
+.stage-center-situation .cards-box {
+  opacity: 0 !important;
+  transform: scale(0.96);
+  pointer-events: none;
+}
+
+/* Phase 3: Situation glides UP smoothly to top spot */
+.stage-glide-up .prompt-box {
+  opacity: 1 !important;
+  transform: translateY(0);
+  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.stage-glide-up .cards-box {
+  opacity: 0 !important;
+  transform: translateY(12px) scale(0.98);
+  pointer-events: none;
+}
+
+/* Phase 4: Final settled state — new cards emerge */
+.stage-settled .prompt-box {
+  opacity: 1;
+  transform: translateY(0);
+}
+.stage-settled .cards-box {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease-out, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
