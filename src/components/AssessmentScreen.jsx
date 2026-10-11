@@ -211,58 +211,49 @@ export function AssessmentScreen({ tier = 'ic', onComplete, onBack }) {
   }
 
   const currentQ = questions[currentIndex];
-  const progressPercent = Math.round(((currentIndex + 1) / questions.length) * 100);
+  const tierClass = tier === 'ic' ? 'tier-ic' : tier === 'manager' ? 'tier-manager' : tier === 'values' ? 'tier-values' : 'tier-director';
+  const tierColorHex = tier === 'ic' ? '#0B538C' : tier === 'manager' ? '#1E5C32' : tier === 'values' ? '#B45309' : '#B23267';
 
   return (
     <div className="w-full flex flex-col items-center flex-1 min-h-0 justify-center animate-in fade-in duration-300">
       
-      {/* Assessment Stage with Viewport Fit & Dynamic Transition Class */}
-      <div className={`w-full max-w-5xl bg-white rounded-3xl border border-slate-200/80 p-5 sm:p-7 md:p-8 shadow-[0_4px_25px_-4px_rgba(0,0,0,0.05)] flex flex-col justify-between flex-1 min-h-0 relative ${animStage}`}>
+      {/* Assessment Stage: Open canvas with Viewport Fit & Dynamic Transition Class */}
+      <div className={`w-full max-w-5xl flex flex-col justify-between flex-1 min-h-0 py-3 sm:py-6 px-4 sm:px-8 relative ${animStage}`}>
 
-        {/* 1. Header: Back Navigation & Question Counter */}
-        <div>
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <button
-              onClick={onBack}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-[#2A2A2A] transition-colors"
-            >
-              <ArrowLeft size={14} />
-              <span>Back to Tier Select</span>
-            </button>
+        {/* 1. Header: Back Navigation & Question Counter (Progress bar removed, text preserved) */}
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-slate-200/60 shrink-0">
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-[#2A2A2A] transition-colors"
+          >
+            <ArrowLeft size={14} />
+            <span>Back to Tier Select</span>
+          </button>
 
-            <span className="text-xs font-bold text-slate-500 tracking-wider uppercase">
-              Question {currentIndex + 1} of {questions.length}
-            </span>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="w-full bg-slate-100 rounded-full h-1 my-2.5 overflow-hidden">
-            <div
-              className="bg-[#B23267] h-1 transition-all duration-300 ease-out"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
+          <span className="text-xs font-bold text-slate-500 tracking-wider uppercase">
+            Question {currentIndex + 1} of {questions.length}
+          </span>
         </div>
 
-        {/* 2. Prompt Box (Choreographed Glide Stack) */}
-        <div className="prompt-box text-center max-w-3xl mx-auto pt-1 pb-2">
-          <p className="text-xs font-semibold text-slate-400 tracking-wider uppercase mb-1.5">
+        {/* 2. Prompt Box with Generous Breathing Room */}
+        <div className="prompt-box text-center max-w-3xl mx-auto pt-4 sm:pt-8 pb-3 sm:pb-6 shrink-0">
+          <p className="text-xs font-semibold text-slate-400 tracking-wider uppercase mb-2">
             Select the option that's most like you. Choose quickly for the best results.
           </p>
-          <h2 className="text-xl sm:text-3xl font-heading text-[#2A2A2A] leading-snug">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-heading text-[#2A2A2A] leading-snug">
             "{currentQ.prompt}"
           </h2>
         </div>
 
-        {/* 3. Cards Box (Fixed Dimensions, Centered Text, Viewport Constrained) */}
-        <div className="cards-box flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10 my-auto w-full max-w-4xl mx-auto py-2">
+        {/* 3. Cards Box (Tier-Themed, Generous Spacing, Fixed Dimensions, Centered Text) */}
+        <div className="cards-box flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12 md:gap-16 my-auto w-full max-w-4xl mx-auto py-4 sm:py-6 flex-1 min-h-0">
 
           {/* Option Card A (Left) */}
           <div
             onClick={() => handleChoice('A')}
-            className={`assessment-card rounded-3xl p-6 sm:p-8 cursor-pointer flex flex-col justify-center items-center text-center w-full sm:w-[340px] md:w-[350px] h-[260px] sm:h-[310px] md:h-[330px] shrink-0 shadow-sm ${selectedSide === 'A' ? 'active-state' : ''}`}
+            className={`assessment-card ${tierClass} rounded-3xl p-6 sm:p-8 cursor-pointer flex flex-col justify-center items-center text-center w-full sm:w-[340px] md:w-[350px] h-[250px] sm:h-[300px] md:h-[320px] shrink-0 shadow-sm ${selectedSide === 'A' ? 'active-state' : ''}`}
           >
-            <p className="behavior-text text-lg sm:text-xl md:text-2xl font-medium leading-relaxed transition-colors text-[#B23267]">
+            <p className="behavior-text text-lg sm:text-xl md:text-2xl font-medium leading-relaxed transition-colors">
               {currentQ.option_a_text}
             </p>
           </div>
@@ -270,9 +261,9 @@ export function AssessmentScreen({ tier = 'ic', onComplete, onBack }) {
           {/* Option Card B (Right) */}
           <div
             onClick={() => handleChoice('B')}
-            className={`assessment-card rounded-3xl p-6 sm:p-8 cursor-pointer flex flex-col justify-center items-center text-center w-full sm:w-[340px] md:w-[350px] h-[260px] sm:h-[310px] md:h-[330px] shrink-0 shadow-sm ${selectedSide === 'B' ? 'active-state' : ''}`}
+            className={`assessment-card ${tierClass} rounded-3xl p-6 sm:p-8 cursor-pointer flex flex-col justify-center items-center text-center w-full sm:w-[340px] md:w-[350px] h-[250px] sm:h-[300px] md:h-[320px] shrink-0 shadow-sm ${selectedSide === 'B' ? 'active-state' : ''}`}
           >
-            <p className="behavior-text text-lg sm:text-xl md:text-2xl font-medium leading-relaxed transition-colors text-[#B23267]">
+            <p className="behavior-text text-lg sm:text-xl md:text-2xl font-medium leading-relaxed transition-colors">
               {currentQ.option_b_text}
             </p>
           </div>
@@ -280,7 +271,7 @@ export function AssessmentScreen({ tier = 'ic', onComplete, onBack }) {
         </div>
 
         {/* 4. Bottom Row: ONLY the [i] Button by Default */}
-        <div className="flex items-center justify-between pt-3 border-t border-slate-100 relative min-h-[38px]">
+        <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-slate-200/60 shrink-0 relative min-h-[40px]">
           
           <div className="relative flex items-center">
             <button
@@ -288,7 +279,11 @@ export function AssessmentScreen({ tier = 'ic', onComplete, onBack }) {
               onClick={() => setShowTooltip(prev => !prev)}
               onMouseEnter={() => setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}
-              className="w-7 h-7 rounded-full border border-slate-300 hover:border-[#B23267] text-slate-500 hover:text-[#B23267] flex items-center justify-center font-serif text-xs font-bold transition-all focus:outline-none"
+              className="w-7 h-7 rounded-full border border-slate-300 text-slate-500 flex items-center justify-center font-serif text-xs font-bold transition-all focus:outline-none"
+              style={{
+                borderColor: showTooltip ? tierColorHex : undefined,
+                color: showTooltip ? tierColorHex : undefined
+              }}
               title="Keyboard shortcut help"
               aria-label="Instructions"
             >

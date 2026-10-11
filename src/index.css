@@ -134,20 +134,78 @@ input, textarea {
 }
 
 /* -------------------------------------------------------------
-   ASSESSMENT CARDS — FIXED DIMENSION, CENTERED & INVERTED
+   ASSESSMENT CARDS — TIER THEMED, FIXED DIMENSION & INVERTED
 ------------------------------------------------------------- */
 .assessment-card {
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  border: 1.5px solid #fce7f3;
   background-color: #ffffff;
 }
-.assessment-card:hover, .assessment-card.active-state {
-  background-color: var(--rose) !important;
-  border-color: var(--rose) !important;
-  transform: translateY(-3px);
-  box-shadow: 0 16px 28px -6px rgba(178, 50, 103, 0.25);
+
+/* Tier: IC (Deep Blue #0B538C) */
+.tier-ic {
+  border: 1.5px solid rgba(11, 83, 140, 0.2);
 }
-.assessment-card:hover .behavior-text, .assessment-card.active-state .behavior-text {
+.tier-ic .behavior-text {
+  color: #0B538C;
+}
+.tier-ic:hover, .tier-ic.active-state {
+  background-color: #0B538C !important;
+  border-color: #0B538C !important;
+  transform: translateY(-3px);
+  box-shadow: 0 16px 28px -6px rgba(11, 83, 140, 0.3);
+}
+.tier-ic:hover .behavior-text, .tier-ic.active-state .behavior-text {
+  color: #ffffff !important;
+}
+
+/* Tier: Manager (Forest Green #1E5C32) */
+.tier-manager {
+  border: 1.5px solid rgba(30, 92, 50, 0.2);
+}
+.tier-manager .behavior-text {
+  color: #1E5C32;
+}
+.tier-manager:hover, .tier-manager.active-state {
+  background-color: #1E5C32 !important;
+  border-color: #1E5C32 !important;
+  transform: translateY(-3px);
+  box-shadow: 0 16px 28px -6px rgba(30, 92, 50, 0.3);
+}
+.tier-manager:hover .behavior-text, .tier-manager.active-state .behavior-text {
+  color: #ffffff !important;
+}
+
+/* Tier: Director (Deep Pink #B23267) */
+.tier-director {
+  border: 1.5px solid rgba(178, 50, 103, 0.2);
+}
+.tier-director .behavior-text {
+  color: #B23267;
+}
+.tier-director:hover, .tier-director.active-state {
+  background-color: #B23267 !important;
+  border-color: #B23267 !important;
+  transform: translateY(-3px);
+  box-shadow: 0 16px 28px -6px rgba(178, 50, 103, 0.3);
+}
+.tier-director:hover .behavior-text, .tier-director.active-state .behavior-text {
+  color: #ffffff !important;
+}
+
+/* Tier: Values (Golden / Amber #B45309) */
+.tier-values {
+  border: 1.5px solid rgba(180, 83, 9, 0.2);
+}
+.tier-values .behavior-text {
+  color: #B45309;
+}
+.tier-values:hover, .tier-values.active-state {
+  background-color: #B45309 !important;
+  border-color: #B45309 !important;
+  transform: translateY(-3px);
+  box-shadow: 0 16px 28px -6px rgba(180, 83, 9, 0.3);
+}
+.tier-values:hover .behavior-text, .tier-values.active-state .behavior-text {
   color: #ffffff !important;
 }
 

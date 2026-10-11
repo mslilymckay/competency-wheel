@@ -68,6 +68,14 @@ export default function App() {
     setScreen('ASSESSMENT');
   };
 
+  const handleRestart = () => {
+    // Restart: clear selections & results, and return to Tier Select
+    setCompetencyPaths([]);
+    setValuesPaths([]);
+    setAssessmentResults(null);
+    setScreen('TIER_SELECT');
+  };
+
   const handleExploreWheelDirectly = () => {
     setScreen('WHEEL');
   };
@@ -133,11 +141,11 @@ export default function App() {
           <div className="flex items-center gap-3">
             {screen === 'WHEEL' && (
               <button
-                onClick={() => setScreen('TIER_SELECT')}
+                onClick={handleRestart}
                 className="btn-secondary py-1.5 px-3 text-xs flex items-center gap-1.5"
               >
                 <RotateCcw size={13} />
-                <span>Change Tier</span>
+                <span>Restart</span>
               </button>
             )}
 
@@ -209,6 +217,7 @@ export default function App() {
               setValuesPaths={setValuesPaths}
               isMultiSelect={isMultiSelect}
               initialFocusAreas={assessmentResults?.focusAreas}
+              selectedTier={selectedTier}
             />
 
             <DefinitionsPanel
