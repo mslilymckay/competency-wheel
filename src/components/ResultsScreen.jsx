@@ -1,96 +1,104 @@
 import React from 'react';
-import { ArrowLeft, ArrowRight, Award, Compass, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Compass, CheckCircle2 } from 'lucide-react';
+import { allDefinitions } from '../lib/wheelTheme.js';
 
 export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
-  // Safe fallbacks for placeholder testing
   const tierName = results?.tier ? results.tier.toUpperCase() : 'IC';
-  const strengths = results?.strengths || ['High-Quality Delivery', 'Execution Efficiency', 'Technical Mastery'];
+  const strengths = results?.strengths || ['High-Quality Delivery', 'Execution Efficiency', 'Timeline Reliability'];
   const focusAreas = results?.focusAreas || ['Roadblock Diagnosis', 'Growth Proactivity', 'Constructive Teaming'];
-  const bypassLog = results?.bypassLog || [];
 
   return (
-    <div className="max-w-4xl mx-auto w-full py-6 sm:py-10 animate-in fade-in duration-300">
+    <div className="max-w-4xl mx-auto w-full py-2 sm:py-4 flex flex-col justify-between flex-1 min-h-0 animate-in fade-in duration-300">
       
       {/* Header */}
-      <div className="text-center max-w-2xl mx-auto mb-10">
-        <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+      <div className="text-center max-w-2xl mx-auto mb-4 sm:mb-6">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-[#1E5C32] bg-[#E8F8EC] border border-[#1E5C32]/20 px-3 py-0.5 rounded-full">
           Assessment Complete
         </span>
-        <h1 className="text-3xl sm:text-4xl font-heading text-charcoal mt-3 mb-2">
+        <h1 className="text-2xl sm:text-3xl font-heading text-[#2A2A2A] mt-2 mb-1">
           Your {tierName} Leadership Footprint
         </h1>
-        <p className="text-sm text-slate-600 leading-relaxed">
+        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
           Here is your mathematically balanced assessment summary. (Full Radar Chart will be visualized in Sprint 4).
         </p>
       </div>
 
       {/* Strengths & Focus Areas Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {/* Top 3 Strengths (2/2s) */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
-              <CheckCircle2 size={18} />
-            </div>
-            <h3 className="font-heading text-lg text-charcoal">Top 3 Strengths</h3>
-          </div>
-          <div className="flex flex-col gap-3">
-            {strengths.map((s, idx) => (
-              <div key={idx} className="p-3 rounded-xl bg-cloud flex items-center justify-between">
-                <span className="text-xs font-bold text-charcoal">{s}</span>
-                <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-100/60 px-2 py-0.5 rounded-md">
-                  Score: 2/2
-                </span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 my-auto">
+        {/* Top 3 Strengths */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-3.5 pb-2.5 border-b border-slate-100">
+              <div className="w-7 h-7 rounded-lg bg-[#E8F8EC] text-[#1E5C32] flex items-center justify-center">
+                <CheckCircle2 size={16} />
               </div>
-            ))}
+              <h3 className="font-heading text-base sm:text-lg text-[#2A2A2A]">Top 3 Strengths</h3>
+            </div>
+            <div className="flex flex-col gap-2.5">
+              {strengths.map((s, idx) => (
+                <div key={idx} className="p-3 rounded-xl bg-[#F5F5F7] flex flex-col gap-1 border border-slate-200/40">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#2A2A2A]">{s}</span>
+                    <span className="text-[10px] font-bold text-[#1E5C32] bg-[#E8F8EC] px-2 py-0.5 rounded-md border border-[#1E5C32]/20">
+                      Foundational Skill
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    {allDefinitions[s] || "Demonstrated strength and high reliability in this domain."}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Top 3 Focus Areas (0/2s) */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center">
-              <Compass size={18} />
-            </div>
-            <h3 className="font-heading text-lg text-charcoal">Top 3 Focus Areas</h3>
-          </div>
-          <div className="flex flex-col gap-3">
-            {focusAreas.map((f, idx) => (
-              <div key={idx} className="p-3 rounded-xl bg-cloud flex flex-col gap-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-charcoal">{f}</span>
-                  <span className="text-[11px] font-extrabold text-rose-700 bg-rose-100/60 px-2 py-0.5 rounded-md">
-                    Priority Area
-                  </span>
-                </div>
-                <div className="text-[10px] text-slate-500">
-                  Passed over in favor of peer priorities during forced comparisons.
-                </div>
+        {/* Top 3 Focus Areas */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-3.5 pb-2.5 border-b border-slate-100">
+              <div className="w-7 h-7 rounded-lg bg-[#FCE7F3] text-[#B23267] flex items-center justify-center">
+                <Compass size={16} />
               </div>
-            ))}
+              <h3 className="font-heading text-base sm:text-lg text-[#2A2A2A]">Top 3 Focus Areas</h3>
+            </div>
+            <div className="flex flex-col gap-2.5">
+              {focusAreas.map((f, idx) => (
+                <div key={idx} className="p-3 rounded-xl bg-[#F5F5F7] flex flex-col gap-1 border border-slate-200/40">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#2A2A2A]">{f}</span>
+                    <span className="text-[10px] font-bold text-[#B23267] bg-[#FCE7F3] px-2 py-0.5 rounded-md border border-[#B23267]/20">
+                      Priority Area
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    {allDefinitions[f] || "Passed over in favor of peer priorities during forced comparisons."}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Next Actions CTA */}
-      <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
-        <div>
-          <h4 className="font-heading text-lg text-charcoal">Ready to explore your customized wheel?</h4>
-          <p className="text-xs text-slate-500 mt-1">
+      <div className="bg-[#F5F5F7] border border-slate-200/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm mt-3 sm:mt-4">
+        <div className="text-center sm:text-left">
+          <h4 className="font-heading text-base text-[#2A2A2A]">Ready to explore your customized wheel?</h4>
+          <p className="text-xs text-slate-500 mt-0.5">
             Launching the wheel will automatically pre-focus on your 3 target growth areas.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={onRetake}
-            className="btn-secondary py-3 px-5 text-xs"
+            className="btn-secondary py-2.5 px-4 text-xs"
           >
             Retake Assessment
           </button>
           <button
             onClick={onContinueToWheel}
-            className="btn-primary py-3 px-6 text-xs flex items-center gap-2"
+            className="btn-primary py-2.5 px-5 text-xs flex items-center gap-2"
           >
             <span>Continue to Wheel</span>
             <ArrowRight size={14} />

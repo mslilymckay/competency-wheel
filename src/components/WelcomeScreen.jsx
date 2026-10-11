@@ -14,54 +14,54 @@ export function WelcomeScreen({ onContinueAsGuest, onLogin }) {
   };
 
   return (
-    <div className="max-w-5xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-10 py-6 sm:py-12 items-center animate-in fade-in duration-300">
+    <div className="max-w-5xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 py-2 sm:py-4 items-center flex-1 min-h-0 my-auto animate-in fade-in duration-300">
       
       {/* Left Column: Overview Details & 3-Pillar List */}
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4 sm:gap-5">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blush text-rose-700 text-xs font-bold border border-rose-200 mb-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FCE7F3] text-[#B23267] text-xs font-bold border border-[#B23267]/20 mb-2.5">
             <ThreeColorPieIcon size={16} /> 360° Career Navigation
           </div>
-          <h1 className="text-3xl sm:text-5xl font-heading text-charcoal leading-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading text-[#2A2A2A] leading-tight">
             Competency and Values Wheel
           </h1>
-          <p className="text-sm text-slate-600 mt-2 leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
             A tactile self-assessment framework designed to chart leadership capabilities, anchor day-to-day work in core organizational values, and construct tailored 70-20-10 growth pathways.
           </p>
         </div>
 
         {/* 3 Pillars List */}
-        <div className="flex flex-col gap-4 border-t border-slate-200 pt-4">
-          <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-blush text-rose-700 flex items-center justify-center shrink-0 shadow-sm border border-rose-100">
-              <Award size={20} />
+        <div className="flex flex-col gap-3 border-t border-slate-200/80 pt-3.5">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[#E0F7FE] text-[#0B538C] flex items-center justify-center shrink-0 shadow-sm border border-[#0B538C]/20">
+              <Award size={18} />
             </div>
             <div>
-              <h3 className="font-heading text-base text-charcoal">Three-Tier Competency Wheel</h3>
+              <h3 className="font-heading text-sm sm:text-base text-[#2A2A2A]">Three-Tier Competency Wheel</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
                 Concentric rings covering Individual Contributor, Manager, and Director tiers across 15 core categories and 45 observable skills.
               </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-blush text-rose-700 flex items-center justify-center shrink-0 shadow-sm border border-rose-100">
-              <Heart size={20} fill="#be185d" />
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[#FCE7F3] text-[#B23267] flex items-center justify-center shrink-0 shadow-sm border border-[#B23267]/20">
+              <Heart size={18} fill="#B23267" />
             </div>
             <div>
-              <h3 className="font-heading text-base text-charcoal">Core Values Alignment</h3>
+              <h3 className="font-heading text-sm sm:text-base text-[#2A2A2A]">Core Values Alignment</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
                 Flip seamlessly to examine company core values (Teamwork, Empathy, Agility, Integrity) and actionable workplace behaviors.
               </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-blush text-rose-700 flex items-center justify-center shrink-0 shadow-sm border border-rose-100">
-              <Route size={20} />
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[#E8F8EC] text-[#1E5C32] flex items-center justify-center shrink-0 shadow-sm border border-[#1E5C32]/20">
+              <Route size={18} />
             </div>
             <div>
-              <h3 className="font-heading text-base text-charcoal">70-20-10 & Focused Growth</h3>
+              <h3 className="font-heading text-sm sm:text-base text-[#2A2A2A]">70-20-10 & Focused Growth</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
                 Transform assessment insights into focused leadership goals, peer mentorship, and tailored growth priorities.
               </p>
@@ -71,17 +71,17 @@ export function WelcomeScreen({ onContinueAsGuest, onLogin }) {
       </div>
 
       {/* Right Column: Clean Login / Create Account / Continue as Guest */}
-      <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-[0_4px_25px_-4px_rgba(0,0,0,0.06)] flex flex-col gap-5 max-w-md mx-auto w-full">
+      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-[0_4px_25px_-4px_rgba(0,0,0,0.06)] flex flex-col gap-4 max-w-md mx-auto w-full">
         <div>
-          <h2 className="text-2xl font-heading text-slate-900">
+          <h2 className="text-xl sm:text-2xl font-heading text-[#2A2A2A]">
             {isSignup ? 'Create Your Account' : 'Welcome Back'}
           </h2>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 mt-0.5">
             Sign in to sync your assessments, or explore immediately as a guest.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-slate-600">Email Address</label>
             <input
@@ -90,7 +90,7 @@ export function WelcomeScreen({ onContinueAsGuest, onLogin }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@company.com"
-              className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-rose-600 outline-none transition-all"
+              className="p-2.5 sm:p-3 rounded-xl bg-[#F5F5F7] border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-[#B23267] outline-none transition-all"
             />
           </div>
 
@@ -102,23 +102,23 @@ export function WelcomeScreen({ onContinueAsGuest, onLogin }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-rose-600 outline-none transition-all"
+              className="p-2.5 sm:p-3 rounded-xl bg-[#F5F5F7] border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-[#B23267] outline-none transition-all"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full mt-1 py-3 btn-primary text-xs"
+            className="w-full mt-1 py-2.5 sm:py-3 btn-primary text-xs"
           >
             {isSignup ? 'Create Account & Start' : 'Sign In'}
           </button>
         </form>
 
-        <div className="flex items-center justify-between text-xs pt-1">
+        <div className="flex items-center justify-between text-xs pt-0.5">
           <button
             type="button"
             onClick={() => setIsSignup(!isSignup)}
-            className="text-rose-700 font-semibold hover:underline"
+            className="text-[#B23267] font-semibold hover:underline"
           >
             {isSignup ? 'Already have an account? Log in' : 'Create an account'}
           </button>
@@ -133,7 +133,7 @@ export function WelcomeScreen({ onContinueAsGuest, onLogin }) {
         <button
           type="button"
           onClick={onContinueAsGuest}
-          className="w-full py-3 btn-secondary flex items-center justify-center gap-2"
+          className="w-full py-2.5 sm:py-3 btn-secondary flex items-center justify-center gap-2"
         >
           <span>Continue as Guest</span>
           <ArrowRight size={14} />

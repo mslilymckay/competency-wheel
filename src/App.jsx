@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ExternalLink, ArrowLeft, RotateCcw } from 'lucide-react';
+import { ExternalLink, RotateCcw } from 'lucide-react';
 import { ThreeColorPieIcon } from './components/ThreeColorPieIcon.jsx';
 import { WelcomeScreen } from './components/WelcomeScreen.jsx';
 import { TierSelectScreen } from './components/TierSelectScreen.jsx';
@@ -9,6 +9,7 @@ import { Wheel } from './components/Wheel.jsx';
 import { DefinitionsPanel } from './components/DefinitionsPanel.jsx';
 import { ConfirmationModal } from './components/ConfirmationModal.jsx';
 import { BrandFooter } from './components/BrandFooter.jsx';
+import { getPathForCompetency } from './lib/wheelTheme.js';
 
 export default function App() {
   // 1. STATE MACHINE ROUTER STATE
@@ -32,7 +33,7 @@ export default function App() {
     title: '',
     message: '',
     confirmText: 'Confirm',
-    confirmColor: 'bg-rose-700',
+    confirmColor: 'bg-[#B23267]',
     onConfirm: () => {}
   });
 
@@ -52,6 +53,18 @@ export default function App() {
   };
 
   const handleStartAssessment = () => {
+    // Fresh assessment start: clear any previous selections & results
+    setCompetencyPaths([]);
+    setValuesPaths([]);
+    setAssessmentResults(null);
+    setScreen('ASSESSMENT');
+  };
+
+  const handleRetakeAssessment = () => {
+    // Retake assessment: clear previous selections & results
+    setCompetencyPaths([]);
+    setValuesPaths([]);
+    setAssessmentResults(null);
     setScreen('ASSESSMENT');
   };
 
@@ -65,11 +78,20 @@ export default function App() {
   };
 
   const handleContinueToWheelWithFocus = () => {
-    // If we have focus areas from the results, inject them into paths!
+    // Port assessment focus areas directly into wheel selections & zoom to focus
     if (assessmentResults?.focusAreas && assessmentResults.focusAreas.length > 0) {
-      // Set the initial paths to the focus areas
-      const tierPrefix = selectedTier === 'values' ? 'values' : 'competencies';
-      // Switch to Wheel state in Focused Mode
+      const isValues = selectedTier === 'values';
+      setActiveMode(isValues ? 'values' : 'competencies');
+
+      const paths = assessmentResults.focusAreas
+        .map(areaName => getPathForCompetency(areaName, selectedTier))
+        .filter(Boolean);
+
+      if (isValues) {
+        setValuesPaths(paths);
+      } else {
+        setCompetencyPaths(paths);
+      }
     }
     setScreen('WHEEL');
   };
@@ -80,7 +102,7 @@ export default function App() {
       title: "Clear All Selections",
       message: "Are you sure you want to clear all selected competencies and values?",
       confirmText: "Clear All",
-      confirmColor: "bg-rose-700",
+      confirmColor: "bg-[#B23267]",
       onConfirm: () => {
         setCompetencyPaths([]);
         setValuesPaths([]);
@@ -90,11 +112,11 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-charcoal font-sans selection:bg-rose-100 selection:text-rose-900">
+    <div className="h-screen max-h-screen overflow-hidden flex flex-col bg-white text-[#2A2A2A] font-sans selection:bg-rose-100 selection:text-rose-900">
       
       {/* GLOBAL HEADER */}
-      <header className="w-full bg-white/95 border-b border-slate-200 sticky top-0 z-40 no-print backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <header className="w-full bg-white border-b border-slate-200 sticky top-0 z-40 shrink-0 no-print">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
           
           {/* Logo & Tool Title */}
           <div 
@@ -102,7 +124,7 @@ export default function App() {
             onClick={() => setScreen('WELCOME')}
           >
             <ThreeColorPieIcon size={26} />
-            <h1 className="text-base sm:text-lg font-heading text-charcoal leading-none tracking-tight">
+            <h1 className="text-base sm:text-lg font-heading text-[#2A2A2A] leading-none tracking-tight">
               Competency and Values Wheel
             </h1>
           </div>
@@ -133,8 +155,8 @@ export default function App() {
         </div>
       </header>
 
-      {/* MAIN STATE MACHINE BODY */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col">
+      {/* MAIN STATE MACHINE BODY (Viewport Constrained: flex-1 min-h-0 overflow-hidden) */}
+      <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto p-2.5 sm:p-4 flex flex-col overflow-hidden">
         
         {/* STATE 1: WELCOME SCREEN */}
         {screen === 'WELCOME' && (
@@ -171,13 +193,13 @@ export default function App() {
           <ResultsScreen
             results={assessmentResults}
             onContinueToWheel={handleContinueToWheelWithFocus}
-            onRetake={() => setScreen('ASSESSMENT')}
+            onRetake={handleRetakeAssessment}
           />
         )}
 
         {/* STATE 5: INTERACTIVE WHEEL VIEW */}
         {screen === 'WHEEL' && (
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch animate-in fade-in duration-300">
+          <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-stretch animate-in fade-in duration-300 overflow-hidden">
             <Wheel
               activeMode={activeMode}
               setActiveMode={setActiveMode}

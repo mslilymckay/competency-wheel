@@ -8,9 +8,10 @@ const TIERS = [
     badge: '15 Questions',
     icon: Award,
     description: 'Foundational execution, craft mastery, proactive collaboration, and personal accountability across 15 observable skills.',
-    accentColor: 'border-blue-500 bg-blue-50/40 text-blue-700',
-    hoverBorder: 'hover:border-blue-500',
-    selectedRing: 'ring-2 ring-blue-500 border-blue-500'
+    accentColor: 'bg-[#E0F7FE] text-[#0B538C] border border-[#0B538C]/20',
+    hoverBorder: 'hover:border-[#0B538C]',
+    selectedRing: 'ring-2 ring-[#0B538C] border-[#0B538C]',
+    brandColor: '#0B538C'
   },
   {
     id: 'manager',
@@ -18,9 +19,10 @@ const TIERS = [
     badge: '15 Questions',
     icon: Users,
     description: 'Coaching direct reports, workload balancing, friction resolution, psychological safety, and operational milestone execution.',
-    accentColor: 'border-emerald-500 bg-emerald-50/40 text-emerald-700',
-    hoverBorder: 'hover:border-emerald-500',
-    selectedRing: 'ring-2 ring-emerald-500 border-emerald-500'
+    accentColor: 'bg-[#E8F8EC] text-[#1E5C32] border border-[#1E5C32]/20',
+    hoverBorder: 'hover:border-[#1E5C32]',
+    selectedRing: 'ring-2 ring-[#1E5C32] border-[#1E5C32]',
+    brandColor: '#1E5C32'
   },
   {
     id: 'director',
@@ -28,9 +30,10 @@ const TIERS = [
     badge: '15 Questions',
     icon: Compass,
     description: 'Strategic foresight, cross-silo consensus, large-scale change management, talent architecture, and fiscal governance.',
-    accentColor: 'border-amber-500 bg-amber-50/40 text-amber-700',
-    hoverBorder: 'hover:border-amber-500',
-    selectedRing: 'ring-2 ring-amber-500 border-amber-500'
+    accentColor: 'bg-[#FCE7F3] text-[#B23267] border border-[#B23267]/20',
+    hoverBorder: 'hover:border-[#B23267]',
+    selectedRing: 'ring-2 ring-[#B23267] border-[#B23267]',
+    brandColor: '#B23267'
   },
   {
     id: 'values',
@@ -38,9 +41,10 @@ const TIERS = [
     badge: '12 Questions',
     icon: Heart,
     description: 'Examine organizational core values (Teamwork, Empathy, Agility, Integrity) and actionable workplace behaviors.',
-    accentColor: 'border-rose-500 bg-rose-50/40 text-rose-700',
-    hoverBorder: 'hover:border-rose-500',
-    selectedRing: 'ring-2 ring-rose-500 border-rose-500'
+    accentColor: 'bg-[#FFFBEB] text-[#B45309] border border-[#B45309]/20',
+    hoverBorder: 'hover:border-[#B45309]',
+    selectedRing: 'ring-2 ring-[#B45309] border-[#B45309]',
+    brandColor: '#B45309'
   }
 ];
 
@@ -55,31 +59,30 @@ export function TierSelectScreen({ onSelectTier, onStartAssessment, onExploreWhe
   const currentTierObj = TIERS.find(t => t.id === selectedTier) || TIERS[0];
 
   return (
-    <div className="max-w-4xl mx-auto w-full py-6 sm:py-10 animate-in fade-in duration-300">
+    <div className="max-w-4xl mx-auto w-full py-2 sm:py-4 flex flex-col justify-between flex-1 min-h-0 animate-in fade-in duration-300">
       
       {/* Top Navigation */}
-      <button
-        onClick={onBack}
-        className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-charcoal mb-6 transition-colors"
-      >
-        <ArrowLeft size={14} /> Back to Welcome
-      </button>
+      <div>
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-[#2A2A2A] mb-3 transition-colors"
+        >
+          <ArrowLeft size={14} /> Back to Welcome
+        </button>
 
-      {/* Header */}
-      <div className="text-center max-w-2xl mx-auto mb-10">
-        <span className="text-xs font-bold uppercase tracking-wider text-rose-700 bg-blush border border-rose-200 px-3 py-1 rounded-full">
-          Step 1 of 2
-        </span>
-        <h1 className="text-3xl sm:text-4xl font-heading text-charcoal mt-3 mb-2">
-          Choose Your Assessment Tier
-        </h1>
-        <p className="text-sm text-slate-600 leading-relaxed">
-          Select the leadership level or values domain you want to evaluate. You can take the balanced 15-question assessment or jump directly into the visual wheel.
-        </p>
+        {/* Header (No Step 1 of 2) */}
+        <div className="text-center max-w-2xl mx-auto mb-5 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl font-heading text-[#2A2A2A] mb-1.5">
+            Choose Your Assessment Tier
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Select the leadership level or values domain you want to evaluate. You can take the balanced assessment or jump directly into the visual wheel.
+          </p>
+        </div>
       </div>
 
       {/* Tier Selection Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 my-auto">
         {TIERS.map((tier) => {
           const Icon = tier.icon;
           const isSelected = selectedTier === tier.id;
@@ -87,28 +90,28 @@ export function TierSelectScreen({ onSelectTier, onStartAssessment, onExploreWhe
             <div
               key={tier.id}
               onClick={() => handleTierClick(tier.id)}
-              className={`p-6 rounded-3xl border-2 cursor-pointer transition-all bg-white relative flex flex-col justify-between ${
+              className={`p-5 rounded-2xl border-2 cursor-pointer transition-all bg-white relative flex flex-col justify-between ${
                 isSelected 
                   ? tier.selectedRing + ' shadow-md' 
                   : 'border-slate-200 ' + tier.hoverBorder + ' hover:shadow-sm'
               }`}
             >
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${tier.accentColor}`}>
-                    <Icon size={20} />
+                <div className="flex items-center justify-between mb-2.5">
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${tier.accentColor}`}>
+                    <Icon size={18} />
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-bold text-slate-500 bg-cloud px-2.5 py-0.5 rounded-full">
+                    <span className="text-[11px] font-semibold text-slate-500 bg-[#F5F5F7] px-2.5 py-0.5 rounded-full">
                       {tier.badge}
                     </span>
                     {isSelected && (
-                      <CheckCircle2 size={18} className="text-rose-700" />
+                      <CheckCircle2 size={18} style={{ color: tier.brandColor }} />
                     )}
                   </div>
                 </div>
 
-                <h3 className="font-heading text-xl text-charcoal mb-1.5">
+                <h3 className="font-heading text-lg text-[#2A2A2A] mb-1">
                   {tier.name}
                 </h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
@@ -121,38 +124,38 @@ export function TierSelectScreen({ onSelectTier, onStartAssessment, onExploreWhe
       </div>
 
       {/* Next Actions Container */}
-      <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+      <div className="bg-[#F5F5F7] border border-slate-200/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm mt-3 sm:mt-4">
         <div className="text-center sm:text-left">
-          <h4 className="font-heading text-lg text-charcoal">
-            Selected: <span className="text-rose-700 font-semibold">{currentTierObj.name}</span>
+          <h4 className="font-heading text-base text-[#2A2A2A]">
+            Selected: <span className="font-semibold" style={{ color: currentTierObj.brandColor }}>{currentTierObj.name}</span>
           </h4>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 mt-0.5">
             Choose how you'd like to experience this framework:
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full sm:w-auto">
           {/* Explore Directly Button */}
           <button
             onClick={() => {
               if (onSelectTier) onSelectTier(selectedTier);
               onExploreWheel();
             }}
-            className="w-full sm:w-auto py-3 px-5 btn-secondary flex items-center justify-center gap-2"
+            className="w-full sm:w-auto py-2.5 px-4 btn-secondary flex items-center justify-center gap-2 text-xs"
           >
             <ExploreIcon size={14} />
             <span>Explore Wheel Directly</span>
           </button>
 
-          {/* Take Assessment Button */}
+          {/* Start Assessment Button */}
           <button
             onClick={() => {
               if (onSelectTier) onSelectTier(selectedTier);
               onStartAssessment();
             }}
-            className="w-full sm:w-auto py-3 px-6 btn-primary flex items-center justify-center gap-2"
+            className="w-full sm:w-auto py-2.5 px-5 btn-primary flex items-center justify-center gap-2 text-xs"
           >
-            <span>Take Ipsative Assessment</span>
+            <span>Start Assessment</span>
             <ArrowRight size={14} />
           </button>
         </div>

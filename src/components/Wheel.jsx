@@ -1,7 +1,29 @@
-﻿import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Award, Heart } from 'lucide-react';
 import { describeArc, describeCurvedTextArc, polarToCartesian } from '../lib/wheelMath.js';
 import { defaultCompetencyFramework, defaultValuesFramework } from '../lib/wheelTheme.js';
+
+function wrapSliceLabel(name, maxChars = 14) {
+  if (!name) return [''];
+  if (name.length <= maxChars) return [name];
+  const words = name.split(/\s+/);
+  if (words.length <= 1) return [name];
+
+  const lines = [];
+  let current = '';
+  for (const w of words) {
+    if (!current) {
+      current = w;
+    } else if ((current + ' ' + w).length <= maxChars) {
+      current += ' ' + w;
+    } else {
+      lines.push(current);
+      current = w;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+}
 
 export function Wheel({
   activeMode,
@@ -16,6 +38,13 @@ export function Wheel({
   const [isZoomedOut, setIsZoomedOut] = useState(true);
   const [rotation, setRotation] = useState(0);
   const [isManual, setIsManual] = useState(false);
+
+  // Auto-focus and zoom to focused view when focus areas are ported from assessment
+  useEffect(() => {
+    if (initialFocusAreas && initialFocusAreas.length > 0) {
+      setIsZoomedOut(false);
+    }
+  }, [initialFocusAreas]);
 
   const dragRef = useRef({ isDown: false, hasMoved: false, lastAtan: 0 });
   const velocityRef = useRef(0);
@@ -294,20 +323,20 @@ export function Wheel({
   };
 
   return (
-    <div className="relative w-full h-full min-h-[640px] max-h-[85vh] bg-white rounded-3xl border border-slate-200 shadow-sm flex items-center overflow-hidden p-0">
+    <div className="relative w-full h-full flex-1 min-h-0 bg-white rounded-3xl border border-slate-200/80 shadow-sm flex items-center justify-center overflow-hidden p-0">
       
       {/* OVERLAY: Upper-Right (Mode Toggle) */}
       <div className="absolute top-4 right-4 z-20">
         <div className="inline-flex rounded-xl p-1 bg-white/95 border border-slate-200 shadow-md backdrop-blur-md">
           <button
             onClick={() => setActiveMode('competencies')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeMode === 'competencies' ? 'bg-rose-700 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeMode === 'competencies' ? 'bg-[#B23267] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
           >
             <Award size={14} /> Competencies
           </button>
           <button
             onClick={() => setActiveMode('values')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeMode === 'values' ? 'bg-rose-700 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeMode === 'values' ? 'bg-[#B23267] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
           >
             <Heart size={14} /> Values
           </button>
@@ -319,14 +348,14 @@ export function Wheel({
         <div className="inline-flex rounded-xl p-1 bg-white/95 border border-slate-200 shadow-md backdrop-blur-md">
           <button
             onClick={handleFullView}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isZoomedOut ? 'bg-charcoal text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isZoomedOut ? 'bg-[#2A2A2A] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
             title="Full View (Resets Rotation)"
           >
             Full View
           </button>
           <button
             onClick={handleFocusedView}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${!isZoomedOut ? 'bg-charcoal text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${!isZoomedOut ? 'bg-[#2A2A2A] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
             title="Focused View (Snaps to Selection)"
           >
             Focused View
@@ -340,7 +369,7 @@ export function Wheel({
         viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}
         className={`drop-shadow-xl transition-all duration-700 ease-in-out select-none ${
           isZoomedOut 
-            ? 'relative mx-auto w-[92%] max-w-[600px] max-h-[90%]' 
+            ? 'relative mx-auto w-full h-full max-h-[96%] p-2' 
             : 'absolute left-0 top-1/2 -translate-y-1/2 -translate-x-[48%] h-[125%] sm:h-[135%] w-auto max-w-none'
         }`}
         onPointerDown={handlePointerDown}
@@ -374,7 +403,8 @@ export function Wheel({
             );
 
             const fill = isSelected ? "#ffffff" : slice.color;
-            const textFill = isSelected ? "#1f2937" : "#ffffff";
+            const isLightBg = isSelected || fill === '#00CCFF' || fill === '#FFAEC9' || fill === '#82D18D' || fill === '#FFCC00';
+            const textFill = isLightBg ? "#2A2A2A" : "#ffffff";
             const strokeColor = "#ffffff";
             const strokeWidth = "1.5";
 
@@ -387,8 +417,6 @@ export function Wheel({
             const textRotation = midAngle - 90;
 
             const shouldShowLabel = slice.level === 0 || !isZoomedOut || isSelected;
-
-            let displayName = slice.name.length > 21 && slice.level === 2 ? slice.name.slice(0, 19) + '…' : slice.name;
 
             return (
               <g
@@ -413,7 +441,7 @@ export function Wheel({
                   <text
                     fill={textFill}
                     fontSize={isZoomedOut ? "24" : "19"}
-                    fontFamily="Tenor Sans, sans-serif"
+                    fontFamily="Tenor Sans, Georgia, serif"
                     fontWeight="normal"
                     className="pointer-events-none select-none transition-colors"
                   >
@@ -426,22 +454,40 @@ export function Wheel({
                     </textPath>
                   </text>
                 ) : (
-                  shouldShowLabel && (
-                    <text
-                      x={textPos.x} y={textPos.y}
-                      fill={textFill}
-                      fontSize={slice.level === 1 ? "12" : "9.5"}
-                      fontFamily="Open Sans, sans-serif"
-                      fontWeight={isSelected ? "700" : "600"}
-                      textAnchor="middle"
-                      alignmentBaseline="middle"
-                      pointerEvents="none"
-                      transform={`rotate(${textRotation}, ${textPos.x}, ${textPos.y})`}
-                      className="pointer-events-none select-none drop-shadow-sm transition-colors"
-                    >
-                      {displayName}
-                    </text>
-                  )
+                  shouldShowLabel && (() => {
+                    const lines = wrapSliceLabel(slice.name, slice.level === 1 ? 13 : 10);
+                    const fontSize = slice.level === 1 ? (isZoomedOut ? "12" : "10.5") : "8";
+                    return (
+                      <text
+                        x={textPos.x}
+                        y={textPos.y}
+                        fill={textFill}
+                        fontSize={fontSize}
+                        fontFamily="Open Sans, sans-serif"
+                        fontWeight={isSelected ? "700" : "600"}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        pointerEvents="none"
+                        transform={`rotate(${textRotation}, ${textPos.x}, ${textPos.y})`}
+                        className="pointer-events-none select-none drop-shadow-sm transition-colors"
+                      >
+                        {lines.length === 1 ? (
+                          lines[0]
+                        ) : lines.length === 2 ? (
+                          <>
+                            <tspan x={textPos.x} dy="-0.6em">{lines[0]}</tspan>
+                            <tspan x={textPos.x} dy="1.2em">{lines[1]}</tspan>
+                          </>
+                        ) : (
+                          <>
+                            <tspan x={textPos.x} dy="-1.1em">{lines[0]}</tspan>
+                            <tspan x={textPos.x} dy="1.1em">{lines[1]}</tspan>
+                            <tspan x={textPos.x} dy="1.1em">{lines[2]}</tspan>
+                          </>
+                        )}
+                      </text>
+                    );
+                  })()
                 )}
               </g>
             );
