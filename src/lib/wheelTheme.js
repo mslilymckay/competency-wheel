@@ -98,6 +98,44 @@ export function buildDefinitionMap() {
 
 export const allDefinitions = buildDefinitionMap();
 
+export function buildMicroHabitsMap() {
+  const map = {};
+  defaultCompetencyFramework.forEach(lvl => {
+    lvl.categories.forEach(cat => {
+      cat.children.forEach(sub => {
+        if (sub.microHabit) {
+          map[sub.name] = sub.microHabit;
+        }
+      });
+    });
+  });
+  return map;
+}
+
+export const allMicroHabits = buildMicroHabitsMap();
+
+export function getCategoryForCompetency(competencyName, tier = 'ic') {
+  if (!competencyName) return null;
+  const target = competencyName.trim().toLowerCase();
+  const tierName = tier === 'ic' ? 'Individual Contributor' : tier === 'manager' ? 'Manager' : 'Director';
+  const tierObj = defaultCompetencyFramework.find(t => t.name === tierName);
+  if (tierObj) {
+    for (const cat of tierObj.categories) {
+      if (cat.children.some(c => c.name.toLowerCase() === target)) {
+        return cat.name;
+      }
+    }
+  }
+  for (const t of defaultCompetencyFramework) {
+    for (const cat of t.categories) {
+      if (cat.children.some(c => c.name.toLowerCase() === target)) {
+        return cat.name;
+      }
+    }
+  }
+  return null;
+}
+
 export function getSegmentThemeColor(path, levelIndex, isValues) {
   if (!path || path.length === 0) return '#0B538C';
   const rootName = path[0];
