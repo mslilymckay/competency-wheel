@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ExternalLink, RotateCcw } from 'lucide-react';
+import { ExternalLink, RotateCcw, ArrowLeft } from 'lucide-react';
 import { ThreeColorPieIcon } from './components/ThreeColorPieIcon.jsx';
 import { WelcomeScreen } from './components/WelcomeScreen.jsx';
 import { TierSelectScreen } from './components/TierSelectScreen.jsx';
@@ -76,6 +76,14 @@ export default function App() {
     setScreen('TIER_SELECT');
   };
 
+  const handleBackFromWheel = () => {
+    if (assessmentResults) {
+      setScreen('RESULTS');
+    } else {
+      setScreen('TIER_SELECT');
+    }
+  };
+
   const handleExploreWheelDirectly = () => {
     setScreen('WHEEL');
   };
@@ -140,13 +148,24 @@ export default function App() {
           {/* Right Header Navigation & Actions */}
           <div className="flex items-center gap-3">
             {screen === 'WHEEL' && (
-              <button
-                onClick={handleRestart}
-                className="btn-secondary py-1.5 px-3 text-xs flex items-center gap-1.5"
-              >
-                <RotateCcw size={13} />
-                <span>Restart</span>
-              </button>
+              <>
+                <button
+                  onClick={handleBackFromWheel}
+                  className="btn-secondary py-1.5 px-3 text-xs flex items-center gap-1.5"
+                  title={assessmentResults ? "Back to Assessment Results" : "Back to Tier Select"}
+                >
+                  <ArrowLeft size={13} />
+                  <span>Back</span>
+                </button>
+
+                <button
+                  onClick={handleRestart}
+                  className="btn-secondary py-1.5 px-3 text-xs flex items-center gap-1.5"
+                >
+                  <RotateCcw size={13} />
+                  <span>Restart</span>
+                </button>
+              </>
             )}
 
             <a

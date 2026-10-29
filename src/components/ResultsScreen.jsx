@@ -182,26 +182,6 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
     // Consistently scroll drawer to top so user sees the Category Spotlight card!
     if (drawerRef.current) {
       drawerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-
-      // Gently highlight any matching cards in the drawer below without scrolling away
-      const matchingCards = drawerRef.current.querySelectorAll(`[data-category="${catName}"]`);
-      if (matchingCards && matchingCards.length > 0) {
-        matchingCards.forEach(card => {
-          card.classList.remove('ring-2', 'ring-offset-2', 'ring-[#0B538C]', 'ring-[#1E5C32]', 'ring-[#B23267]', 'ring-[#B45309]');
-          void card.offsetWidth; // Force reflow
-          const ringColor = tierColor === '#B23267' 
-            ? 'ring-[#B23267]' 
-            : tierColor === '#1E5C32' 
-              ? 'ring-[#1E5C32]' 
-              : tierColor === '#B45309' 
-                ? 'ring-[#B45309]' 
-                : 'ring-[#0B538C]';
-          card.classList.add('ring-2', 'ring-offset-2', ringColor);
-          setTimeout(() => {
-            card.classList.remove('ring-2', 'ring-offset-2', ringColor);
-          }, 2400);
-        });
-      }
     }
   };
 
@@ -314,21 +294,15 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
 
               {/* Radial Spokes connecting Center to Outer Vertices */}
               <g stroke="#CBD5E1" strokeWidth="1">
-                {radarData.map((d, i) => {
-                  const isHighlighted = inspectedCategory?.name === d.name || hoveredCategory === d.name;
-                  return (
-                    <line
-                      key={`spoke-${i}`}
-                      x1={center}
-                      y1={center}
-                      x2={d.spokeX}
-                      y2={d.spokeY}
-                      stroke={isHighlighted ? tierColor : "#CBD5E1"}
-                      strokeWidth={isHighlighted ? "1.8" : "1"}
-                      className="transition-colors duration-200"
-                    />
-                  );
-                })}
+                {radarData.map((d, i) => (
+                  <line
+                    key={`spoke-${i}`}
+                    x1={center}
+                    y1={center}
+                    x2={d.spokeX}
+                    y2={d.spokeY}
+                  />
+                ))}
               </g>
 
               {/* USER RESULTS RADAR POLYGON */}
@@ -407,14 +381,11 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
                   if (d.angleDeg > -70 && d.angleDeg < 70) textAnchor = "start";
                   else if (d.angleDeg > 110 || d.angleDeg < -110) textAnchor = "end";
 
-                  const isInspected = inspectedCategory?.name === d.name;
-                  const isHovered = hoveredCategory === d.name;
                   const isFocus = d.status === 'Growth Focus Area';
                   const isStrength = d.status === 'Foundational Strength';
                   
-                  let labelFill = '#2A2A2A';
-                  if (isInspected || isHovered) labelFill = tierColor;
-                  else if (isFocus) labelFill = '#B23267';
+                  let labelFill = '#334155';
+                  if (isFocus) labelFill = '#B23267';
                   else if (isStrength) labelFill = '#1E5C32';
 
                   return (
@@ -424,10 +395,8 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
                       y={d.labelY + 4}
                       textAnchor={textAnchor}
                       fill={labelFill}
-                      fontWeight={isInspected ? "800" : "700"}
-                      className="cursor-pointer hover:underline transition-colors"
-                      onMouseEnter={() => setHoveredCategory(d.name)}
-                      onMouseLeave={() => setHoveredCategory(null)}
+                      fontWeight="700"
+                      className="cursor-pointer hover:underline"
                       onClick={() => handleCategoryClick(d.name)}
                     >
                       {d.name}
