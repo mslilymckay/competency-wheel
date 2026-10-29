@@ -40,83 +40,6 @@ export function Wheel({
   const [rotation, setRotation] = useState(0);
   const [isManual, setIsManual] = useState(false);
 
-  const autoRotateKeyRef = useRef(null);
-
-  // Auto-focus and zoom to focused view when focus areas are ported from assessment
-  useEffect(() => {
-    if (initialFocusAreas && initialFocusAreas.length > 0) {
-      setIsZoomedOut(false);
-    }
-  }, [initialFocusAreas]);
-
-  // Rotate wheel to appropriate position (focus areas cluster or selected tier)
-  useEffect(() => {
-    const hasFocusAreas = initialFocusAreas && initialFocusAreas.length > 0;
-    
-    // When focus areas are ported, wait until Focused View slices (Ring 3) are rendered
-    if (hasFocusAreas && isZoomedOut) return;
-
-    const currentKey = hasFocusAreas
-      ? `focus:${initialFocusAreas.join(',')}`
-      : `tier:${selectedTier || 'ic'}:${activeMode}`;
-
-    if (autoRotateKeyRef.current === currentKey) return;
-    autoRotateKeyRef.current = currentKey;
-
-    if (hasFocusAreas) {
-      // Find matching slices in baseSlices for the ported focus areas
-      const matched = [];
-      initialFocusAreas.forEach(areaName => {
-        const s = baseSlices.find(slice => 
-          slice.name.toLowerCase() === areaName.toLowerCase() ||
-          (slice.path && slice.path[slice.path.length - 1].toLowerCase() === areaName.toLowerCase())
-        );
-        if (s) matched.push(s);
-      });
-
-      if (matched.length > 0) {
-        const midAngles = matched.map(s => s.startAngle + (s.endAngle - s.startAngle) / 2);
-        const avgAngle = midAngles.reduce((a, b) => a + b, 0) / midAngles.length;
-
-        // Rotate so the focus cluster centers at 3 o'clock (90 deg, facing Definitions panel)
-        let targetRotation = 90 - avgAngle;
-        let delta = targetRotation - (rotation % 360);
-        delta = ((delta + 180) % 360 + 360) % 360 - 180;
-
-        setIsManual(false);
-        setRotation(prev => prev + delta);
-      }
-    } else if (selectedTier && activeMode === 'competencies') {
-      // Rotate core tier to 3 o'clock
-      const tierSlice = baseSlices.find(s => 
-        s.level === 0 && (
-          (selectedTier === 'ic' && s.name === 'Individual Contributor') ||
-          (selectedTier === 'manager' && s.name === 'Manager') ||
-          (selectedTier === 'director' && s.name === 'Director')
-        )
-      );
-      if (tierSlice) {
-        const midAngle = tierSlice.startAngle + (tierSlice.endAngle - tierSlice.startAngle) / 2;
-        let targetRotation = 90 - midAngle;
-        let delta = targetRotation - (rotation % 360);
-        delta = ((delta + 180) % 360 + 360) % 360 - 180;
-
-        setIsManual(false);
-        setRotation(prev => prev + delta);
-      }
-    }
-  }, [initialFocusAreas, isZoomedOut, baseSlices, selectedTier, activeMode, rotation]);
-
-  const dragRef = useRef({ isDown: false, hasMoved: false, lastAtan: 0 });
-  const velocityRef = useRef(0);
-  const lastAngleRef = useRef(0);
-  const lastTimeRef = useRef(0);
-  const rafRef = useRef(null);
-  const clickStartRef = useRef({ x: 0, y: 0 });
-  const lastClickTimeRef = useRef(0);
-  const pendingSliceRef = useRef(null);
-  const svgRef = useRef(null);
-
   const viewBoxSize = 1000;
   const center = viewBoxSize / 2;
   const centerRadius = 82;
@@ -240,6 +163,83 @@ export function Wheel({
 
     return result;
   }, [activeMode, isZoomedOut]);
+
+  const autoRotateKeyRef = useRef(null);
+
+  // Auto-focus and zoom to focused view when focus areas are ported from assessment
+  useEffect(() => {
+    if (initialFocusAreas && initialFocusAreas.length > 0) {
+      setIsZoomedOut(false);
+    }
+  }, [initialFocusAreas]);
+
+  // Rotate wheel to appropriate position (focus areas cluster or selected tier)
+  useEffect(() => {
+    const hasFocusAreas = initialFocusAreas && initialFocusAreas.length > 0;
+    
+    // When focus areas are ported, wait until Focused View slices (Ring 3) are rendered
+    if (hasFocusAreas && isZoomedOut) return;
+
+    const currentKey = hasFocusAreas
+      ? `focus:${initialFocusAreas.join(',')}`
+      : `tier:${selectedTier || 'ic'}:${activeMode}`;
+
+    if (autoRotateKeyRef.current === currentKey) return;
+    autoRotateKeyRef.current = currentKey;
+
+    if (hasFocusAreas) {
+      // Find matching slices in baseSlices for the ported focus areas
+      const matched = [];
+      initialFocusAreas.forEach(areaName => {
+        const s = baseSlices.find(slice => 
+          slice.name.toLowerCase() === areaName.toLowerCase() ||
+          (slice.path && slice.path[slice.path.length - 1].toLowerCase() === areaName.toLowerCase())
+        );
+        if (s) matched.push(s);
+      });
+
+      if (matched.length > 0) {
+        const midAngles = matched.map(s => s.startAngle + (s.endAngle - s.startAngle) / 2);
+        const avgAngle = midAngles.reduce((a, b) => a + b, 0) / midAngles.length;
+
+        // Rotate so the focus cluster centers at 3 o'clock (90 deg, facing Definitions panel)
+        let targetRotation = 90 - avgAngle;
+        let delta = targetRotation - (rotation % 360);
+        delta = ((delta + 180) % 360 + 360) % 360 - 180;
+
+        setIsManual(false);
+        setRotation(prev => prev + delta);
+      }
+    } else if (selectedTier && activeMode === 'competencies') {
+      // Rotate core tier to 3 o'clock
+      const tierSlice = baseSlices.find(s => 
+        s.level === 0 && (
+          (selectedTier === 'ic' && s.name === 'Individual Contributor') ||
+          (selectedTier === 'manager' && s.name === 'Manager') ||
+          (selectedTier === 'director' && s.name === 'Director')
+        )
+      );
+      if (tierSlice) {
+        const midAngle = tierSlice.startAngle + (tierSlice.endAngle - tierSlice.startAngle) / 2;
+        let targetRotation = 90 - midAngle;
+        let delta = targetRotation - (rotation % 360);
+        delta = ((delta + 180) % 360 + 360) % 360 - 180;
+
+        setIsManual(false);
+        setRotation(prev => prev + delta);
+      }
+    }
+  }, [initialFocusAreas, isZoomedOut, baseSlices, selectedTier, activeMode, rotation]);
+
+  const dragRef = useRef({ isDown: false, hasMoved: false, lastAtan: 0 });
+  const velocityRef = useRef(0);
+  const lastAngleRef = useRef(0);
+  const lastTimeRef = useRef(0);
+  const rafRef = useRef(null);
+  const clickStartRef = useRef({ x: 0, y: 0 });
+  const lastClickTimeRef = useRef(0);
+  const pendingSliceRef = useRef(null);
+  const svgRef = useRef(null);
 
   // Snapping logic
   const focusOnPath = (path) => {

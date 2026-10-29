@@ -1,9 +1,10 @@
 import React, { useState, useRef, useMemo } from 'react';
-import { ArrowRight, RotateCcw } from 'lucide-react';
-import { allDefinitions, allMicroHabits, getCategoryForCompetency, defaultCompetencyFramework } from '../lib/wheelTheme.js';
+import { ArrowRight, RotateCcw, X, Sparkles } from 'lucide-react';
+import { allDefinitions, allMicroHabits, defaultCompetencyFramework } from '../lib/wheelTheme.js';
 
 export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
   const [inspectedCategory, setInspectedCategory] = useState(null);
+  const [hoveredCategory, setHoveredCategory] = useState(null);
   const drawerRef = useRef(null);
 
   const tier = results?.tier || 'ic';
@@ -19,20 +20,14 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
     return results?.focusAreas || ['Growth Proactivity', 'Active Listening', 'Timeline Reliability'];
   }, [results]);
 
-  // Retrieve the 5 categories for the current tier
+  // Retrieve the 5 categories and their children for the current tier
   const tierCategories = useMemo(() => {
     const tierObj = defaultCompetencyFramework.find(t => 
       (tier === 'ic' && t.name === 'Individual Contributor') ||
       (tier === 'manager' && t.name === 'Manager') ||
       (tier === 'director' && t.name === 'Director')
     );
-    return tierObj ? tierObj.categories.map(c => c.name) : [
-      'Action Orientation',
-      'Collaborative Communication',
-      'Problem Solving',
-      'Functional Expertise',
-      'Personal Accountability'
-    ];
+    return tierObj ? tierObj.categories : [];
   }, [tier]);
 
   // Center & Radii configuration for the 3-ring system (0 = inner, 1 = middle, 2 = outer)
@@ -42,28 +37,51 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
   const rOuter = 140;  // Level 2 (Foundational Strength level)
 
   // Compute category scores & dynamic footprint points
-  // Angle: 5 equidistant axes, starting at 12 o'clock (-90 degrees)
+  // Aggregating each category's 3 sub-competencies (0-2 each, total 0-6 points)
   const radarData = useMemo(() => {
-    return tierCategories.map((catName, idx) => {
+    const userScores = results?.scores || {};
+
+    return tierCategories.map((catObj, idx) => {
+      const catName = catObj.name;
       const angleDeg = -90 + (idx * 72);
       const angleRad = angleDeg * (Math.PI / 180);
 
-      // Determine strength / focus prominence for this category
-      const hasStrength = strengths.some(s => getCategoryForCompetency(s, tier) === catName);
-      const hasFocus = focusAreas.some(f => getCategoryForCompetency(f, tier) === catName);
+      // Sub-competencies for this category
+      const subCompetencies = catObj.children || [];
+      
+      // Calculate total points earned in this category from assessment choices (0 to 6)
+      let catPoints = 0;
+      const subDetails = subCompetencies.map(sub => {
+        let score = userScores[sub.name];
+        if (score === undefined) {
+          if (strengths.includes(sub.name)) score = 2;
+          else if (focusAreas.includes(sub.name)) score = 0;
+          else score = 1;
+        }
+        catPoints += score;
+        return {
+          name: sub.name,
+          score,
+          isStrength: strengths.includes(sub.name) || score === 2,
+          isFocus: focusAreas.includes(sub.name) || score === 0,
+        };
+      });
 
+      // Determine Category Status based on aggregated score (out of 6)
+      let status = 'Balanced Baseline';
+      if (catPoints >= 4) {
+        status = 'Foundational Strength';
+      } else if (catPoints <= 2) {
+        status = 'Growth Focus Area';
+      }
+
+      // Continuous radius interpolation along the spoke:
+      // Score 0 -> rInner (38), Score 3 -> rMiddle (88), Score 6 -> rOuter (140)
       let radius = rMiddle;
-      let status = 'Balanced';
-
-      if (hasStrength && !hasFocus) {
-        radius = rOuter;
-        status = 'Strength';
-      } else if (hasFocus && !hasStrength) {
-        radius = rInner;
-        status = 'Focus Area';
-      } else if (hasStrength && hasFocus) {
-        radius = (rMiddle + rOuter) / 2;
-        status = 'Mixed';
+      if (catPoints <= 3) {
+        radius = rInner + (catPoints / 3) * (rMiddle - rInner);
+      } else {
+        radius = rMiddle + ((catPoints - 3) / 3) * (rOuter - rMiddle);
       }
 
       const x = center + (radius * Math.cos(angleRad));
@@ -88,35 +106,47 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
         spokeY,
         labelX,
         labelY,
-        status
+        status,
+        catPoints,
+        subDetails
       };
     });
-  }, [tierCategories, strengths, focusAreas, tier]);
+  }, [tierCategories, strengths, focusAreas, results]);
 
   // SVG polygon points string for user result shape
   const userPolygonPoints = useMemo(() => {
     return radarData.map(d => `${d.x.toFixed(1)},${d.y.toFixed(1)}`).join(' ');
   }, [radarData]);
 
-  // Click handler for category points & labels: updates badge and scrolls to matching card
+  // Click handler for category points & labels: updates spotlight and scrolls to matching card
   const handleCategoryClick = (catName) => {
     const data = radarData.find(d => d.name === catName);
-    if (data) {
-      setInspectedCategory({ name: catName, status: data.status });
+    if (!data) return;
+
+    if (inspectedCategory?.name === catName) {
+      setInspectedCategory(null);
+      return;
     }
 
-    // Attempt to scroll to the category's card in the right drawer
+    setInspectedCategory(data);
+
+    // Attempt to scroll to matching cards in the right drawer
     if (drawerRef.current) {
-      const safeId = `card-cat-${catName.replace(/[^a-zA-Z0-9]/g, '-')}`;
-      const targetCard = drawerRef.current.querySelector(`#${safeId}`);
-      if (targetCard) {
-        targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        targetCard.classList.remove('ring-2', 'ring-offset-2', 'ring-[#0B538C]');
-        void targetCard.offsetWidth; // Force reflow
-        targetCard.classList.add('ring-2', 'ring-offset-2', 'ring-[#0B538C]');
-        setTimeout(() => {
-          targetCard.classList.remove('ring-2', 'ring-offset-2', 'ring-[#0B538C]');
-        }, 1800);
+      const matchingCards = drawerRef.current.querySelectorAll(`[data-category="${catName}"]`);
+      if (matchingCards && matchingCards.length > 0) {
+        matchingCards[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        matchingCards.forEach(card => {
+          card.classList.remove('ring-2', 'ring-offset-2', 'ring-[#0B538C]', 'ring-[#B23267]');
+          void card.offsetWidth; // Force reflow
+          const ringColor = data.status === 'Growth Focus Area' ? 'ring-[#B23267]' : 'ring-[#0B538C]';
+          card.classList.add('ring-2', 'ring-offset-2', ringColor);
+          setTimeout(() => {
+            card.classList.remove('ring-2', 'ring-offset-2', ringColor);
+          }, 2200);
+        });
+      } else {
+        // Scroll to top of drawer so user sees the Category Spotlight card
+        drawerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
   };
@@ -162,15 +192,21 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
               {tierName}
             </span>
 
-            {/* Dynamic Inspector Badge (No numeric scores!) */}
+            {/* Dynamic Inspector Badge */}
             <span
               className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border transition-all ${
                 inspectedCategory 
-                  ? (inspectedCategory.status === 'Strength' ? 'text-[#1E5C32] bg-[#E8F8EC] border-[#1E5C32]/20' : 'text-[#B23267] bg-[#FDE8EF] border-[#B23267]/20')
+                  ? (inspectedCategory.status === 'Foundational Strength' 
+                      ? 'text-[#1E5C32] bg-[#E8F8EC] border-[#1E5C32]/20' 
+                      : inspectedCategory.status === 'Growth Focus Area'
+                        ? 'text-[#B23267] bg-[#FDE8EF] border-[#B23267]/20'
+                        : 'text-slate-700 bg-slate-100 border-slate-200')
                   : 'text-slate-500 bg-slate-50 border-slate-200/60'
               }`}
             >
-              {inspectedCategory ? `${inspectedCategory.name} — ${inspectedCategory.status}` : 'Click points to inspect details'}
+              {inspectedCategory 
+                ? `${inspectedCategory.name} — ${inspectedCategory.status}` 
+                : (hoveredCategory ? `${hoveredCategory} (Click to inspect)` : 'Click points to inspect details')}
             </span>
           </div>
 
@@ -179,50 +215,62 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
             <svg viewBox="0 0 440 440" className="w-full h-full max-h-[380px] overflow-visible">
               <defs>
                 <radialGradient id="radar-grad-blue" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stop-color="#00CCFF" stop-opacity="0.38" />
-                  <stop offset="100%" stop-color="#0B538C" stop-opacity="0.16" />
+                  <stop offset="0%" stopColor="#00CCFF" stopOpacity="0.38" />
+                  <stop offset="100%" stopColor="#0B538C" stopOpacity="0.16" />
                 </radialGradient>
                 <radialGradient id="radar-grad-green" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stop-color="#82D18D" stop-opacity="0.38" />
-                  <stop offset="100%" stop-color="#1E5C32" stop-opacity="0.16" />
+                  <stop offset="0%" stopColor="#82D18D" stopOpacity="0.38" />
+                  <stop offset="100%" stopColor="#1E5C32" stopOpacity="0.16" />
                 </radialGradient>
                 <radialGradient id="radar-grad-pink" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stop-color="#FFAEC9" stop-opacity="0.40" />
-                  <stop offset="100%" stop-color="#B23267" stop-opacity="0.18" />
+                  <stop offset="0%" stopColor="#FFAEC9" stopOpacity="0.40" />
+                  <stop offset="100%" stopColor="#B23267" stopOpacity="0.18" />
                 </radialGradient>
               </defs>
 
               {/* 3-RING SYSTEM: 0 = Inner-most, 1 = Middle, 2 = Outer Perimeter */}
               <g fill="none">
-                {/* Ring 0: Inner-most (Radius 38) */}
+                {/* Ring 0: Inner-most (Radius 38 - Focus Area zone) */}
                 <polygon
                   points="220,182 256,208 242,251 198,251 184,208"
                   stroke="#E2E8F0"
-                  stroke-width="1.2"
-                  stroke-dasharray="3,3"
+                  strokeWidth="1.2"
+                  strokeDasharray="3,3"
                 />
                 
-                {/* Ring 1: Middle (Radius 88) */}
+                {/* Ring 1: Middle (Radius 88 - Proficient baseline) */}
                 <polygon
                   points="220,132 304,193 272,291 168,291 136,193"
                   stroke="#CBD5E1"
-                  stroke-width="1.2"
-                  stroke-dasharray="3,3"
+                  strokeWidth="1.2"
+                  strokeDasharray="3,3"
                 />
                 
-                {/* Ring 2: Outer Perimeter (Radius 140) */}
+                {/* Ring 2: Outer Perimeter (Radius 140 - Foundational Strength) */}
                 <polygon
                   points="220,80 353,177 302,333 138,333 87,177"
                   stroke="#94A3B8"
-                  stroke-width="1.8"
+                  strokeWidth="1.8"
                 />
               </g>
 
               {/* Radial Spokes connecting Center to 5 Outer Vertices */}
-              <g stroke="#CBD5E1" stroke-width="1">
-                {radarData.map((d, i) => (
-                  <line key={`spoke-${i}`} x1={center} y1={center} x2={d.spokeX} y2={d.spokeY} />
-                ))}
+              <g stroke="#CBD5E1" strokeWidth="1">
+                {radarData.map((d, i) => {
+                  const isHighlighted = inspectedCategory?.name === d.name || hoveredCategory === d.name;
+                  return (
+                    <line
+                      key={`spoke-${i}`}
+                      x1={center}
+                      y1={center}
+                      x2={d.spokeX}
+                      y2={d.spokeY}
+                      stroke={isHighlighted ? tierColor : "#CBD5E1"}
+                      strokeWidth={isHighlighted ? "1.8" : "1"}
+                      className="transition-colors duration-200"
+                    />
+                  );
+                })}
               </g>
 
               {/* USER RESULTS RADAR POLYGON */}
@@ -230,40 +278,78 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
                 points={userPolygonPoints}
                 fill={tier === 'ic' ? 'url(#radar-grad-blue)' : tier === 'manager' ? 'url(#radar-grad-green)' : 'url(#radar-grad-pink)'}
                 stroke={tierColor}
-                stroke-width="2.5"
+                strokeWidth="2.5"
                 className="transition-all duration-500 ease-out"
               />
 
-              {/* Interactive Vertices Points */}
+              {/* Interactive Vertices Points & Hit Targets (No flickering!) */}
               <g>
                 {radarData.map((d, i) => {
-                  const isFocus = d.status === 'Focus Area';
-                  const pointColor = isFocus ? '#B23267' : tierColor;
+                  const isFocus = d.status === 'Growth Focus Area';
+                  const isStrength = d.status === 'Foundational Strength';
+                  const pointColor = isFocus ? '#B23267' : (isStrength ? '#1E5C32' : tierColor);
+                  const isInspected = inspectedCategory?.name === d.name;
+                  const isHovered = hoveredCategory === d.name;
+
                   return (
-                    <circle
-                      key={`pt-${i}`}
-                      cx={d.x}
-                      cy={d.y}
-                      r={isFocus ? 6 : 5.5}
-                      fill={pointColor}
-                      stroke="#ffffff"
-                      stroke-width="2"
-                      className="cursor-pointer transition-transform hover:scale-125"
-                      onClick={() => handleCategoryClick(d.name)}
-                    />
+                    <g key={`pt-group-${i}`}>
+                      {/* Active / Hover Pulse Halo */}
+                      {(isInspected || isHovered) && (
+                        <circle
+                          cx={d.x}
+                          cy={d.y}
+                          r={isInspected ? 13 : 10}
+                          fill={pointColor}
+                          fillOpacity={isInspected ? 0.35 : 0.2}
+                          stroke={pointColor}
+                          strokeWidth={isInspected ? 2 : 1.5}
+                          className="pointer-events-none transition-all duration-300"
+                        />
+                      )}
+
+                      {/* Visible Center Circle */}
+                      <circle
+                        cx={d.x}
+                        cy={d.y}
+                        r={isInspected ? 8 : (isHovered ? 7 : (isFocus ? 6 : 5.5))}
+                        fill={pointColor}
+                        stroke="#ffffff"
+                        strokeWidth={isInspected ? 2.5 : 2}
+                        className="pointer-events-none transition-all duration-200"
+                      />
+
+                      {/* Large Invisible Hit Area (Prevents tiny-target miss and hover flicker) */}
+                      <circle
+                        cx={d.x}
+                        cy={d.y}
+                        r={22}
+                        fill="transparent"
+                        className="cursor-pointer"
+                        onMouseEnter={() => setHoveredCategory(d.name)}
+                        onMouseLeave={() => setHoveredCategory(null)}
+                        onClick={() => handleCategoryClick(d.name)}
+                      />
+                    </g>
                   );
                 })}
               </g>
 
               {/* Category Axis Labels (Surrounding the perimeter) */}
-              <g font-size="11" font-weight="700">
+              <g fontSize="11" fontWeight="700">
                 {radarData.map((d, i) => {
                   let textAnchor = "middle";
                   if (d.angleDeg > -70 && d.angleDeg < 70) textAnchor = "start";
                   else if (d.angleDeg > 110 || d.angleDeg < -110) textAnchor = "end";
 
-                  const isFocus = d.status === 'Focus Area';
-                  const labelFill = isFocus ? '#B23267' : '#2A2A2A';
+                  const isInspected = inspectedCategory?.name === d.name;
+                  const isHovered = hoveredCategory === d.name;
+                  const isFocus = d.status === 'Growth Focus Area';
+                  const isStrength = d.status === 'Foundational Strength';
+                  
+                  let labelFill = '#2A2A2A';
+                  if (isInspected || isHovered) labelFill = tierColor;
+                  else if (isFocus) labelFill = '#B23267';
+                  else if (isStrength) labelFill = '#1E5C32';
 
                   return (
                     <text
@@ -272,7 +358,10 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
                       y={d.labelY + 4}
                       textAnchor={textAnchor}
                       fill={labelFill}
-                      className="cursor-pointer hover:underline"
+                      fontWeight={isInspected ? "800" : "700"}
+                      className="cursor-pointer hover:underline transition-colors"
+                      onMouseEnter={() => setHoveredCategory(d.name)}
+                      onMouseLeave={() => setHoveredCategory(null)}
                       onClick={() => handleCategoryClick(d.name)}
                     >
                       {d.name}
@@ -289,7 +378,7 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
               <span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: tierColor }} />
               <span className="font-semibold text-slate-700">Assessment Result</span>
             </div>
-            <span className="text-[11px] text-slate-400">Click points to view details</span>
+            <span className="text-[11px] text-slate-400">Click points or labels to inspect</span>
           </div>
 
         </div>
@@ -315,6 +404,70 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
           <div ref={drawerRef} className="flex-1 min-h-0 overflow-y-auto pr-1.5 space-y-4 custom-scrollbar">
 
             {/* ------------------------------------------------------------- */}
+            {/* CATEGORY SPOTLIGHT CARD (APPEARS WHEN A POINT/LABEL IS CLICKED) */}
+            {/* ------------------------------------------------------------- */}
+            {inspectedCategory && (
+              <div className="p-3.5 rounded-2xl border-2 border-slate-300 bg-slate-50/80 animate-in fade-in slide-in-from-top-2 duration-200 shadow-sm">
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={14} style={{ color: tierColor }} />
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                      Category Inspection: {inspectedCategory.name}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setInspectedCategory(null)}
+                    className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors"
+                    title="Clear Inspection"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2 mb-2">
+                  <span
+                    className={`text-[11px] font-bold px-2 py-0.5 rounded-md ${
+                      inspectedCategory.status === 'Foundational Strength'
+                        ? 'bg-[#E8F8EC] text-[#1E5C32]'
+                        : inspectedCategory.status === 'Growth Focus Area'
+                          ? 'bg-[#FDE8EF] text-[#B23267]'
+                          : 'bg-white text-slate-700 border border-slate-200'
+                    }`}
+                  >
+                    {inspectedCategory.status}
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    {inspectedCategory.status === 'Foundational Strength'
+                      ? 'Consistently chosen across multiple trade-off scenarios.'
+                      : inspectedCategory.status === 'Growth Focus Area'
+                        ? 'Frequently passed over when forced to make priority trade-offs.'
+                        : 'Balanced proficiency across everyday operational trade-offs.'}
+                  </span>
+                </div>
+
+                {/* Sub-competencies in this category */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2 pt-2 border-t border-slate-200">
+                  {inspectedCategory.subDetails.map((sub, sIdx) => (
+                    <div key={`sub-${sIdx}`} className="bg-white p-2 rounded-xl border border-slate-200/70 text-xs">
+                      <div className="font-semibold text-slate-800 leading-tight truncate" title={sub.name}>
+                        {sub.name}
+                      </div>
+                      <div className="text-[10px] mt-1">
+                        {sub.isStrength ? (
+                          <span className="text-[#1E5C32] font-bold">★ Strength</span>
+                        ) : sub.isFocus ? (
+                          <span className="text-[#B23267] font-bold">▲ Focus Area</span>
+                        ) : (
+                          <span className="text-slate-500 font-medium">● Proficient</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ------------------------------------------------------------- */}
             {/* SECTION 1: TOP 3 FOCUS AREAS (PLACED FIRST!) */}
             {/* ------------------------------------------------------------- */}
             <div>
@@ -330,12 +483,11 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
                   const catName = getCategoryForCompetency(areaName, tier) || 'Core Dimension';
                   const defText = allDefinitions[areaName] || "Identified as a prime developmental opportunity.";
                   const microHabitText = allMicroHabits[areaName] || "Practice daily behavioral consistency in this domain.";
-                  const cardId = `card-cat-${catName.replace(/[^a-zA-Z0-9]/g, '-')}`;
 
                   return (
                     <div
                       key={`focus-${idx}`}
-                      id={cardId}
+                      data-category={catName}
                       className="p-3.5 rounded-2xl border border-[#B23267]/30 bg-[#FDE8EF]/25 hover:bg-white hover:border-[#B23267] transition-all shadow-2xs"
                     >
                       <div className="flex items-center justify-between mb-1">
@@ -379,12 +531,11 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
                 {strengths.map((strName, idx) => {
                   const catName = getCategoryForCompetency(strName, tier) || 'Core Dimension';
                   const defText = allDefinitions[strName] || "Demonstrated craft anchor with high consistency.";
-                  const cardId = `card-cat-${catName.replace(/[^a-zA-Z0-9]/g, '-')}`;
 
                   return (
                     <div
                       key={`str-${idx}`}
-                      id={cardId}
+                      data-category={catName}
                       className="p-3.5 rounded-2xl border border-slate-200/80 bg-slate-50/60 hover:bg-white hover:border-[#1E5C32] transition-all shadow-2xs"
                     >
                       <div className="flex items-center justify-between mb-1">
