@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { ArrowRight, RotateCcw, X, Sparkles } from 'lucide-react';
-import { allDefinitions, allMicroHabits, defaultCompetencyFramework } from '../lib/wheelTheme.js';
+import { allDefinitions, allMicroHabits, getCategoryForCompetency, defaultCompetencyFramework } from '../lib/wheelTheme.js';
 
 export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
   const [inspectedCategory, setInspectedCategory] = useState(null);
@@ -26,7 +26,7 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
       (tier === 'ic' && t.name === 'Individual Contributor') ||
       (tier === 'manager' && t.name === 'Manager') ||
       (tier === 'director' && t.name === 'Director')
-    );
+    ) || defaultCompetencyFramework[0];
     return tierObj ? tierObj.categories : [];
   }, [tier]);
 
