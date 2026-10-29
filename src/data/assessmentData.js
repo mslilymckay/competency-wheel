@@ -78,7 +78,7 @@ export const assessmentData = {
       "option_a_text": "Implementing lean, pragmatic fixes for immediate challenges.",
       "option_a_competency": "Practical Solutions",
       "option_b_text": "Keeping my technical capabilities current through practice.",
-      "option_b_competency": "Continuous Learning"
+      "option_b_competency": "Skill Continuous Learning"
     },
     {
       "id": "ic_1.9",
@@ -86,9 +86,9 @@ export const assessmentData = {
       "pair_id": "1.9",
       "prompt": "After a project concludes, I am most likely to...",
       "option_a_text": "Research new methods to keep my capabilities current.",
-      "option_a_competency": "Continuous Learning",
+      "option_a_competency": "Skill Continuous Learning",
       "option_b_text": "Transparently acknowledge missteps to turn them into improvements.",
-      "option_b_competency": "Constructive Correction"
+      "option_b_competency": "Constructive Self-Correction"
     },
     {
       "id": "ic_1.10",
@@ -96,7 +96,7 @@ export const assessmentData = {
       "pair_id": "1.10",
       "prompt": "When reviewing my recent performance, I prioritize...",
       "option_a_text": "Acknowledging personal missteps openly.",
-      "option_a_competency": "Constructive Correction",
+      "option_a_competency": "Constructive Self-Correction",
       "option_b_text": "Meeting deadlines dependably and communicating milestones.",
       "option_b_competency": "Timeline Reliability"
     },
@@ -158,7 +158,7 @@ export const assessmentData = {
       "pair_id": "2.1",
       "prompt": "When the team faces a complex roadblock, my instinct is to...",
       "option_a_text": "Ask open-ended questions to help them figure out the solution.",
-      "option_a_competency": "Development Coaching",
+      "option_a_competency": "Developmental Coaching",
       "option_b_text": "Re-distribute responsibilities to sustain peak energy.",
       "option_b_competency": "Workload Balancing"
     },
@@ -210,7 +210,7 @@ export const assessmentData = {
       "option_a_text": "Providing timely, growth-oriented performance reviews.",
       "option_a_competency": "Actionable Feedback",
       "option_b_text": "Investing resources prudently in high-leverage tools.",
-      "option_b_competency": "Resource Stewardship"
+      "option_b_competency": "Budget & Tool Stewardship"
     },
     {
       "id": "manager_2.7",
@@ -218,7 +218,7 @@ export const assessmentData = {
       "pair_id": "2.7",
       "prompt": "When project priorities clash, I tend to...",
       "option_a_text": "Invest resources prudently to address the gap.",
-      "option_a_competency": "Resource Stewardship",
+      "option_a_competency": "Budget & Tool Stewardship",
       "option_b_text": "Facilitate open dialogue to ensure mutual understanding.",
       "option_b_competency": "Neutral Mediation"
     },
@@ -250,7 +250,7 @@ export const assessmentData = {
       "option_a_text": "Demonstrating genuine care for individuals' personal situations.",
       "option_a_competency": "Empathetic Attunement",
       "option_b_text": "Creating visibility and opportunities for direct reports' career advancement.",
-      "option_b_competency": "Pathway Unblocking"
+      "option_b_competency": "Career Pathway Unblocking"
     },
     {
       "id": "manager_2.11",
@@ -258,7 +258,7 @@ export const assessmentData = {
       "pair_id": "2.11",
       "prompt": "When reviewing team performance, I prioritize...",
       "option_a_text": "Creating visibility for my direct reports' career advancement.",
-      "option_a_competency": "Pathway Unblocking",
+      "option_a_competency": "Career Pathway Unblocking",
       "option_b_text": "Accurately sizing team bandwidth against the annual project load.",
       "option_b_competency": "Capacity Forecasting"
     },
@@ -270,7 +270,7 @@ export const assessmentData = {
       "option_a_text": "Accurately sizing bandwidth against the project load.",
       "option_a_competency": "Capacity Forecasting",
       "option_b_text": "Securing commitment to shared team working agreements.",
-      "option_b_competency": "Norms Alignment"
+      "option_b_competency": "Agreement Alignment"
     },
     {
       "id": "manager_2.13",
@@ -278,7 +278,7 @@ export const assessmentData = {
       "pair_id": "2.13",
       "prompt": "The hallmark of a healthy team culture is...",
       "option_a_text": "Durable commitments to shared team working agreements.",
-      "option_a_competency": "Norms Alignment",
+      "option_a_competency": "Agreement Alignment",
       "option_b_text": "Productive standups and syncs that sustain steady velocity.",
       "option_b_competency": "Execution Cadence"
     },
@@ -300,7 +300,7 @@ export const assessmentData = {
       "option_a_text": "Ensuring their voice and perspective are actively considered.",
       "option_a_competency": "Inclusive Decisions",
       "option_b_text": "Supporting their self-directed onboarding with curiosity over advice.",
-      "option_b_competency": "Development Coaching"
+      "option_b_competency": "Developmental Coaching"
     }
   ],
   "director": [
@@ -322,7 +322,7 @@ export const assessmentData = {
       "option_a_text": "Rallying peer department heads behind the initiative.",
       "option_a_competency": "Executive Consensus",
       "option_b_text": "Designing phased transition roadmaps that maintain business continuity.",
-      "option_b_competency": "Transformation Design"
+      "option_b_competency": "Transformation Architecture"
     },
     {
       "id": "director_3.3",
@@ -330,7 +330,7 @@ export const assessmentData = {
       "pair_id": "3.3",
       "prompt": "When a project undergoes significant scope creep, I prioritize...",
       "option_a_text": "Redesigning the phased transition roadmap to maintain continuity.",
-      "option_a_competency": "Transformation Design",
+      "option_a_competency": "Transformation Architecture",
       "option_b_text": "Restructuring reporting lines for agility and minimal bureaucracy.",
       "option_b_competency": "Org Design"
     },
@@ -342,7 +342,7 @@ export const assessmentData = {
       "option_a_text": "Structuring departments for agility and minimal bureaucracy.",
       "option_a_competency": "Org Design",
       "option_b_text": "Allocating significant departmental budgets responsibly.",
-      "option_b_competency": "Budget Allocation"
+      "option_b_competency": "Macro Budget Control"
     },
     {
       "id": "director_3.5",
@@ -350,7 +350,7 @@ export const assessmentData = {
       "pair_id": "3.5",
       "prompt": "At the executive table, I am most relied upon for...",
       "option_a_text": "Allocating significant departmental budgets responsibly.",
-      "option_a_competency": "Budget Allocation",
+      "option_a_competency": "Macro Budget Control",
       "option_b_text": "Painting an inspiring, actionable multi-year vision for the division.",
       "option_b_competency": "Vision Articulation"
     },
@@ -382,7 +382,7 @@ export const assessmentData = {
       "option_a_text": "Championing core values through uncertainty.",
       "option_a_competency": "Cultural Stewardship",
       "option_b_text": "Cultivating a deep bench of future leaders who can take my place.",
-      "option_b_competency": "Succession Bench"
+      "option_b_competency": "Succession Pipeline"
     },
     {
       "id": "director_3.9",
@@ -390,7 +390,7 @@ export const assessmentData = {
       "pair_id": "3.9",
       "prompt": "When looking at the 3-year plan, my primary concern is...",
       "option_a_text": "Cultivating a deep bench of future leaders and high-potential contributors.",
-      "option_a_competency": "Succession Bench",
+      "option_a_competency": "Succession Pipeline",
       "option_b_text": "Measuring quantitative and qualitative return on major capital investments.",
       "option_b_competency": "ROI Evaluation"
     },
@@ -402,7 +402,7 @@ export const assessmentData = {
       "option_a_text": "Measuring quantitative and qualitative return on investment.",
       "option_a_competency": "ROI Evaluation",
       "option_b_text": "Taking measured risks on strategic organizational bets.",
-      "option_b_competency": "Strategic Bets"
+      "option_b_competency": "Strategic Prioritization"
     },
     {
       "id": "director_3.11",
@@ -410,7 +410,7 @@ export const assessmentData = {
       "pair_id": "3.11",
       "prompt": "A successful leader must be able to...",
       "option_a_text": "Take measured risks on transformative long-term opportunities.",
-      "option_a_competency": "Strategic Bets",
+      "option_a_competency": "Strategic Prioritization",
       "option_b_text": "Dismantle silos through mutual incentives.",
       "option_b_competency": "Cross-Silo Coalition"
     },
@@ -422,7 +422,7 @@ export const assessmentData = {
       "option_a_text": "Dismantling silos through mutual incentives and shared goals.",
       "option_a_competency": "Cross-Silo Coalition",
       "option_b_text": "Proactively answering concerns and aligning the company narrative.",
-      "option_b_competency": "Change Narrative"
+      "option_b_competency": "Change Communication"
     },
     {
       "id": "director_3.13",
@@ -430,7 +430,7 @@ export const assessmentData = {
       "pair_id": "3.13",
       "prompt": "To keep our company competitive, we must...",
       "option_a_text": "Proactively align the company narrative across departments.",
-      "option_a_competency": "Change Narrative",
+      "option_a_competency": "Change Communication",
       "option_b_text": "Anticipate the organizational skills needed 2-3 years into the future.",
       "option_b_competency": "Capability Modeling"
     },
@@ -442,7 +442,7 @@ export const assessmentData = {
       "option_a_text": "Anticipating organizational skills needed 2-3 years into the future.",
       "option_a_competency": "Capability Modeling",
       "option_b_text": "Ensuring long-term organizational solvency and compliance.",
-      "option_b_competency": "Risk Governance"
+      "option_b_competency": "Risk & Governance"
     },
     {
       "id": "director_3.15",
@@ -450,7 +450,7 @@ export const assessmentData = {
       "pair_id": "3.15",
       "prompt": "I protect the organization's long-term interests by...",
       "option_a_text": "Ensuring risk mitigation and compliance.",
-      "option_a_competency": "Risk Governance",
+      "option_a_competency": "Risk & Governance",
       "option_b_text": "Identifying technological disruptions well ahead of the curve.",
       "option_b_competency": "Horizon Scanning"
     }

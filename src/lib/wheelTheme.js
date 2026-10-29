@@ -76,6 +76,30 @@ export const defaultValuesFramework = [
   }
 ];
 
+export const COMPETENCY_ALIASES = {
+  // IC
+  'Continuous Learning': 'Skill Continuous Learning',
+  'Constructive Correction': 'Constructive Self-Correction',
+  // Manager
+  'Development Coaching': 'Developmental Coaching',
+  'Resource Stewardship': 'Budget & Tool Stewardship',
+  'Pathway Unblocking': 'Career Pathway Unblocking',
+  'Norms Alignment': 'Agreement Alignment',
+  // Director
+  'Transformation Design': 'Transformation Architecture',
+  'Budget Allocation': 'Macro Budget Control',
+  'Succession Bench': 'Succession Pipeline',
+  'Strategic Bets': 'Strategic Prioritization',
+  'Change Narrative': 'Change Communication',
+  'Risk Governance': 'Risk & Governance'
+};
+
+export function canonicalizeCompetency(name) {
+  if (!name) return name;
+  const trimmed = name.trim();
+  return COMPETENCY_ALIASES[trimmed] || trimmed;
+}
+
 export function buildDefinitionMap() {
   const map = {};
   defaultCompetencyFramework.forEach(lvl => {
@@ -93,6 +117,11 @@ export function buildDefinitionMap() {
       map[beh.name] = beh.definition;
     });
   });
+  Object.entries(COMPETENCY_ALIASES).forEach(([alias, canonical]) => {
+    if (map[canonical]) {
+      map[alias] = map[canonical];
+    }
+  });
   return map;
 }
 
@@ -109,6 +138,18 @@ export function buildMicroHabitsMap() {
       });
     });
   });
+  defaultValuesFramework.forEach(val => {
+    val.children.forEach(beh => {
+      if (beh.microHabit) {
+        map[beh.name] = beh.microHabit;
+      }
+    });
+  });
+  Object.entries(COMPETENCY_ALIASES).forEach(([alias, canonical]) => {
+    if (map[canonical]) {
+      map[alias] = map[canonical];
+    }
+  });
   return map;
 }
 
@@ -116,7 +157,17 @@ export const allMicroHabits = buildMicroHabitsMap();
 
 export function getCategoryForCompetency(competencyName, tier = 'ic') {
   if (!competencyName) return null;
-  const target = competencyName.trim().toLowerCase();
+  const canonical = canonicalizeCompetency(competencyName);
+  const target = canonical.trim().toLowerCase();
+
+  if (tier === 'values') {
+    for (const val of defaultValuesFramework) {
+      if (val.children.some(c => c.name.toLowerCase() === target)) {
+        return val.name;
+      }
+    }
+  }
+
   const tierName = tier === 'ic' ? 'Individual Contributor' : tier === 'manager' ? 'Manager' : 'Director';
   const tierObj = defaultCompetencyFramework.find(t => t.name === tierName);
   if (tierObj) {
@@ -131,6 +182,11 @@ export function getCategoryForCompetency(competencyName, tier = 'ic') {
       if (cat.children.some(c => c.name.toLowerCase() === target)) {
         return cat.name;
       }
+    }
+  }
+  for (const val of defaultValuesFramework) {
+    if (val.children.some(c => c.name.toLowerCase() === target)) {
+      return val.name;
     }
   }
   return null;
@@ -152,7 +208,8 @@ export function getSegmentThemeColor(path, levelIndex, isValues) {
  */
 export function getPathForCompetency(competencyName, tier = 'ic') {
   if (!competencyName) return null;
-  const target = competencyName.trim().toLowerCase();
+  const canonical = canonicalizeCompetency(competencyName);
+  const target = canonical.trim().toLowerCase();
 
   if (tier === 'values') {
     for (const val of defaultValuesFramework) {

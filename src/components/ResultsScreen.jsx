@@ -1,6 +1,23 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { ArrowRight, RotateCcw, X, Sparkles } from 'lucide-react';
-import { allDefinitions, allMicroHabits, getCategoryForCompetency, defaultCompetencyFramework } from '../lib/wheelTheme.js';
+import {
+  allDefinitions,
+  allMicroHabits,
+  getCategoryForCompetency,
+  defaultCompetencyFramework,
+  defaultValuesFramework,
+  canonicalizeCompetency
+} from '../lib/wheelTheme.js';
+
+function getPolygonPoints(sides, radius, center = 220) {
+  if (!sides || sides < 3) return '';
+  return Array.from({ length: sides }, (_, i) => {
+    const angleRad = (-90 + (i * (360 / sides))) * (Math.PI / 180);
+    const x = center + radius * Math.cos(angleRad);
+    const y = center + radius * Math.sin(angleRad);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+}
 
 export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
   const [inspectedCategory, setInspectedCategory] = useState(null);
@@ -8,9 +25,30 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
   const drawerRef = useRef(null);
 
   const tier = results?.tier || 'ic';
-  const tierName = tier === 'ic' ? 'Individual Contributor' : tier === 'manager' ? 'Manager' : 'Director';
-  const tierColor = tier === 'ic' ? '#0B538C' : tier === 'manager' ? '#1E5C32' : '#B23267';
-  const tierBg = tier === 'ic' ? '#EBF5FB' : tier === 'manager' ? '#E8F8EC' : '#FDE8EF';
+  const isValues = tier === 'values';
+  const tierName = isValues
+    ? 'Core Values'
+    : tier === 'ic'
+      ? 'Individual Contributor'
+      : tier === 'manager'
+        ? 'Manager'
+        : 'Director';
+
+  const tierColor = isValues
+    ? '#B45309'
+    : tier === 'ic'
+      ? '#0B538C'
+      : tier === 'manager'
+        ? '#1E5C32'
+        : '#B23267';
+
+  const tierBg = isValues
+    ? '#FFFBEB'
+    : tier === 'ic'
+      ? '#EBF5FB'
+      : tier === 'manager'
+        ? '#E8F8EC'
+        : '#FDE8EF';
 
   const strengths = useMemo(() => {
     return results?.strengths || ['High-Quality Delivery', 'Transparent Sharing', 'Roadblock Diagnosis'];
@@ -20,8 +58,11 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
     return results?.focusAreas || ['Growth Proactivity', 'Active Listening', 'Timeline Reliability'];
   }, [results]);
 
-  // Retrieve the 5 categories and their children for the current tier
+  // Retrieve categories and their children for the current tier (4 for Values, 5 for Competencies)
   const tierCategories = useMemo(() => {
+    if (tier === 'values') {
+      return defaultValuesFramework.map(v => ({ name: v.name, children: v.children }));
+    }
     const tierObj = defaultCompetencyFramework.find(t => 
       (tier === 'ic' && t.name === 'Individual Contributor') ||
       (tier === 'manager' && t.name === 'Manager') ||
@@ -37,33 +78,36 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
   const rOuter = 140;  // Level 2 (Foundational Strength level)
 
   // Compute category scores & dynamic footprint points
-  // Aggregating each category's 3 sub-competencies (0-2 each, total 0-6 points)
+  // Aggregating each category's 3 sub-competencies / behaviors (0-2 each, total 0-6 points)
   const radarData = useMemo(() => {
     const userScores = results?.scores || {};
+    const sides = tierCategories.length || 5;
 
     return tierCategories.map((catObj, idx) => {
       const catName = catObj.name;
-      const angleDeg = -90 + (idx * 72);
+      const angleDeg = -90 + (idx * (360 / sides));
       const angleRad = angleDeg * (Math.PI / 180);
 
-      // Sub-competencies for this category
+      // Sub-competencies / behaviors for this category
       const subCompetencies = catObj.children || [];
       
       // Calculate total points earned in this category from assessment choices (0 to 6)
       let catPoints = 0;
       const subDetails = subCompetencies.map(sub => {
-        let score = userScores[sub.name];
+        const canonicalSub = canonicalizeCompetency(sub.name);
+        let score = userScores[sub.name] ?? userScores[canonicalSub];
         if (score === undefined) {
-          if (strengths.includes(sub.name)) score = 2;
-          else if (focusAreas.includes(sub.name)) score = 0;
+          if (strengths.some(s => canonicalizeCompetency(s) === canonicalSub)) score = 2;
+          else if (focusAreas.some(f => canonicalizeCompetency(f) === canonicalSub)) score = 0;
           else score = 1;
         }
         catPoints += score;
         return {
           name: sub.name,
+          canonicalName: canonicalSub,
           score,
-          isStrength: strengths.includes(sub.name) || score === 2,
-          isFocus: focusAreas.includes(sub.name) || score === 0,
+          isStrength: strengths.some(s => canonicalizeCompetency(s) === canonicalSub) || score === 2,
+          isFocus: focusAreas.some(f => canonicalizeCompetency(f) === canonicalSub) || score === 0,
         };
       });
 
@@ -118,7 +162,12 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
     return radarData.map(d => `${d.x.toFixed(1)},${d.y.toFixed(1)}`).join(' ');
   }, [radarData]);
 
-  // Click handler for category points & labels: updates spotlight and scrolls to matching card
+  // Concentric 3-ring grid polygons (dynamically adapts: 5-sided pentagon for competencies, 4-sided diamond for values)
+  const ring0Points = useMemo(() => getPolygonPoints(tierCategories.length, rInner, center), [tierCategories.length]);
+  const ring1Points = useMemo(() => getPolygonPoints(tierCategories.length, rMiddle, center), [tierCategories.length]);
+  const ring2Points = useMemo(() => getPolygonPoints(tierCategories.length, rOuter, center), [tierCategories.length]);
+
+  // Click handler for category points & labels: consistently scrolls to top to highlight Category Spotlight card
   const handleCategoryClick = (catName) => {
     const data = radarData.find(d => d.name === catName);
     if (!data) return;
@@ -130,23 +179,28 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
 
     setInspectedCategory(data);
 
-    // Attempt to scroll to matching cards in the right drawer
+    // Consistently scroll drawer to top so user sees the Category Spotlight card!
     if (drawerRef.current) {
+      drawerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Gently highlight any matching cards in the drawer below without scrolling away
       const matchingCards = drawerRef.current.querySelectorAll(`[data-category="${catName}"]`);
       if (matchingCards && matchingCards.length > 0) {
-        matchingCards[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         matchingCards.forEach(card => {
-          card.classList.remove('ring-2', 'ring-offset-2', 'ring-[#0B538C]', 'ring-[#B23267]');
+          card.classList.remove('ring-2', 'ring-offset-2', 'ring-[#0B538C]', 'ring-[#1E5C32]', 'ring-[#B23267]', 'ring-[#B45309]');
           void card.offsetWidth; // Force reflow
-          const ringColor = data.status === 'Growth Focus Area' ? 'ring-[#B23267]' : 'ring-[#0B538C]';
+          const ringColor = tierColor === '#B23267' 
+            ? 'ring-[#B23267]' 
+            : tierColor === '#1E5C32' 
+              ? 'ring-[#1E5C32]' 
+              : tierColor === '#B45309' 
+                ? 'ring-[#B45309]' 
+                : 'ring-[#0B538C]';
           card.classList.add('ring-2', 'ring-offset-2', ringColor);
           setTimeout(() => {
             card.classList.remove('ring-2', 'ring-offset-2', ringColor);
-          }, 2200);
+          }, 2400);
         });
-      } else {
-        // Scroll to top of drawer so user sees the Category Spotlight card
-        drawerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
   };
@@ -158,10 +212,10 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
       <div className="flex flex-wrap items-center justify-between pb-2 sm:pb-3 mb-2 border-b border-slate-200/80 shrink-0 gap-2">
         <div>
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            Assessment Results
+            {isValues ? 'Values Diagnostic' : 'Assessment Results'}
           </span>
           <h2 className="text-xl sm:text-2xl font-heading text-[#2A2A2A] leading-tight">
-            Leadership Competency Diagnostic & Report
+            {isValues ? 'Core Values Behavioral Diagnostic & Report' : 'Leadership Competency Diagnostic & Report'}
           </h2>
         </div>
         <div className="flex items-center gap-2">
@@ -226,13 +280,17 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
                   <stop offset="0%" stopColor="#FFAEC9" stopOpacity="0.40" />
                   <stop offset="100%" stopColor="#B23267" stopOpacity="0.18" />
                 </radialGradient>
+                <radialGradient id="radar-grad-amber" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#FFCC00" stopOpacity="0.45" />
+                  <stop offset="100%" stopColor="#B45309" stopOpacity="0.18" />
+                </radialGradient>
               </defs>
 
               {/* 3-RING SYSTEM: 0 = Inner-most, 1 = Middle, 2 = Outer Perimeter */}
               <g fill="none">
                 {/* Ring 0: Inner-most (Radius 38 - Focus Area zone) */}
                 <polygon
-                  points="220,182 256,208 242,251 198,251 184,208"
+                  points={ring0Points}
                   stroke="#E2E8F0"
                   strokeWidth="1.2"
                   strokeDasharray="3,3"
@@ -240,7 +298,7 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
                 
                 {/* Ring 1: Middle (Radius 88 - Proficient baseline) */}
                 <polygon
-                  points="220,132 304,193 272,291 168,291 136,193"
+                  points={ring1Points}
                   stroke="#CBD5E1"
                   strokeWidth="1.2"
                   strokeDasharray="3,3"
@@ -248,13 +306,13 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
                 
                 {/* Ring 2: Outer Perimeter (Radius 140 - Foundational Strength) */}
                 <polygon
-                  points="220,80 353,177 302,333 138,333 87,177"
+                  points={ring2Points}
                   stroke="#94A3B8"
                   strokeWidth="1.8"
                 />
               </g>
 
-              {/* Radial Spokes connecting Center to 5 Outer Vertices */}
+              {/* Radial Spokes connecting Center to Outer Vertices */}
               <g stroke="#CBD5E1" strokeWidth="1">
                 {radarData.map((d, i) => {
                   const isHighlighted = inspectedCategory?.name === d.name || hoveredCategory === d.name;
@@ -276,7 +334,15 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
               {/* USER RESULTS RADAR POLYGON */}
               <polygon
                 points={userPolygonPoints}
-                fill={tier === 'ic' ? 'url(#radar-grad-blue)' : tier === 'manager' ? 'url(#radar-grad-green)' : 'url(#radar-grad-pink)'}
+                fill={
+                  isValues
+                    ? 'url(#radar-grad-amber)'
+                    : tier === 'ic'
+                      ? 'url(#radar-grad-blue)'
+                      : tier === 'manager'
+                        ? 'url(#radar-grad-green)'
+                        : 'url(#radar-grad-pink)'
+                }
                 stroke={tierColor}
                 strokeWidth="2.5"
                 className="transition-all duration-500 ease-out"
@@ -392,7 +458,7 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3 shrink-0">
             <div>
               <h3 className="font-heading text-lg text-[#2A2A2A] leading-snug">
-                Key Competencies & Development
+                {isValues ? 'Key Value Behaviors & Development' : 'Key Competencies & Development'}
               </h3>
               <p className="text-[11px] text-slate-400">
                 Derived from balanced ipsative trade-off analysis
@@ -412,7 +478,7 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
                   <div className="flex items-center gap-2">
                     <Sparkles size={14} style={{ color: tierColor }} />
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                      Category Inspection: {inspectedCategory.name}
+                      {isValues ? 'Value Domain' : 'Category Inspection'}: {inspectedCategory.name}
                     </span>
                   </div>
                   <button
@@ -445,12 +511,12 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
                   </span>
                 </div>
 
-                {/* Sub-competencies in this category */}
+                {/* Sub-competencies / behaviors in this category */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2 pt-2 border-t border-slate-200">
                   {inspectedCategory.subDetails.map((sub, sIdx) => (
                     <div key={`sub-${sIdx}`} className="bg-white p-2 rounded-xl border border-slate-200/70 text-xs">
-                      <div className="font-semibold text-slate-800 leading-tight truncate" title={sub.name}>
-                        {sub.name}
+                      <div className="font-semibold text-slate-800 leading-tight truncate" title={sub.canonicalName || sub.name}>
+                        {sub.canonicalName || sub.name}
                       </div>
                       <div className="text-[10px] mt-1">
                         {sub.isStrength ? (
@@ -480,9 +546,10 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
 
               <div className="space-y-2.5">
                 {focusAreas.map((areaName, idx) => {
-                  const catName = getCategoryForCompetency(areaName, tier) || 'Core Dimension';
-                  const defText = allDefinitions[areaName] || "Identified as a prime developmental opportunity.";
-                  const microHabitText = allMicroHabits[areaName] || "Practice daily behavioral consistency in this domain.";
+                  const canonicalName = canonicalizeCompetency(areaName);
+                  const catName = getCategoryForCompetency(canonicalName, tier) || getCategoryForCompetency(areaName, tier) || (isValues ? 'Core Value' : 'Core Dimension');
+                  const defText = allDefinitions[canonicalName] || allDefinitions[areaName] || "Identified as a prime developmental opportunity.";
+                  const microHabitText = allMicroHabits[canonicalName] || allMicroHabits[areaName] || "Practice daily behavioral consistency in this domain.";
 
                   return (
                     <div
@@ -498,7 +565,7 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
                           Priority #{idx + 1}
                         </span>
                       </div>
-                      <h5 className="text-sm font-bold text-[#2A2A2A]">{areaName}</h5>
+                      <h5 className="text-sm font-bold text-[#2A2A2A]">{canonicalName}</h5>
                       <p className="text-xs text-slate-600 leading-relaxed mt-0.5">
                         {defText}
                       </p>
@@ -529,8 +596,9 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
 
               <div className="space-y-2.5">
                 {strengths.map((strName, idx) => {
-                  const catName = getCategoryForCompetency(strName, tier) || 'Core Dimension';
-                  const defText = allDefinitions[strName] || "Demonstrated craft anchor with high consistency.";
+                  const canonicalName = canonicalizeCompetency(strName);
+                  const catName = getCategoryForCompetency(canonicalName, tier) || getCategoryForCompetency(strName, tier) || (isValues ? 'Core Value' : 'Core Dimension');
+                  const defText = allDefinitions[canonicalName] || allDefinitions[strName] || "Demonstrated craft anchor with high consistency.";
 
                   return (
                     <div
@@ -546,7 +614,7 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
                           Foundational Skill
                         </span>
                       </div>
-                      <h5 className="text-sm font-bold text-[#2A2A2A]">{strName}</h5>
+                      <h5 className="text-sm font-bold text-[#2A2A2A]">{canonicalName}</h5>
                       <p className="text-xs text-slate-600 leading-relaxed mt-0.5">
                         {defText}
                       </p>
@@ -564,7 +632,7 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
               onClick={onContinueToWheel}
               className="flex-1 btn-primary py-2.5 px-4 text-xs flex items-center justify-center gap-2"
             >
-              <span>Explore on Interactive Wheel</span>
+              <span>{isValues ? 'Explore on Values Wheel' : 'Explore on Interactive Wheel'}</span>
               <ArrowRight size={14} />
             </button>
             <button
