@@ -123,12 +123,250 @@ export async function fetchFramework(tier = 'ic') {
 }
 
 /**
+ * Fetch all framework rows across all tiers for dynamic hydration
+ */
+export async function fetchAllFrameworks() {
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('frameworks')
+        .select('*')
+        .order('sort_order', { ascending: true });
+
+      if (!error && data && data.length > 0) {
+        return data;
+      }
+      console.warn('Supabase fetchAllFrameworks returned empty or error:', error);
+    } catch (err) {
+      console.warn('Error querying Supabase all frameworks:', err);
+    }
+  }
+  return null;
+}
+
+/**
+ * Sign up a new user with Supabase Auth and insert profile
+ */
+export async function signUpUser({ email, password, displayName }) {
+  const cleanName = (displayName || '').trim();
+  if (!supabase) {
+    const mockUser = {
+      id: localStore.getProfileId(),
+      email,
+      displayName: cleanName || email.split('@')[0]
+    };
+    return { user: mockUser, error: null };
+  }
+
+  try {
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          display_name: cleanName
+        }
+      }
+    });
+
+    if (authError) {
+      return { user: null, error: authError };
+    }
+
+    const authUser = authData?.user;
+    if (!authUser) {
+      return { user: null, error: new Error('Failed to create user account') };
+    }
+
+    // Upsert into public.profiles
+    const profilePayload = {
+      id: authUser.id,
+      email: authUser.email || email,
+      display_name: cleanName || authUser.email?.split('@')[0],
+      current_tier: 'ic'
+    };
+
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert(profilePayload);
+
+    if (profileError) {
+      console.warn('Failed to upsert profile record in Supabase:', profileError);
+    }
+
+    const userObj = {
+      id: authUser.id,
+      email: authUser.email,
+      displayName: cleanName || authUser.email?.split('@')[0]
+    };
+
+    return { user: userObj, error: null };
+  } catch (err) {
+    console.error('Unexpected error during sign up:', err);
+    return { user: null, error: err };
+  }
+}
+
+/**
+ * Sign in existing user with Supabase Auth
+ */
+export async function signInUser({ email, password }) {
+  if (!supabase) {
+    const mockUser = {
+      id: localStore.getProfileId(),
+      email,
+      displayName: email.split('@')[0]
+    };
+    return { user: mockUser, error: null };
+  }
+
+  try {
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (authError) {
+      return { user: null, error: authError };
+    }
+
+    const authUser = authData?.user;
+    if (!authUser) {
+      return { user: null, error: new Error('User not found') };
+    }
+
+    let displayName = authUser.user_metadata?.display_name;
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name, email')
+        .eq('id', authUser.id)
+        .single();
+
+      if (profile?.display_name) {
+        displayName = profile.display_name;
+      }
+
+      if (!profile?.email && authUser.email) {
+        await supabase
+          .from('profiles')
+          .update({ email: authUser.email })
+          .eq('id', authUser.id);
+      }
+    } catch (e) {
+      console.warn('Failed to fetch profile during sign in:', e);
+    }
+
+    const userObj = {
+      id: authUser.id,
+      email: authUser.email,
+      displayName: displayName || authUser.email?.split('@')[0]
+    };
+
+    return { user: userObj, error: null };
+  } catch (err) {
+    console.error('Unexpected error during sign in:', err);
+    return { user: null, error: err };
+  }
+}
+
+/**
+ * Sign out current user from Supabase
+ */
+export async function signOutUser() {
+  if (supabase) {
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.warn('Error signing out:', e);
+    }
+  }
+}
+
+/**
+ * Permanently delete user assessment results, profile record, and active session
+ */
+export async function deleteUserData(userId) {
+  if (supabase && userId) {
+    try {
+      // 1. Delete all saved assessment results
+      const { error: resultsError } = await supabase
+        .from('assessment_results')
+        .delete()
+        .eq('profile_id', userId);
+      if (resultsError) {
+        console.warn('Error deleting assessment results from Supabase:', resultsError);
+      }
+
+      // 2. Delete profile record
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+      if (profileError) {
+        console.warn('Error deleting profile record from Supabase:', profileError);
+      }
+    } catch (err) {
+      console.error('Unexpected error deleting user data in Supabase:', err);
+    }
+  }
+
+  // 3. Clear local storage
+  localStore.clearCurrentSession();
+  try {
+    localStorage.removeItem(STORAGE_KEY_ASSESSMENTS);
+    localStorage.removeItem(STORAGE_KEY_PROFILE);
+  } catch (e) {
+    // ignore
+  }
+
+  // 4. Sign out auth session
+  await signOutUser();
+}
+
+/**
+ * Get current active session user
+ */
+export async function getCurrentUser() {
+  if (!supabase) return null;
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return null;
+
+    let displayName = session.user.user_metadata?.display_name;
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profile?.display_name) {
+        displayName = profile.display_name;
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    return {
+      id: session.user.id,
+      email: session.user.email,
+      displayName: displayName || session.user.email?.split('@')[0]
+    };
+  } catch (e) {
+    console.warn('Error getting session user:', e);
+    return null;
+  }
+}
+
+/**
  * Save assessment results to both Supabase and localStorage
  */
-export async function saveAssessmentResult({ tier, scores, strengths, focusAreas, bypassLog }) {
-  const profileId = localStore.getProfileId();
+export async function saveAssessmentResult({ tier, scores, strengths, focusAreas, bypassLog, profileId }) {
+  const finalProfileId = profileId || localStore.getProfileId();
   const record = {
     id: 'res_' + Date.now(),
+    profile_id: profileId || null,
     tier,
     scores,
     strengths,
@@ -142,15 +380,21 @@ export async function saveAssessmentResult({ tier, scores, strengths, focusAreas
 
   if (supabase) {
     try {
+      const payload = {
+        tier,
+        scores,
+        strengths,
+        focus_areas: focusAreas,
+        bypass_log: bypassLog
+      };
+
+      if (profileId) {
+        payload.profile_id = profileId;
+      }
+
       const { data, error } = await supabase
         .from('assessment_results')
-        .insert([{
-          tier,
-          scores,
-          strengths,
-          focus_areas: focusAreas,
-          bypass_log: bypassLog
-        }])
+        .insert([payload])
         .select();
 
       if (error) {
@@ -164,6 +408,55 @@ export async function saveAssessmentResult({ tier, scores, strengths, focusAreas
   }
 
   return record;
+}
+
+/**
+ * Fetch the latest assessment result for a user, optionally filtered by tier
+ */
+export async function fetchLatestAssessmentResult(profileId, tier = null) {
+  if (!supabase || !profileId) {
+    const saved = localStore.getSavedAssessments();
+    if (tier) {
+      return saved.find(a => a.tier === tier) || null;
+    }
+    return saved[0] || null;
+  }
+
+  try {
+    let query = supabase
+      .from('assessment_results')
+      .select('*')
+      .eq('profile_id', profileId)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (tier) {
+      query = query.eq('tier', tier);
+    }
+
+    const { data, error } = await query;
+    if (!error && data && data.length > 0) {
+      const row = data[0];
+      return {
+        id: row.id,
+        tier: row.tier,
+        scores: row.scores || {},
+        strengths: row.strengths || [],
+        focusAreas: row.focus_areas || [],
+        bypassLog: row.bypass_log || [],
+        createdAt: row.created_at
+      };
+    }
+  } catch (err) {
+    console.warn('Error fetching latest assessment result:', err);
+  }
+
+  // Fallback to local storage
+  const saved = localStore.getSavedAssessments();
+  if (tier) {
+    return saved.find(a => a.tier === tier) || null;
+  }
+  return saved[0] || null;
 }
 
 /**

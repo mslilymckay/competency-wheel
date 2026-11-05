@@ -9,8 +9,18 @@ import { Wheel } from './components/Wheel.jsx';
 import { DefinitionsPanel } from './components/DefinitionsPanel.jsx';
 import { LearningPathView } from './components/LearningPathView.jsx';
 import { ConfirmationModal } from './components/ConfirmationModal.jsx';
+import { SignOutModal } from './components/SignOutModal.jsx';
 import { BrandFooter } from './components/BrandFooter.jsx';
-import { getPathForCompetency } from './lib/wheelTheme.js';
+import { NarrowViewportNotice } from './components/NarrowViewportNotice.jsx';
+import { getPathForCompetency, applyHydratedFramework } from './lib/wheelTheme.js';
+import { 
+  getCurrentUser, 
+  signOutUser, 
+  deleteUserData,
+  saveAssessmentResult, 
+  fetchAllFrameworks, 
+  fetchLatestAssessmentResult 
+} from './lib/supabaseClient.js';
 
 export default function App() {
   // 1. STATE MACHINE ROUTER STATE
@@ -26,9 +36,12 @@ export default function App() {
 
   // 3. ASSESSMENT RESULTS STATE
   const [assessmentResults, setAssessmentResults] = useState(null);
+  const [assessmentKey, setAssessmentKey] = useState(0);
 
   // 4. USER & MODALS STATE
   const [user, setUser] = useState(null);
+  const [isNarrowViewport, setIsNarrowViewport] = useState(false);
+  const [dismissNarrowNotice, setDismissNarrowNotice] = useState(false);
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
     title: '',
@@ -37,6 +50,71 @@ export default function App() {
     confirmColor: 'bg-[#B23267]',
     onConfirm: () => {}
   });
+  const [isSignOutModalOpen, setIsSignOutModalOpen] = useState(false);
+
+  const [frameworkVersion, setFrameworkVersion] = useState(0);
+
+  // Track viewport width for narrow screen advisory
+  useEffect(() => {
+    const checkViewport = () => {
+      setIsNarrowViewport(window.innerWidth < 1024);
+    };
+    checkViewport();
+    window.addEventListener('resize', checkViewport, { passive: true });
+    return () => window.removeEventListener('resize', checkViewport);
+  }, []);
+
+  // 1. Dynamic Framework Hydration & 2. Active Session / Option A Latest Assessment
+  useEffect(() => {
+    async function initApp() {
+      // 1. Dynamic Hydration of Framework from Supabase
+      try {
+        const rows = await fetchAllFrameworks();
+        if (rows && rows.length > 0) {
+          applyHydratedFramework(rows);
+          setFrameworkVersion(v => v + 1);
+        }
+      } catch (err) {
+        console.warn('Framework hydration error:', err);
+      }
+
+      // 2. Check active user session & load Option A latest assessment
+      try {
+        const activeUser = await getCurrentUser();
+        if (activeUser) {
+          setUser(activeUser);
+          const latestResult = await fetchLatestAssessmentResult(activeUser.id);
+          if (latestResult) {
+            setAssessmentResults(latestResult);
+            if (latestResult.tier) {
+              setSelectedTier(latestResult.tier);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('User initialization error:', err);
+      }
+    }
+    initApp();
+  }, []);
+
+  const handleRequestSignOut = () => {
+    setIsSignOutModalOpen(true);
+  };
+
+  const handleConfirmSignOut = async ({ deleteData }) => {
+    if (deleteData && user?.id) {
+      await deleteUserData(user.id);
+      setAssessmentResults(null);
+      setCompetencyPaths([]);
+      setValuesPaths([]);
+    } else {
+      await signOutUser();
+    }
+    setUser(null);
+    setIsSignOutModalOpen(false);
+    setScreen('WELCOME');
+  };
 
   // --- TRANSITION HANDLERS --- //
 
@@ -44,7 +122,25 @@ export default function App() {
     setScreen('TIER_SELECT');
   };
 
-  const handleSelectTier = (tierId, clearSelections = false) => {
+  const handleUserLogin = async (userData) => {
+    setUser(userData);
+    if (userData?.id) {
+      try {
+        const latest = await fetchLatestAssessmentResult(userData.id);
+        if (latest) {
+          setAssessmentResults(latest);
+          if (latest.tier) {
+            setSelectedTier(latest.tier);
+          }
+        }
+      } catch (e) {
+        console.warn('Could not load latest assessment on login:', e);
+      }
+    }
+    handleStartFromWelcome();
+  };
+
+  const handleSelectTier = async (tierId, clearSelections = false) => {
     if (clearSelections && tierId !== selectedTier) {
       setCompetencyPaths([]);
       setValuesPaths([]);
@@ -55,21 +151,35 @@ export default function App() {
     } else {
       setActiveMode('competencies');
     }
+
+    // Option A: Check if signed-in user has a saved assessment for this specific tier
+    if (user?.id) {
+      try {
+        const tierResult = await fetchLatestAssessmentResult(user.id, tierId);
+        if (tierResult) {
+          setAssessmentResults(tierResult);
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
   };
 
   const handleStartAssessment = () => {
-    // Fresh assessment start: clear any previous selections & results
+    // Fresh assessment start: clear any previous selections & results, randomize key
     setCompetencyPaths([]);
     setValuesPaths([]);
     setAssessmentResults(null);
+    setAssessmentKey(prev => prev + 1);
     setScreen('ASSESSMENT');
   };
 
   const handleRetakeAssessment = () => {
-    // Retake assessment: clear previous selections & results
+    // Retake assessment: clear previous selections & results, randomize key
     setCompetencyPaths([]);
     setValuesPaths([]);
     setAssessmentResults(null);
+    setAssessmentKey(prev => prev + 1);
     setScreen('ASSESSMENT');
   };
 
@@ -78,6 +188,7 @@ export default function App() {
     setCompetencyPaths([]);
     setValuesPaths([]);
     setAssessmentResults(null);
+    setAssessmentKey(prev => prev + 1);
     setScreen('TIER_SELECT');
   };
 
@@ -93,9 +204,25 @@ export default function App() {
     setScreen('WHEEL');
   };
 
-  const handleAssessmentComplete = (results) => {
+  const handleAssessmentComplete = async (results) => {
     setAssessmentResults(results);
     setScreen('RESULTS');
+
+    // When signed in, update Supabase with user's results
+    if (user?.id) {
+      try {
+        await saveAssessmentResult({
+          tier: results.tier,
+          scores: results.scores,
+          strengths: results.strengths,
+          focusAreas: results.focusAreas,
+          bypassLog: results.bypassLog,
+          profileId: user.id
+        });
+      } catch (err) {
+        console.error('Failed to update Supabase with assessment results:', err);
+      }
+    }
   };
 
   const handleContinueToWheelWithFocus = () => {
@@ -155,6 +282,11 @@ export default function App() {
         : 'h-screen max-h-screen overflow-hidden'
     }`}>
       
+      {/* NARROW VIEWPORT ADVISORY SCREEN */}
+      {isNarrowViewport && !dismissNarrowNotice && (
+        <NarrowViewportNotice onDismiss={() => setDismissNarrowNotice(true)} />
+      )}
+
       {/* GLOBAL HEADER */}
       <header className="w-full bg-white border-b border-slate-200 sticky top-0 z-40 shrink-0 no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
@@ -199,6 +331,20 @@ export default function App() {
               </>
             )}
 
+            {user && (
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span className="font-semibold text-slate-800">{user.displayName}</span>
+                <button
+                  onClick={handleRequestSignOut}
+                  className="text-[11px] text-slate-500 hover:text-rose-600 hover:underline ml-1"
+                  title="Sign Out"
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
+
             <a
               href="https://www.mslilymckay.com"
               target="_blank"
@@ -223,11 +369,10 @@ export default function App() {
         {/* STATE 1: WELCOME SCREEN */}
         {screen === 'WELCOME' && (
           <WelcomeScreen
+            user={user}
             onContinueAsGuest={handleStartFromWelcome}
-            onLogin={(userData) => {
-              setUser(userData);
-              handleStartFromWelcome();
-            }}
+            onLogin={handleUserLogin}
+            onSignOut={handleRequestSignOut}
           />
         )}
 
@@ -235,6 +380,8 @@ export default function App() {
         {screen === 'TIER_SELECT' && (
           <TierSelectScreen
             selectedTier={selectedTier}
+            hasSavedResults={Boolean(assessmentResults && assessmentResults.tier === selectedTier)}
+            onViewSavedResults={() => setScreen('RESULTS')}
             onSelectTier={(tierId) => handleSelectTier(tierId, true)}
             onStartAssessment={handleStartAssessment}
             onExploreWheel={handleExploreWheelDirectly}
@@ -245,6 +392,7 @@ export default function App() {
         {/* STATE 3: IPSATIVE ASSESSMENT SCREEN */}
         {screen === 'ASSESSMENT' && (
           <AssessmentScreen
+            key={`assessment-${selectedTier}-${assessmentKey}`}
             tier={selectedTier}
             onComplete={handleAssessmentComplete}
             onBack={() => setScreen('TIER_SELECT')}
@@ -254,7 +402,9 @@ export default function App() {
         {/* STATE 4: RESULTS REPORT SCREEN */}
         {screen === 'RESULTS' && (
           <ResultsScreen
+            key={`results-${selectedTier}-${frameworkVersion}`}
             results={assessmentResults}
+            user={user}
             onContinueToWheel={handleContinueToWheelWithFocus}
             onViewLearningPath={() => {
               handleContinueToWheelWithFocus();
@@ -266,7 +416,7 @@ export default function App() {
 
         {/* STATE 5: INTERACTIVE WHEEL VIEW */}
         {screen === 'WHEEL' && (
-          <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-stretch animate-in fade-in duration-300 overflow-hidden">
+          <div key={`wheel-grid-${selectedTier}-${frameworkVersion}`} className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-stretch animate-in fade-in duration-300 overflow-hidden">
             <Wheel
               activeMode={activeMode}
               setActiveMode={setActiveMode}
@@ -302,6 +452,7 @@ export default function App() {
             values={valuesPaths}
             assessmentResults={assessmentResults}
             selectedTier={selectedTier}
+            user={user}
             onBackToWheel={() => setScreen('WHEEL')}
             onBackToResults={assessmentResults ? () => setScreen('RESULTS') : null}
             onRetakeAssessment={handleRetakeAssessment}
@@ -322,6 +473,14 @@ export default function App() {
         confirmColor={confirmModal.confirmColor}
         onConfirm={confirmModal.onConfirm}
         onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+      />
+
+      {/* SIGN OUT & DELETE DATA MODAL */}
+      <SignOutModal
+        isOpen={isSignOutModalOpen}
+        user={user}
+        onClose={() => setIsSignOutModalOpen(false)}
+        onConfirm={handleConfirmSignOut}
       />
 
     </div>

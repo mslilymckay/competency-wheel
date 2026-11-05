@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
-  Award, Heart, ArrowLeft, FileText, Zap, ShieldCheck, User, 
+  Award, Heart, ArrowLeft, ArrowUp, FileText, Zap, ShieldCheck, User, 
   Copy, Check, ExternalLink, Sparkles, Route, RotateCcw
 } from 'lucide-react';
 import { getBlueprintForCompetency, buildTailoredPrompt } from '../data/interventionsData.js';
@@ -45,12 +45,31 @@ export function LearningPathView({
   values = [],
   assessmentResults = null,
   selectedTier = 'ic',
+  user = null,
   onBackToWheel,
   onBackToResults,
   onRetakeAssessment
 }) {
   const [viewMode, setViewMode] = useState('employee'); // 'employee' | 'manager'
   const [hasCopiedPrompt, setHasCopiedPrompt] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 200);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
 
   // Extract focus area leaf names and their corresponding tier
   const focusItems = useMemo(() => {
@@ -218,25 +237,27 @@ export function LearningPathView({
         {/* ============================================================= */}
         {/* DOCUMENT CONTAINER (SCREEN & PRINT)                           */}
         {/* ============================================================= */}
-        <div className="page-container bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/90 shadow-sm flex flex-col gap-8 print:border-none print:shadow-none print:p-0">
+        <div className="page-container bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/90 shadow-sm flex flex-col gap-8 print:border-none print:shadow-none print:p-0 print:gap-0">
           
           {/* Lily McKay Letterhead */}
           <header 
-            className="border-b-4 pb-4 sm:pb-5 mb-4 sm:mb-6 print:pb-3 print:mb-4 transition-colors"
+            className="border-b-4 pb-4 sm:pb-5 mb-4 sm:mb-6 print:pb-2 print:mb-2.5 transition-colors"
             style={{ borderColor: theme.primary }}
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h1 className="text-3xl sm:text-4xl font-heading text-[#2A2A2A] mb-1">
+                <h1 className="text-3xl sm:text-4xl font-heading text-[#2A2A2A] mb-1 print:text-2xl print:mb-0.5">
                   Career Development Pathway
                 </h1>
                 <p 
-                  className="text-xs sm:text-sm font-bold uppercase tracking-widest transition-colors"
+                  className="text-xs sm:text-sm font-bold uppercase tracking-widest transition-colors print:text-xs print:mb-0"
                   style={{ color: theme.primary }}
                 >
-                  {viewMode === 'manager' 
-                    ? `Manager Coaching & Unblocking Playbook • ${levelTitle} Focus`
-                    : `70-20-10 Professional Growth Blueprint • ${levelTitle} Focus`}
+                  {user?.displayName
+                    ? `Created for ${user.displayName} • ${levelTitle} Focus`
+                    : (viewMode === 'manager' 
+                        ? `Manager Coaching & Unblocking Playbook • ${levelTitle} Focus`
+                        : `70-20-10 Professional Growth Blueprint • ${levelTitle} Focus`)}
                 </p>
               </div>
 
@@ -256,21 +277,21 @@ export function LearningPathView({
               </div>
             </div>
 
-            <p className="text-xs text-slate-500 mt-2">
+            <p className="text-xs text-slate-500 mt-2 print:text-[10px] print:mt-1">
               Presented by Lily McKay, Transformation Architect • Career Navigation Framework
             </p>
           </header>
 
           {/* Focus Areas Overview Badges */}
-          <div className="page-break-avoid flex flex-col gap-2.5 mb-6 sm:mb-8 print:mb-7">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+          <div className="page-break-avoid flex flex-col gap-2.5 mb-6 sm:mb-8 print:mb-3 print:gap-1.5">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 print:text-[9.5px]">
               Identified Priority Focus Areas ({blueprints.length})
             </span>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 print:gap-1.5">
               {blueprints.map((bp) => (
                 <span 
                   key={bp.name} 
-                  className="px-3 py-1 rounded-full text-xs font-semibold border flex items-center gap-1.5 transition-colors shadow-2xs"
+                  className="px-3 py-1 rounded-full text-xs font-semibold border flex items-center gap-1.5 transition-colors shadow-2xs print:py-0.5 print:px-2 print:text-[10.5px]"
                   style={{ 
                     backgroundColor: theme.lightBg, 
                     color: theme.primary, 
@@ -287,130 +308,130 @@ export function LearningPathView({
           {/* ============================================================= */}
           {/* DISTINCT FOCUS AREA SECTIONS                                  */}
           {/* ============================================================= */}
-          <div className="flex flex-col gap-8 print:gap-0 print:space-y-6">
+          <div className="flex flex-col gap-8 print:gap-0 print:space-y-4">
             {blueprints.map((bp, index) => (
               <section 
                 key={bp.name} 
-                className="page-break-avoid p-5 sm:p-7 rounded-3xl bg-[#F5F5F7]/70 border border-slate-200/90 flex flex-col gap-5 shadow-2xs print:bg-white print:border-slate-300 print:p-5 print:mb-6 print:gap-4 print:rounded-2xl"
+                className="page-break-avoid p-5 sm:p-7 rounded-3xl bg-[#F5F5F7]/70 border border-slate-200/90 flex flex-col gap-5 shadow-2xs print:bg-white print:border-slate-300 print:p-4 print:mb-4 print:gap-2.5 print:rounded-xl"
               >
                 
                 {/* Section Header */}
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-3 print:pb-1.5">
                   <div>
                     <span 
-                      className="text-[10px] font-extrabold uppercase tracking-widest transition-colors"
+                      className="text-[10px] font-extrabold uppercase tracking-widest transition-colors print:text-[9px]"
                       style={{ color: theme.primary }}
                     >
                       Focus Area #{index + 1} • {bp.category}
                     </span>
-                    <h2 className="text-2xl font-heading text-[#2A2A2A]">{bp.name}</h2>
+                    <h2 className="text-2xl font-heading text-[#2A2A2A] print:text-lg">{bp.name}</h2>
                   </div>
-                  <p className="text-xs text-slate-500 max-w-md italic">
+                  <p className="text-xs text-slate-500 max-w-md italic print:text-[10px] print:max-w-xs">
                     "{bp.definition}"
                   </p>
                 </div>
 
                 {/* 1. DAILY MICRO-HABIT BANNER (Immediate Day-1 Ritual) */}
-                <div className="p-4 rounded-2xl bg-white border border-[#F59E0B]/30 shadow-2xs flex items-start gap-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-[#FFFBEB] text-[#B45309] flex items-center justify-center shrink-0 border border-[#F59E0B]/20">
-                    <Zap size={18} />
+                <div className="p-4 rounded-2xl bg-white border border-[#F59E0B]/30 shadow-2xs flex items-start gap-3.5 print:p-2.5 print:gap-2.5 print:rounded-xl">
+                  <div className="w-9 h-9 rounded-xl bg-[#FFFBEB] text-[#B45309] flex items-center justify-center shrink-0 border border-[#F59E0B]/20 print:w-7 print:h-7 print:rounded-lg">
+                    <Zap size={16} />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#B45309]">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#B45309] print:text-[9px]">
                         Daily Micro-Habit (Day 1 Ritual)
                       </span>
-                      <span className="text-[10px] text-slate-400 font-semibold">
+                      <span className="text-[10px] text-slate-400 font-semibold print:text-[9px]">
                         &lt; 2 mins / day • Starts Today
                       </span>
                     </div>
-                    <p className="text-xs sm:text-sm font-semibold text-[#2A2A2A] leading-relaxed">
+                    <p className="text-xs sm:text-sm font-semibold text-[#2A2A2A] leading-relaxed print:text-xs print:leading-snug">
                       {bp.microHabit}
                     </p>
                   </div>
                 </div>
 
                 {/* 2. 70-20-10 STRATEGIC ACTION GRID */}
-                <div className="grid grid-cols-1 md:grid-cols-3 print:grid-cols-3 gap-3.5 print:gap-2.5">
+                <div className="grid grid-cols-1 md:grid-cols-3 print:grid-cols-3 gap-3.5 print:gap-2">
                   
                   {/* 70% Experiential */}
-                  <div className="p-4 print:p-3 rounded-2xl bg-white border border-slate-200/90 flex flex-col justify-between gap-3 shadow-2xs">
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-slate-100/90">
+                  <div className="p-4 print:p-2.5 rounded-2xl bg-white border border-slate-200/90 flex flex-col justify-between gap-3 print:gap-1.5 shadow-2xs print:rounded-xl">
+                    <div className="flex flex-col gap-2 print:gap-1">
+                      <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-slate-100/90 print:pb-1">
                         <span 
-                          className="inline-flex items-center px-2 py-0.5 rounded-md text-white text-[10px] font-bold tracking-wide uppercase whitespace-nowrap shrink-0 shadow-2xs"
+                          className="inline-flex items-center px-2 py-0.5 rounded-md text-white text-[10px] font-bold tracking-wide uppercase whitespace-nowrap shrink-0 shadow-2xs print:text-[9px] print:px-1.5"
                           style={{ backgroundColor: theme.primary }}
                         >
                           70% Experiential
                         </span>
-                        <span className="text-[9.5px] font-extrabold text-slate-400 uppercase tracking-wider whitespace-nowrap shrink-0 text-right truncate">
+                        <span className="text-[9.5px] font-extrabold text-slate-400 uppercase tracking-wider whitespace-nowrap shrink-0 text-right truncate print:text-[8.5px]">
                           {bp.experiential.tag}
                         </span>
                       </div>
-                      <h4 className="text-xs font-bold text-[#2A2A2A] leading-snug">
+                      <h4 className="text-xs font-bold text-[#2A2A2A] leading-snug print:text-[11px] print:leading-tight">
                         {bp.experiential.title}
                       </h4>
-                      <p className="text-xs text-slate-600 leading-relaxed">
+                      <p className="text-xs text-slate-600 leading-relaxed print:text-[10px] print:leading-snug">
                         {bp.experiential.action}
                       </p>
                     </div>
 
                     {/* Reflection Box */}
-                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 text-[11px] text-slate-600">
-                      <span className="font-bold text-slate-700 block mb-0.5">Coaching Reflection:</span>
-                      <p className="italic leading-relaxed">{bp.experiential.reflection}</p>
+                    <div className="p-2.5 print:p-1.5 rounded-xl bg-slate-50 border border-slate-200/70 text-[11px] text-slate-600 print:text-[9.5px] print:rounded-lg">
+                      <span className="font-bold text-slate-700 block mb-0.5 print:text-[9px]">Coaching Reflection:</span>
+                      <p className="italic leading-relaxed print:leading-snug">{bp.experiential.reflection}</p>
                     </div>
                   </div>
 
                   {/* 20% Social */}
-                  <div className="p-4 print:p-3 rounded-2xl bg-white border border-slate-200/90 flex flex-col justify-between gap-3 shadow-2xs">
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-slate-100/90">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#2A2A2A] text-white text-[10px] font-bold tracking-wide uppercase whitespace-nowrap shrink-0 shadow-2xs">
+                  <div className="p-4 print:p-2.5 rounded-2xl bg-white border border-slate-200/90 flex flex-col justify-between gap-3 print:gap-1.5 shadow-2xs print:rounded-xl">
+                    <div className="flex flex-col gap-2 print:gap-1">
+                      <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-slate-100/90 print:pb-1">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#2A2A2A] text-white text-[10px] font-bold tracking-wide uppercase whitespace-nowrap shrink-0 shadow-2xs print:text-[9px] print:px-1.5">
                           20% Social
                         </span>
-                        <span className="text-[9.5px] font-extrabold text-slate-400 uppercase tracking-wider whitespace-nowrap shrink-0 text-right truncate">
+                        <span className="text-[9.5px] font-extrabold text-slate-400 uppercase tracking-wider whitespace-nowrap shrink-0 text-right truncate print:text-[8.5px]">
                           {bp.social.tag}
                         </span>
                       </div>
-                      <h4 className="text-xs font-bold text-[#2A2A2A] leading-snug">
+                      <h4 className="text-xs font-bold text-[#2A2A2A] leading-snug print:text-[11px] print:leading-tight">
                         {bp.social.title}
                       </h4>
-                      <p className="text-xs text-slate-600 leading-relaxed">
+                      <p className="text-xs text-slate-600 leading-relaxed print:text-[10px] print:leading-snug">
                         {bp.social.action}
                       </p>
                     </div>
 
                     {/* Reflection Box */}
-                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 text-[11px] text-slate-600">
-                      <span className="font-bold text-slate-700 block mb-0.5">Coaching Reflection:</span>
-                      <p className="italic leading-relaxed">{bp.social.reflection}</p>
+                    <div className="p-2.5 print:p-1.5 rounded-xl bg-slate-50 border border-slate-200/70 text-[11px] text-slate-600 print:text-[9.5px] print:rounded-lg">
+                      <span className="font-bold text-slate-700 block mb-0.5 print:text-[9px]">Coaching Reflection:</span>
+                      <p className="italic leading-relaxed print:leading-snug">{bp.social.reflection}</p>
                     </div>
                   </div>
 
                   {/* 10% Formal */}
-                  <div className="p-4 print:p-3 rounded-2xl bg-white border border-slate-200/90 flex flex-col justify-between gap-3 shadow-2xs">
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-slate-100/90">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-200 text-slate-800 text-[10px] font-bold tracking-wide uppercase whitespace-nowrap shrink-0">
+                  <div className="p-4 print:p-2.5 rounded-2xl bg-white border border-slate-200/90 flex flex-col justify-between gap-3 print:gap-1.5 shadow-2xs print:rounded-xl">
+                    <div className="flex flex-col gap-2 print:gap-1">
+                      <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-slate-100/90 print:pb-1">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-200 text-slate-800 text-[10px] font-bold tracking-wide uppercase whitespace-nowrap shrink-0 print:text-[9px] print:px-1.5">
                           10% Formal
                         </span>
-                        <span className="text-[9.5px] font-extrabold text-slate-400 uppercase tracking-wider whitespace-nowrap shrink-0 text-right truncate">
+                        <span className="text-[9.5px] font-extrabold text-slate-400 uppercase tracking-wider whitespace-nowrap shrink-0 text-right truncate print:text-[8.5px]">
                           {bp.formal.tag}
                         </span>
                       </div>
-                      <h4 className="text-xs font-bold text-[#2A2A2A] leading-snug">
+                      <h4 className="text-xs font-bold text-[#2A2A2A] leading-snug print:text-[11px] print:leading-tight">
                         {bp.formal.title}
                       </h4>
-                      <p className="text-xs text-slate-600 leading-relaxed">
+                      <p className="text-xs text-slate-600 leading-relaxed print:text-[10px] print:leading-snug">
                         {bp.formal.action}
                       </p>
                     </div>
 
                     {/* Reflection Box */}
-                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 text-[11px] text-slate-600">
-                      <span className="font-bold text-slate-700 block mb-0.5">Coaching Reflection:</span>
-                      <p className="italic leading-relaxed">{bp.formal.reflection}</p>
+                    <div className="p-2.5 print:p-1.5 rounded-xl bg-slate-50 border border-slate-200/70 text-[11px] text-slate-600 print:text-[9.5px] print:rounded-lg">
+                      <span className="font-bold text-slate-700 block mb-0.5 print:text-[9px]">Coaching Reflection:</span>
+                      <p className="italic leading-relaxed print:leading-snug">{bp.formal.reflection}</p>
                     </div>
                   </div>
 
@@ -418,28 +439,28 @@ export function LearningPathView({
 
                 {/* 3. MANAGER UNBLOCKER & COACHING SECTION */}
                 {viewMode === 'manager' ? (
-                  <div className="p-4 sm:p-5 rounded-2xl bg-[#FFFBEB] border-2 border-[#F59E0B]/60 shadow-2xs flex flex-col gap-3 animate-in fade-in duration-200">
+                  <div className="p-4 sm:p-5 rounded-2xl bg-[#FFFBEB] border-2 border-[#F59E0B]/60 shadow-2xs flex flex-col gap-3 print:p-2.5 print:gap-1.5 print:rounded-xl animate-in fade-in duration-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-[#B45309]">
-                        <ShieldCheck size={18} />
-                        <h4 className="font-bold text-xs uppercase tracking-wider">
+                        <ShieldCheck size={18} className="print:w-4 print:h-4" />
+                        <h4 className="font-bold text-xs uppercase tracking-wider print:text-[10px]">
                           Manager Commitment & Unblocking Action
                         </h4>
                       </div>
-                      <span className="text-[10px] font-bold bg-white text-[#B45309] px-2.5 py-0.5 rounded-md border border-[#F59E0B]/30">
+                      <span className="text-[10px] font-bold bg-white text-[#B45309] px-2.5 py-0.5 rounded-md border border-[#F59E0B]/30 print:text-[9px] print:px-1.5 print:py-0">
                         1-on-1 Action Item
                       </span>
                     </div>
 
-                    <p className="text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed">
+                    <p className="text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed print:text-[11px] print:leading-snug">
                       {bp.managerUnblocker}
                     </p>
 
-                    <div className="pt-2 border-t border-[#F59E0B]/30 flex flex-col gap-1">
-                      <span className="text-[11px] font-bold text-[#B45309]">
+                    <div className="pt-2 border-t border-[#F59E0B]/30 flex flex-col gap-1 print:pt-1 print:gap-0.5">
+                      <span className="text-[11px] font-bold text-[#B45309] print:text-[9.5px]">
                         Suggested 1-on-1 Discussion Starter:
                       </span>
-                      <p className="text-xs text-slate-700 italic">
+                      <p className="text-xs text-slate-700 italic print:text-[10px] print:leading-snug">
                         "{bp.managerCoachingQuestion}"
                       </p>
                     </div>
@@ -569,6 +590,18 @@ export function LearningPathView({
         </div>
 
       </div>
+
+      {/* Floating Action Button: Back to Top (main page brand rose, outside intervention container, hidden in print) */}
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          aria-label="Back to Top"
+          title="Back to Top"
+          className="fixed bottom-6 right-6 z-50 p-3.5 rounded-full shadow-lg hover:shadow-xl bg-[#B23267] hover:bg-[#942854] text-white transition-all transform hover:-translate-y-1 active:translate-y-0 no-print flex items-center justify-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B23267] focus:ring-offset-2"
+        >
+          <ArrowUp size={20} />
+        </button>
+      )}
 
     </div>
   );

@@ -19,7 +19,7 @@ function getPolygonPoints(sides, radius, center = 220) {
   }).join(' ');
 }
 
-export function ResultsScreen({ results, onContinueToWheel, onRetake, onViewLearningPath }) {
+export function ResultsScreen({ results, user, onContinueToWheel, onRetake, onViewLearningPath }) {
   const [inspectedCategory, setInspectedCategory] = useState(null);
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const drawerRef = useRef(null);
@@ -195,7 +195,9 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake, onViewLear
             {isValues ? 'Values Diagnostic' : 'Assessment Results'}
           </span>
           <h2 className="text-xl sm:text-2xl font-heading text-[#2A2A2A] leading-tight">
-            {isValues ? 'Core Values Behavioral Diagnostic & Report' : 'Leadership Competency Diagnostic & Report'}
+            {user?.displayName
+              ? (isValues ? `Values Diagnostic & Report for ${user.displayName}` : `Competency Diagnostic & Report for ${user.displayName}`)
+              : (isValues ? 'Core Values Behavioral Diagnostic & Report' : 'Leadership Competency Diagnostic & Report')}
           </h2>
         </div>
         <div className="flex items-center gap-2">

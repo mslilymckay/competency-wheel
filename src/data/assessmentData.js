@@ -78,7 +78,7 @@ export const assessmentData = {
       "option_a_text": "Implementing lean, pragmatic fixes for immediate challenges.",
       "option_a_competency": "Practical Solutions",
       "option_b_text": "Keeping my technical capabilities current through practice.",
-      "option_b_competency": "Skill Continuous Learning"
+      "option_b_competency": "Continuous Learning"
     },
     {
       "id": "ic_1.9",
@@ -86,7 +86,7 @@ export const assessmentData = {
       "pair_id": "1.9",
       "prompt": "After a project concludes, I am most likely to...",
       "option_a_text": "Research new methods to keep my capabilities current.",
-      "option_a_competency": "Skill Continuous Learning",
+      "option_a_competency": "Continuous Learning",
       "option_b_text": "Transparently acknowledge missteps to turn them into improvements.",
       "option_b_competency": "Constructive Self-Correction"
     },

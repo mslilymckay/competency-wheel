@@ -78,7 +78,7 @@ export const defaultValuesFramework = [
 
 export const COMPETENCY_ALIASES = {
   // IC
-  'Continuous Learning': 'Skill Continuous Learning',
+  'Skill Continuous Learning': 'Continuous Learning',
   'Constructive Correction': 'Constructive Self-Correction',
   // Manager
   'Development Coaching': 'Developmental Coaching',
@@ -154,6 +154,81 @@ export function buildMicroHabitsMap() {
 }
 
 export const allMicroHabits = buildMicroHabitsMap();
+
+/**
+ * Dynamically hydrate the in-memory frameworks with real-time data from Supabase
+ */
+export function applyHydratedFramework(rows) {
+  if (!rows || rows.length === 0) return false;
+
+  try {
+    const byTier = {};
+    rows.forEach(r => {
+      const t = r.tier || 'ic';
+      if (!byTier[t]) byTier[t] = {};
+      const cat = r.category || 'General';
+      if (!byTier[t][cat]) byTier[t][cat] = [];
+      byTier[t][cat].push(r);
+    });
+
+    const tierMap = {
+      'ic': 'Individual Contributor',
+      'manager': 'Manager',
+      'director': 'Director'
+    };
+
+    Object.entries(tierMap).forEach(([tKey, tName]) => {
+      const tierObj = defaultCompetencyFramework.find(t => t.name === tName);
+      if (tierObj && byTier[tKey]) {
+        tierObj.categories.forEach(cat => {
+          const matchingRows = byTier[tKey][cat.name];
+          if (matchingRows && matchingRows.length > 0) {
+            matchingRows.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+            cat.children = matchingRows.map(r => ({
+              name: r.name,
+              definition: r.definition,
+              microHabit: r.micro_habit || r.microHabit || ''
+            }));
+          }
+        });
+      }
+    });
+
+    if (byTier['values']) {
+      defaultValuesFramework.forEach(valObj => {
+        const matchingRows = byTier['values'][valObj.name];
+        if (matchingRows && matchingRows.length > 0) {
+          matchingRows.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+          valObj.children = matchingRows.map(r => ({
+            name: r.name,
+            definition: r.definition,
+            microHabit: r.micro_habit || r.microHabit || ''
+          }));
+        }
+      });
+    }
+
+    const newDefs = buildDefinitionMap();
+    Object.keys(allDefinitions).forEach(k => delete allDefinitions[k]);
+    Object.assign(allDefinitions, newDefs);
+
+    const newHabits = buildMicroHabitsMap();
+    Object.keys(allMicroHabits).forEach(k => delete allMicroHabits[k]);
+    Object.assign(allMicroHabits, newHabits);
+
+    rows.forEach(r => {
+      if (r.name) {
+        if (r.definition) allDefinitions[r.name] = r.definition;
+        if (r.micro_habit) allMicroHabits[r.name] = r.micro_habit;
+      }
+    });
+
+    return true;
+  } catch (err) {
+    console.error('Error applying hydrated framework:', err);
+    return false;
+  }
+}
 
 export function getCategoryForCompetency(competencyName, tier = 'ic') {
   if (!competencyName) return null;

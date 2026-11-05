@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Award, Users, Compass, Heart, ArrowRight, Compass as ExploreIcon, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Award, Users, Compass, Heart, ArrowRight, Compass as ExploreIcon, CheckCircle2, ArrowLeft, FileText } from 'lucide-react';
 
 const TIERS = [
   {
@@ -48,7 +48,15 @@ const TIERS = [
   }
 ];
 
-export function TierSelectScreen({ selectedTier: initialTier = 'ic', onSelectTier, onStartAssessment, onExploreWheel, onBack }) {
+export function TierSelectScreen({ 
+  selectedTier: initialTier = 'ic', 
+  hasSavedResults = false,
+  onViewSavedResults,
+  onSelectTier, 
+  onStartAssessment, 
+  onExploreWheel, 
+  onBack 
+}) {
   const [selectedTier, setSelectedTier] = useState(initialTier);
 
   useEffect(() => {
@@ -141,6 +149,17 @@ export function TierSelectScreen({ selectedTier: initialTier = 'ic', onSelectTie
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full sm:w-auto">
+          {/* View Saved Report Button (if available) */}
+          {hasSavedResults && onViewSavedResults && (
+            <button
+              onClick={onViewSavedResults}
+              className="w-full sm:w-auto py-2.5 px-4 btn-secondary flex items-center justify-center gap-1.5 text-xs text-[#B23267] border-[#B23267]/30 hover:bg-rose-50 font-bold"
+            >
+              <FileText size={14} />
+              <span>View Saved Report</span>
+            </button>
+          )}
+
           {/* Explore Directly Button */}
           <button
             onClick={() => {

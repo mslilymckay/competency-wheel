@@ -84,7 +84,7 @@ export const competencyFramework = [
             microHabit: "Dedicate 60 minutes weekly to studying architecture standards and best practices."
           },
           {
-            name: "Skill Continuous Learning",
+            name: "Continuous Learning",
             definition: "Keeping technical capabilities current through continuous practice and research.",
             microHabit: "Experiment with a new tool or workflow method on one task each bi-weekly cycle."
           },

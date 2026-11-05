@@ -2,6 +2,15 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { fetchAssessments } from '../lib/supabaseClient.js';
 
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 export function AssessmentScreen({ tier = 'ic', onComplete, onBack }) {
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -38,7 +47,7 @@ export function AssessmentScreen({ tier = 'ic', onComplete, onBack }) {
       const data = await fetchAssessments(tier);
       if (isMounted) {
         if (data && data.length > 0) {
-          setQuestions(data);
+          setQuestions(shuffleArray(data));
         }
         setLoading(false);
       }

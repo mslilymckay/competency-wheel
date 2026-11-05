@@ -111,7 +111,7 @@ input, textarea {
 @media print {
   @page {
     size: letter portrait;
-    margin: 0.5in 0.4in;
+    margin: 0.35in 0.4in;
   }
   html, body, #root, #root > div, main, .learning-path-wrapper {
     overflow: visible !important;
@@ -139,7 +139,7 @@ input, textarea {
     color: #2A2A2A !important;
     box-shadow: none !important;
     margin: 0 !important;
-    padding-top: 0.15in !important;
+    padding-top: 0 !important;
     padding-bottom: 0 !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
