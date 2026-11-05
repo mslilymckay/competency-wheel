@@ -165,3 +165,30 @@ export async function saveAssessmentResult({ tier, scores, strengths, focusAreas
 
   return record;
 }
+
+/**
+ * Fetch learning interventions by tier and optionally competency
+ */
+export async function fetchInterventions(tier = 'ic', competency = null) {
+  if (supabase) {
+    try {
+      let query = supabase
+        .from('interventions')
+        .select('*')
+        .eq('tier', tier);
+
+      if (competency) {
+        query = query.eq('competency', competency);
+      }
+
+      const { data, error } = await query;
+      if (!error && data && data.length > 0) {
+        return data;
+      }
+      console.warn('Supabase interventions query returned empty or error:', error);
+    } catch (err) {
+      console.warn('Error querying Supabase interventions:', err);
+    }
+  }
+  return null;
+}
