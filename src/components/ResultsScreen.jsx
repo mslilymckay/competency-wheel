@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo } from 'react';
-import { ArrowRight, RotateCcw, X, Sparkles } from 'lucide-react';
+import { ArrowRight, RotateCcw, X, Sparkles, Route } from 'lucide-react';
 import {
   allDefinitions,
   allMicroHabits,
@@ -19,7 +19,7 @@ function getPolygonPoints(sides, radius, center = 220) {
   }).join(' ');
 }
 
-export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
+export function ResultsScreen({ results, onContinueToWheel, onRetake, onViewLearningPath }) {
   const [inspectedCategory, setInspectedCategory] = useState(null);
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const drawerRef = useRef(null);
@@ -596,17 +596,27 @@ export function ResultsScreen({ results, onContinueToWheel, onRetake }) {
           </div>
 
           {/* Sticky Bottom Action Buttons */}
-          <div className="pt-3 mt-2 border-t border-slate-100 shrink-0 flex items-center gap-3">
+          <div className="pt-3 mt-2 border-t border-slate-100 shrink-0 flex items-center gap-2">
             <button
               onClick={onContinueToWheel}
-              className="flex-1 btn-primary py-2.5 px-4 text-xs flex items-center justify-center gap-2"
+              className="flex-1 btn-primary py-2.5 px-3 text-xs flex items-center justify-center gap-1.5"
             >
-              <span>{isValues ? 'Explore on Values Wheel' : 'Explore on Interactive Wheel'}</span>
-              <ArrowRight size={14} />
+              <span>{isValues ? 'Explore on Wheel' : 'Explore on Wheel'}</span>
+              <ArrowRight size={13} />
             </button>
+            {onViewLearningPath && (
+              <button
+                onClick={onViewLearningPath}
+                className="btn-secondary py-2.5 px-3 text-xs flex items-center justify-center gap-1.5"
+                title="View 70-20-10 Learning Path Blueprint"
+              >
+                <Route size={14} className="text-[#B23267]" />
+                <span>Learning Path</span>
+              </button>
+            )}
             <button
               onClick={onRetake}
-              className="btn-secondary py-2.5 px-3.5 text-xs"
+              className="btn-secondary py-2.5 px-3 text-xs"
               title="Retake Assessment"
             >
               <RotateCcw size={13} />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ExternalLink, RotateCcw, ArrowLeft } from 'lucide-react';
 import { ThreeColorPieIcon } from './components/ThreeColorPieIcon.jsx';
 import { WelcomeScreen } from './components/WelcomeScreen.jsx';
@@ -7,6 +7,7 @@ import { AssessmentScreen } from './components/AssessmentScreen.jsx';
 import { ResultsScreen } from './components/ResultsScreen.jsx';
 import { Wheel } from './components/Wheel.jsx';
 import { DefinitionsPanel } from './components/DefinitionsPanel.jsx';
+import { LearningPathView } from './components/LearningPathView.jsx';
 import { ConfirmationModal } from './components/ConfirmationModal.jsx';
 import { BrandFooter } from './components/BrandFooter.jsx';
 import { getPathForCompetency } from './lib/wheelTheme.js';
@@ -43,7 +44,11 @@ export default function App() {
     setScreen('TIER_SELECT');
   };
 
-  const handleSelectTier = (tierId) => {
+  const handleSelectTier = (tierId, clearSelections = false) => {
+    if (clearSelections && tierId !== selectedTier) {
+      setCompetencyPaths([]);
+      setValuesPaths([]);
+    }
     setSelectedTier(tierId);
     if (tierId === 'values') {
       setActiveMode('values');
@@ -127,8 +132,28 @@ export default function App() {
     });
   };
 
+  // Toggle html/body scroll unconstraining when on Learning Path screen
+  useEffect(() => {
+    if (screen === 'LEARNING_PATH') {
+      document.documentElement.classList.add('screen-learning-path');
+      document.body.classList.add('screen-learning-path');
+      window.scrollTo(0, 0);
+    } else {
+      document.documentElement.classList.remove('screen-learning-path');
+      document.body.classList.remove('screen-learning-path');
+    }
+    return () => {
+      document.documentElement.classList.remove('screen-learning-path');
+      document.body.classList.remove('screen-learning-path');
+    };
+  }, [screen]);
+
   return (
-    <div className="h-screen max-h-screen overflow-hidden flex flex-col bg-white text-[#2A2A2A] font-sans selection:bg-rose-100 selection:text-rose-900">
+    <div className={`flex flex-col bg-white text-[#2A2A2A] font-sans selection:bg-rose-100 selection:text-rose-900 ${
+      screen === 'LEARNING_PATH'
+        ? 'min-h-screen h-auto overflow-visible bg-slate-50/50'
+        : 'h-screen max-h-screen overflow-hidden'
+    }`}>
       
       {/* GLOBAL HEADER */}
       <header className="w-full bg-white border-b border-slate-200 sticky top-0 z-40 shrink-0 no-print">
@@ -141,18 +166,24 @@ export default function App() {
           >
             <ThreeColorPieIcon size={26} />
             <h1 className="text-base sm:text-lg font-heading text-[#2A2A2A] leading-none tracking-tight">
-              Competency and Values Wheel
+              Competency & Values Explorer
             </h1>
           </div>
 
           {/* Right Header Navigation & Actions */}
           <div className="flex items-center gap-3">
-            {screen === 'WHEEL' && (
+            {(screen === 'WHEEL' || screen === 'LEARNING_PATH') && (
               <>
                 <button
-                  onClick={handleBackFromWheel}
+                  onClick={() => {
+                    if (screen === 'LEARNING_PATH') {
+                      setScreen('WHEEL');
+                    } else {
+                      handleBackFromWheel();
+                    }
+                  }}
                   className="btn-secondary py-1.5 px-3 text-xs flex items-center gap-1.5"
-                  title={assessmentResults ? "Back to Assessment Results" : "Back to Tier Select"}
+                  title={screen === 'LEARNING_PATH' ? "Back to Wheel" : (assessmentResults ? "Back to Assessment Results" : "Back to Tier Select")}
                 >
                   <ArrowLeft size={13} />
                   <span>Back</span>
@@ -182,8 +213,12 @@ export default function App() {
         </div>
       </header>
 
-      {/* MAIN STATE MACHINE BODY (Viewport Constrained: flex-1 min-h-0 overflow-hidden) */}
-      <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto p-2.5 sm:p-4 flex flex-col overflow-hidden">
+      {/* MAIN STATE MACHINE BODY */}
+      <main className={`flex-1 flex flex-col ${
+        screen === 'LEARNING_PATH'
+          ? 'w-full overflow-visible p-0'
+          : 'min-h-0 max-w-7xl w-full mx-auto p-2.5 sm:p-4 overflow-hidden'
+      }`}>
         
         {/* STATE 1: WELCOME SCREEN */}
         {screen === 'WELCOME' && (
@@ -199,7 +234,8 @@ export default function App() {
         {/* STATE 2: TIER SELECT SCREEN */}
         {screen === 'TIER_SELECT' && (
           <TierSelectScreen
-            onSelectTier={handleSelectTier}
+            selectedTier={selectedTier}
+            onSelectTier={(tierId) => handleSelectTier(tierId, true)}
             onStartAssessment={handleStartAssessment}
             onExploreWheel={handleExploreWheelDirectly}
             onBack={() => setScreen('WELCOME')}
@@ -220,6 +256,10 @@ export default function App() {
           <ResultsScreen
             results={assessmentResults}
             onContinueToWheel={handleContinueToWheelWithFocus}
+            onViewLearningPath={() => {
+              handleContinueToWheelWithFocus();
+              setScreen('LEARNING_PATH');
+            }}
             onRetake={handleRetakeAssessment}
           />
         )}
@@ -237,6 +277,7 @@ export default function App() {
               isMultiSelect={isMultiSelect}
               initialFocusAreas={assessmentResults?.focusAreas}
               selectedTier={selectedTier}
+              onSelectTier={handleSelectTier}
             />
 
             <DefinitionsPanel
@@ -248,15 +289,29 @@ export default function App() {
               setValuesPaths={setValuesPaths}
               isMultiSelect={isMultiSelect}
               setIsMultiSelect={setIsMultiSelect}
+              onExploreLearningPath={() => setScreen('LEARNING_PATH')}
               onRequestClearAll={handleClearAllSelections}
             />
           </div>
         )}
 
+        {/* STATE 6: 70-20-10 LEARNING PATH VIEW */}
+        {screen === 'LEARNING_PATH' && (
+          <LearningPathView
+            competencies={competencyPaths}
+            values={valuesPaths}
+            assessmentResults={assessmentResults}
+            selectedTier={selectedTier}
+            onBackToWheel={() => setScreen('WHEEL')}
+            onBackToResults={assessmentResults ? () => setScreen('RESULTS') : null}
+            onRetakeAssessment={handleRetakeAssessment}
+          />
+        )}
+
       </main>
 
-      {/* FOOTER (Shown on all pages except Wheel) */}
-      {screen !== 'WHEEL' && <BrandFooter />}
+      {/* FOOTER (Shown on all pages except Wheel and Learning Path) */}
+      {screen !== 'WHEEL' && screen !== 'LEARNING_PATH' && <BrandFooter />}
 
       {/* CONFIRMATION MODAL */}
       <ConfirmationModal

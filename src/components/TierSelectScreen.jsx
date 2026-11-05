@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Award, Users, Compass, Heart, ArrowRight, Compass as ExploreIcon, CheckCircle2, ArrowLeft } from 'lucide-react';
 
 const TIERS = [
@@ -48,8 +48,14 @@ const TIERS = [
   }
 ];
 
-export function TierSelectScreen({ onSelectTier, onStartAssessment, onExploreWheel, onBack }) {
-  const [selectedTier, setSelectedTier] = useState('ic');
+export function TierSelectScreen({ selectedTier: initialTier = 'ic', onSelectTier, onStartAssessment, onExploreWheel, onBack }) {
+  const [selectedTier, setSelectedTier] = useState(initialTier);
+
+  useEffect(() => {
+    if (initialTier) {
+      setSelectedTier(initialTier);
+    }
+  }, [initialTier]);
 
   const handleTierClick = (tierId) => {
     setSelectedTier(tierId);

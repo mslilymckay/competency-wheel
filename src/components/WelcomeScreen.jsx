@@ -23,7 +23,7 @@ export function WelcomeScreen({ onContinueAsGuest, onLogin }) {
             <ThreeColorPieIcon size={16} /> 360° Career Navigation
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading text-[#2A2A2A] leading-tight">
-            Competency and Values Wheel
+            Competency & Values Explorer
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
             A tactile self-assessment framework designed to chart leadership capabilities, anchor day-to-day work in core organizational values, and construct tailored 70-20-10 growth pathways.

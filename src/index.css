@@ -55,6 +55,37 @@ html, body {
   scrollbar-color: #cbd5e1 #f1f5f9 !important;
 }
 
+/* Learning Path Mode: unconstrain html & body to allow natural full-document scrolling */
+html.screen-learning-path,
+body.screen-learning-path {
+  overflow: visible !important;
+  overflow-y: auto !important;
+  height: auto !important;
+  min-height: 100% !important;
+  scrollbar-width: thin !important;
+  -ms-overflow-style: auto !important;
+  background-color: #f8fafc !important;
+}
+
+html.screen-learning-path::-webkit-scrollbar,
+body.screen-learning-path::-webkit-scrollbar {
+  display: block !important;
+  width: 8px;
+}
+html.screen-learning-path::-webkit-scrollbar-track,
+body.screen-learning-path::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+html.screen-learning-path::-webkit-scrollbar-thumb,
+body.screen-learning-path::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+html.screen-learning-path::-webkit-scrollbar-thumb:hover,
+body.screen-learning-path::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
 body {
   font-family: 'Open Sans', sans-serif;
   color: var(--charcoal);
@@ -79,17 +110,53 @@ input, textarea {
 
 @media print {
   @page {
-    size: letter;
-    margin: 0.5in 0.25in;
+    size: letter portrait;
+    margin: 0.5in 0.4in;
   }
-  body {
-    background-color: white !important;
+  html, body, #root, #root > div, main, .learning-path-wrapper {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    display: block !important;
+    background: transparent !important;
+    background-color: #ffffff !important;
     color: #2A2A2A !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .page-container {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    display: block !important;
+    background: transparent !important;
+    background-color: #ffffff !important;
+    color: #2A2A2A !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding-top: 0.15in !important;
+    padding-bottom: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .learning-path-wrapper > div {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
   }
   .no-print {
     display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .page-break-avoid {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 }
 

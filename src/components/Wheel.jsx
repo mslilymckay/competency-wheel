@@ -34,9 +34,10 @@ export function Wheel({
   setValuesPaths,
   isMultiSelect,
   initialFocusAreas,
-  selectedTier
+  selectedTier,
+  onSelectTier
 }) {
-  const [isZoomedOut, setIsZoomedOut] = useState(true);
+  const [isZoomedOut, setIsZoomedOut] = useState(() => !(selectedTier || (initialFocusAreas && initialFocusAreas.length > 0)));
   const [rotation, setRotation] = useState(0);
   const [isManual, setIsManual] = useState(false);
 
@@ -166,12 +167,12 @@ export function Wheel({
 
   const autoRotateKeyRef = useRef(null);
 
-  // Auto-focus and zoom to focused view when focus areas are ported from assessment
+  // Auto-focus and zoom to focused view when focus areas are ported from assessment OR when exploring a selected tier directly
   useEffect(() => {
-    if (initialFocusAreas && initialFocusAreas.length > 0) {
+    if ((initialFocusAreas && initialFocusAreas.length > 0) || selectedTier) {
       setIsZoomedOut(false);
     }
-  }, [initialFocusAreas]);
+  }, [initialFocusAreas, selectedTier]);
 
   // Rotate wheel to appropriate position (focus areas cluster or selected tier)
   useEffect(() => {
@@ -221,6 +222,18 @@ export function Wheel({
       );
       if (tierSlice) {
         const midAngle = tierSlice.startAngle + (tierSlice.endAngle - tierSlice.startAngle) / 2;
+        let targetRotation = 90 - midAngle;
+        let delta = targetRotation - (rotation % 360);
+        delta = ((delta + 180) % 360 + 360) % 360 - 180;
+
+        setIsManual(false);
+        setRotation(prev => prev + delta);
+      }
+    } else if (selectedTier && activeMode === 'values') {
+      // Rotate first value to 3 o'clock
+      const valSlice = baseSlices.find(s => s.level === 0);
+      if (valSlice) {
+        const midAngle = valSlice.startAngle + (valSlice.endAngle - valSlice.startAngle) / 2;
         let targetRotation = 90 - midAngle;
         let delta = targetRotation - (rotation % 360);
         delta = ((delta + 180) % 360 + 360) % 360 - 180;
@@ -278,6 +291,18 @@ export function Wheel({
     }
 
     setSelectedPaths(updated);
+
+    if (onSelectTier) {
+      if (isValues) {
+        autoRotateKeyRef.current = `tier:values:${activeMode}`;
+        onSelectTier('values', false);
+      } else if (slice.path && slice.path.length > 0) {
+        const root = slice.path[0];
+        const nextTier = root === 'Individual Contributor' ? 'ic' : (root === 'Manager' ? 'manager' : (root === 'Director' ? 'director' : 'ic'));
+        autoRotateKeyRef.current = `tier:${nextTier}:${activeMode}`;
+        onSelectTier(nextTier, false);
+      }
+    }
 
     if (updated.length > 0) {
       if (isZoomedOut) setIsZoomedOut(false);
@@ -384,10 +409,17 @@ export function Wheel({
   };
 
   return (
-    <div className="relative w-full h-full flex-1 min-h-0 bg-white rounded-3xl border border-slate-200/80 shadow-sm flex items-center justify-center overflow-hidden p-0">
+    <div 
+      className="relative w-full h-full flex-1 min-h-0 bg-white rounded-3xl border border-slate-200/80 shadow-sm flex items-center justify-center overflow-hidden p-0"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      style={{ touchAction: 'none' }}
+    >
       
       {/* OVERLAY: Upper-Right (Mode Toggle) */}
-      <div className="absolute top-4 right-4 z-20">
+      <div className="absolute top-4 right-4 z-20" onPointerDown={(e) => e.stopPropagation()}>
         <div className="inline-flex rounded-xl p-1 bg-white/95 border border-slate-200 shadow-md backdrop-blur-md">
           <button
             onClick={() => setActiveMode('competencies')}
@@ -404,8 +436,33 @@ export function Wheel({
         </div>
       </div>
 
+      {/* OVERLAY: Mid-Right Rotary Dial Affordance (Compact, Centered in Open Space, Subtle True Double Arrow) */}
+      <div 
+        className="absolute right-6 sm:right-10 lg:right-12 top-1/2 -translate-y-1/2 z-20 pointer-events-none select-none flex items-center justify-center animate-in fade-in duration-300"
+        title="Rotary dial - click & drag to rotate"
+      >
+        <svg
+          width="24"
+          height="60"
+          viewBox="0 0 24 60"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="text-slate-400/80 hover:text-slate-600 transition-colors"
+        >
+          {/* Top Arrowhead (pointing counter-clockwise / upward along curve) */}
+          <path d="M 18.6 8.3 L 11 5 L 11.1 13.3" />
+          {/* Curved Stem (matching rotary dial radius curvature) */}
+          <path d="M 11 5 A 45 45 0 0 1 11 55" />
+          {/* Bottom Arrowhead (pointing clockwise / downward along curve) */}
+          <path d="M 18.6 51.7 L 11 55 L 11.1 46.7" />
+        </svg>
+      </div>
+
       {/* OVERLAY: Lower-Right (Full View & Focused View Only) */}
-      <div className="absolute bottom-4 right-4 z-20 flex items-center gap-2">
+      <div className="absolute bottom-4 right-4 z-20 flex items-center gap-2" onPointerDown={(e) => e.stopPropagation()}>
         <div className="inline-flex rounded-xl p-1 bg-white/95 border border-slate-200 shadow-md backdrop-blur-md">
           <button
             onClick={handleFullView}
@@ -554,44 +611,16 @@ export function Wheel({
             );
           })}
 
-          {/* Center Toggle Circle */}
-          <g
-            className="cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              setActiveMode(prev => prev === 'competencies' ? 'values' : 'competencies');
-            }}
-          >
-            {activeMode === 'competencies' ? (
-              <>
-                <circle
-                  cx={center} cy={center} r={centerRadius}
-                  fill="#be185d"
-                  className="drop-shadow-sm"
-                />
-                <foreignObject x={center - 20} y={center - 20} width="40" height="40" className="pointer-events-none">
-                  <div className="w-full h-full flex items-center justify-center text-white">
-                    <Award size={32} strokeWidth={2.2} />
-                  </div>
-                </foreignObject>
-              </>
-            ) : (
-              <>
-                <circle
-                  cx={center} cy={center} r={centerRadius}
-                  fill="#ffffff"
-                  stroke="#be185d"
-                  strokeWidth="3.5"
-                  className="drop-shadow-sm"
-                />
-                <foreignObject x={center - 20} y={center - 20} width="40" height="40" className="pointer-events-none">
-                  <div className="w-full h-full flex items-center justify-center text-rose-700">
-                    <Heart size={32} strokeWidth={2.2} fill="#be185d" />
-                  </div>
-                </foreignObject>
-              </>
-            )}
-          </g>
+          {/* Center Hollow Donut Hub (No Icon) */}
+          <circle
+            cx={center}
+            cy={center}
+            r={centerRadius}
+            fill="#ffffff"
+            stroke="#E2E8F0"
+            strokeWidth="2"
+            className="pointer-events-none select-none drop-shadow-xs"
+          />
         </g>
       </svg>
     </div>
