@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Award, Heart, Route, ArrowRight, UserCheck, AlertCircle } from 'lucide-react';
+import { Award, Heart, Route, ArrowRight, UserCheck, AlertCircle, Sparkles } from 'lucide-react';
 import { ThreeColorPieIcon } from './ThreeColorPieIcon.jsx';
 import { signUpUser, signInUser } from '../lib/supabaseClient.js';
 
@@ -68,10 +68,31 @@ export function WelcomeScreen({ user, onContinueAsGuest, onLogin, onSignOut }) {
   };
 
   return (
-    <div className="max-w-5xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 py-2 sm:py-4 items-center flex-1 min-h-0 my-auto animate-in fade-in duration-300">
+    <div className="max-w-5xl mx-auto w-full flex flex-col gap-4 py-2 sm:py-3 flex-1 min-h-0 my-auto animate-in fade-in duration-300">
       
-      {/* Left Column: Overview Details & 3-Pillar List */}
-      <div className="flex flex-col gap-4 sm:gap-5">
+      {/* Prototype Preview Banner */}
+      <aside 
+        aria-label="Prototype preview notice"
+        className="w-full bg-gradient-to-r from-[#FCE7F3] via-[#FFF1F2] to-[#EBF5FB] border border-[#B23267]/20 rounded-2xl p-3 sm:p-4 shadow-xs flex items-start gap-3 text-left"
+      >
+        <div className="w-8 h-8 rounded-xl bg-[#B23267] text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+          <Sparkles size={16} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] uppercase font-extrabold tracking-wider bg-[#B23267] text-white px-2 py-0.5 rounded-md">
+              Interactive Preview
+            </span>
+          </div>
+          <p className="text-xs text-slate-700 leading-relaxed font-medium">
+            Welcome to the interactive preview of this Competency & Values Explorer. This prototype includes the end-to-end assessment and learning-plan experience for ICs. You may also explore Manager and Director competencies manually without dedicated assessments or learning plans (coming soon).
+          </p>
+        </div>
+      </aside>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 items-center">
+        {/* Left Column: Overview Details & 3-Pillar List */}
+        <div className="flex flex-col gap-4 sm:gap-5">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FCE7F3] text-[#B23267] text-xs font-bold border border-[#B23267]/20 mb-2.5">
             <ThreeColorPieIcon size={16} /> 360° Career Navigation
@@ -265,5 +286,7 @@ export function WelcomeScreen({ user, onContinueAsGuest, onLogin, onSignOut }) {
       </div>
 
     </div>
+
+  </div>
   );
 }

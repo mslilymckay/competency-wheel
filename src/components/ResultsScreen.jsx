@@ -607,14 +607,26 @@ export function ResultsScreen({ results, user, onContinueToWheel, onRetake, onVi
               <ArrowRight size={13} />
             </button>
             {onViewLearningPath && (
-              <button
-                onClick={onViewLearningPath}
-                className="btn-secondary py-2.5 px-3 text-xs flex items-center justify-center gap-1.5"
-                title="View 70-20-10 Learning Path Blueprint"
-              >
-                <Route size={14} className="text-[#B23267]" />
-                <span>Learning Path</span>
-              </button>
+              <div className="relative group">
+                <button
+                  disabled={tier !== 'ic'}
+                  onClick={onViewLearningPath}
+                  className={`btn-secondary py-2.5 px-3 text-xs flex items-center justify-center gap-1.5 ${tier !== 'ic' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  title={tier === 'ic' ? "View 70-20-10 Learning Path Blueprint" : "Learning plans currently available for Individual Contributor tier."}
+                >
+                  <Route size={14} className={tier === 'ic' ? "text-[#B23267]" : "text-slate-400"} />
+                  <span>Learning Path</span>
+                </button>
+                {tier !== 'ic' && (
+                  <div 
+                    role="tooltip"
+                    className="pointer-events-none absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-56 p-2 bg-slate-900 text-white text-[10px] font-medium leading-snug rounded-xl shadow-xl opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity z-50 text-center"
+                  >
+                    Learning blueprints are currently curated for Individual Contributor competencies.
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
+                  </div>
+                )}
+              </div>
             )}
             <button
               onClick={onRetake}

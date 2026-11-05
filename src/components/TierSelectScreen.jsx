@@ -5,7 +5,7 @@ const TIERS = [
   {
     id: 'ic',
     name: 'Individual Contributor',
-    badge: '15 Questions',
+    badge: '15 Questions • End-to-End',
     icon: Award,
     description: 'Foundational execution, craft mastery, proactive collaboration, and personal accountability across 15 observable skills.',
     accentColor: 'bg-[#E0F7FE] text-[#0B538C] border border-[#0B538C]/20',
@@ -16,7 +16,7 @@ const TIERS = [
   {
     id: 'manager',
     name: 'Manager',
-    badge: '15 Questions',
+    badge: 'Wheel Explorer (Demo)',
     icon: Users,
     description: 'Coaching direct reports, workload balancing, friction resolution, psychological safety, and operational milestone execution.',
     accentColor: 'bg-[#E8F8EC] text-[#1E5C32] border border-[#1E5C32]/20',
@@ -27,7 +27,7 @@ const TIERS = [
   {
     id: 'director',
     name: 'Director',
-    badge: '15 Questions',
+    badge: 'Wheel Explorer (Demo)',
     icon: Compass,
     description: 'Strategic foresight, cross-silo consensus, large-scale change management, talent architecture, and fiscal governance.',
     accentColor: 'bg-[#FCE7F3] text-[#B23267] border border-[#B23267]/20',
@@ -38,7 +38,7 @@ const TIERS = [
   {
     id: 'values',
     name: 'Core Values',
-    badge: '12 Questions',
+    badge: 'Wheel Explorer (Demo)',
     icon: Heart,
     description: 'Examine organizational core values (Teamwork, Empathy, Agility, Integrity) and actionable workplace behaviors.',
     accentColor: 'bg-[#FFFBEB] text-[#B45309] border border-[#B45309]/20',
@@ -172,17 +172,36 @@ export function TierSelectScreen({
             <span>Explore Wheel Directly</span>
           </button>
 
-          {/* Start Assessment Button */}
-          <button
-            onClick={() => {
-              if (onSelectTier) onSelectTier(selectedTier);
-              onStartAssessment();
-            }}
-            className="w-full sm:w-auto py-2.5 px-5 btn-primary flex items-center justify-center gap-2 text-xs"
-          >
-            <span>Start Assessment</span>
-            <ArrowRight size={14} />
-          </button>
+          {/* Start Assessment Button (Disabled for non-IC with Tooltip) */}
+          <div className="relative group w-full sm:w-auto">
+            <button
+              disabled={selectedTier !== 'ic'}
+              onClick={() => {
+                if (selectedTier !== 'ic') return;
+                if (onSelectTier) onSelectTier(selectedTier);
+                onStartAssessment();
+              }}
+              title={selectedTier !== 'ic' ? "Assessments are currently available for the Individual Contributor tier. Manager, Director, and Values assessments coming soon." : ""}
+              className={`w-full sm:w-auto py-2.5 px-5 flex items-center justify-center gap-2 text-xs font-bold rounded-xl transition-all ${
+                selectedTier === 'ic'
+                  ? 'btn-primary'
+                  : 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300/60 shadow-none'
+              }`}
+            >
+              <span>Start Assessment</span>
+              <ArrowRight size={14} />
+            </button>
+
+            {selectedTier !== 'ic' && (
+              <div 
+                role="tooltip"
+                className="pointer-events-none absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 w-64 p-2.5 bg-slate-900 text-white text-[11px] font-medium leading-snug rounded-xl shadow-xl opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity z-50 text-center"
+              >
+                Assessments are currently available for the Individual Contributor tier. Manager, Director, and Values assessments coming soon.
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

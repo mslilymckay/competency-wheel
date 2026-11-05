@@ -37,6 +37,13 @@ export function DefinitionsPanel({
 
   const totalSelected = competencyPaths.length + valuesPaths.length;
 
+  // Prototype Demo Guardrail:
+  // Curated 70-20-10 learning plans currently exist only for Individual Contributor competencies.
+  const hasNonICCompetencies = competencyPaths.some(p => p[0] && p[0] !== 'Individual Contributor');
+  const hasValuesSelected = valuesPaths.length > 0;
+  const hasNonICTiers = hasNonICCompetencies || hasValuesSelected;
+  const isLearningPlanDisabled = totalSelected === 0 || hasNonICTiers;
+
   return (
     <div className="flex flex-col justify-between h-full flex-1 min-h-0 bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 sm:p-6 overflow-hidden">
       
@@ -179,16 +186,27 @@ export function DefinitionsPanel({
 
       {/* Bottom CTA Button */}
       {onExploreLearningPath && (
-        <div className="pt-2.5 shrink-0">
+        <div className="pt-2.5 shrink-0 relative group">
           <button
-            disabled={totalSelected === 0}
+            disabled={isLearningPlanDisabled}
             onClick={onExploreLearningPath}
+            title={hasNonICTiers && totalSelected > 0 ? "Personalized 70-20-10 Learning Plans are currently curated for Individual Contributor competencies. Manager, Director, and Values learning blueprints are in development." : ""}
             className="w-full py-3 px-5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md bg-[#B23267] hover:bg-[#9d174d] text-white disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed hover:shadow-lg active:scale-[0.99]"
           >
             <Route size={16} />
             <span>Explore Learning Path ({totalSelected})</span>
             <ArrowRight size={15} />
           </button>
+
+          {hasNonICTiers && totalSelected > 0 && (
+            <div 
+              role="tooltip"
+              className="pointer-events-none absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 w-72 p-2.5 bg-slate-900 text-white text-[11px] font-medium leading-snug rounded-xl shadow-xl opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity z-50 text-center"
+            >
+              Personalized 70-20-10 Learning Plans are currently curated for Individual Contributor competencies. Manager, Director, and Values learning blueprints are in development.
+              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
+            </div>
+          )}
         </div>
       )}
 
