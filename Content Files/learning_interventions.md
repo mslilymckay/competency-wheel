@@ -10,6 +10,8 @@ Here is how you can structure the data complexity to make the recommendations fe
 
 **The 70-20-10 Bucket Tag:** Every intervention must be strictly categorized as Experiential (70%), Social (20%), or Formal (10%) so the algorithm can pull exactly one from each bucket to build the balanced blueprint. **The Effort or Context Modifier:** An experiential stretch assignment for a fully remote employee might look different than one for an on-site employee, just as a high-effort project differs from a quick-win task. Adding a modifier tag allows the algorithm to filter interventions based on the user's working environment or current bandwidth. **The Manager Enablement Column:** Because your consulting brief promises to actively equip managers, every intervention row in your database should have a specific manager-action text field. When the tool generates the employee's blueprint, it can simultaneously output a companion unblocking script for the manager.
 
+## Individual Contributor Interventions
+
 **Action Orientation: Timeline Reliability**
 
 * **70% Experiential:** Act as milestone tracker for a cross-functional project for two weeks, synthesizing Friday status updates. *Reflection: What patterns emerged in how peers estimated capacity versus actual output?*  
@@ -114,6 +116,115 @@ Here is how you can structure the data complexity to make the recommendations fe
 * **20% Social:** Schedule a "career exploration" coffee chat with a leader in a different department whose career trajectory you admire. *Reflection: What non-linear lateral move did they make that accelerated their long-term growth?*  
 * **10% Formal:** Complete a module on creating SMART goals and individual development plans (IDPs). *Reflection: Is your current career goal actionable within the next six months, or is it too vague?*  
 * **Manager Unblocker:** Dedicate a full 1-on-1 exclusively to reviewing the employee's self-directed project ideas and connecting them with relevant cross-departmental mentors.
+
+&nbsp;
+
+## **Manager Tier Interventions**
+
+**Performance Enablement: Actionable Feedback**
+
+* **70% Experiential:** Practice delivering constructive feedback within 24 hours of an event for the next month. Use the Situation-Behavior-Impact model to make feedback timely, growth-oriented, and performance-focused. *Reflection: How did delivering feedback promptly change the recipient's defensiveness compared to waiting for a formal check-in?*  
+* **20% Social:** Role-play a difficult performance conversation with a peer manager, asking them to push back on your framing and listen for explicit actionable guidance. *Reflection: What ambiguous phrasing did your peer help you improve?*  
+* **10% Formal:** Complete a micro-learning module on overcoming the "ruinous empathy" trap in performance evaluations. *Reflection: In what area are you currently withholding necessary feedback to preserve comfort?*  
+* **Leader Unblocker:** Review the manager's written feedback for a direct report before it is delivered to ensure the SBI model is applied objectively.
+
+**Performance Enablement: Career Pathway Unblocking**
+
+* **70% Experiential:** Dedicate one 1:1 for each direct report this month exclusively to mapping long-term career aspirations and creating visibility opportunities. *Reflection: Which employee's career goals surprised you, and why?*  
+* **20% Social:** Observe a senior leader in another department sourcing and advocating for internal talent. The best leaders don’t wait until the performance cycle. *Reflection: What internal networking channel are you underutilizing for your team's advancement?*  
+* **10% Formal:** Study organizational case studies on succession planning and internal talent mobility. *Reflection: Who is the immediate successor for your most critical team member, and are they ready?*  
+* **Leader Unblocker:** Facilitate an introduction between the manager's high-performing direct report and a cross-functional director to aid their sponsorship efforts.
+
+**Performance Enablement: Developmental Coaching**
+
+* **70% Experiential:** In your next three 1:1s, guide team members by asking open-ended questions like "What would you try first?" instead of proposing direct solutions. *Reflection: How did shifting from a 'fixer' to a 'coach' impact the employee's problem-solving ownership?*  
+* **20% Social:** Ask a leader known for strong coaching skills to give you feedback so you can observe how they guide discussions without dictating outcomes. *Reflection: What conversational pivot did they use when you asked for the answer directly?*  
+* **10% Formal:** Review literature on the GROW model (Goal, Reality, Options, Will) for coaching direct reports. *Reflection: Which stage of the GROW model do you typically rush through?*  
+* **Leader Unblocker:** Brainstorm with the manager in your next 1:1 about how to prioritize long-term capability building over quick, short-term commands.
+
+**Conflict Resolution: Agreement Alignment**
+
+* **70% Experiential:** Document shared team working agreements in writing immediately following the resolution of a disagreement to secure durable commitments. *Reflection: Which working norm required the most debate to secure shared ground?*  
+* **20% Social:** Partner with a peer manager to review your team's documented working norms and identify potential inclusion blind spots. *Reflection: What assumption about working styles was embedded in your initial agreements?*  
+* **10% Formal:** Complete a course on consensus-building techniques and establishing psychological contracts. *Reflection: How often do you currently revisit working agreements once they are established?*  
+* **Leader Unblocker:** Formally endorse the new team working agreements in a broader department setting to provide the manager with structural backing.
+
+**Conflict Resolution: Friction Detection**
+
+* **70% Experiential:** Observe non-verbal engagement cues in meetings for two weeks, immediately scheduling a 1:1 check-in when you sense early interpersonal tension. *Reflection: Did the immediate check-in prevent a larger productivity loss, or was it a false alarm?*  
+* **20% Social:** Discuss a recent team conflict with a mentor, reverse-engineering the timeline to identify missed warning signs. *Reflection: What specific non-verbal indicator did you dismiss as temporary stress?*  
+* **10% Formal:** Study emotional intelligence (EQ) models focused on reading team dynamics before they escalate. *Reflection: Which team member's communication style is hardest for you to read accurately?*  
+* **Leader Unblocker:** Share observations with the manager about team dynamics they might miss when facilitating, acting as a secondary radar.
+
+**Conflict Resolution: Neutral Mediation**
+
+* **70% Experiential:** Mediate a resolution to build mutual understanding, requiring both parties to articulate each other's perspective before choosing a way forward. *Reflection: How did the act of stating the opposing view change the emotional temperature of the dialogue?*  
+* **20% Social:** Interview a peer manager about a recent mediation they facilitated, focusing on how they used neutrality and diverse questioning techniques. *Reflection: Where can you apply these skills to uncover implicit bias or a tendency to “leak” into the resolution?*  
+* **10% Formal:** Read foundational principles of alternative dispute resolution and open dialogue. *Reflection: Do you currently mediate to find the best solution, or simply the fastest compromise?*  
+* **Leader Unblocker:** Step in to mediate if the conflict involves a systemic issue that surpasses the manager's span of control, preserving their neutrality.
+
+**Resource Optimization: Budget & Tool Stewardship**
+
+* **70% Experiential:** Review software licenses this quarter to eliminate shelfware, proactively investing those resources into high-leverage tools and processes. *Reflection: What emotional or structural resistance did you face when sunsetting the unused tool?*  
+* **20% Social:** Consult with the IT or Procurement team to understand the hidden administrative costs of maintaining multiple redundant processes. *Reflection: How much time is your team losing to context-switching between poorly integrated platforms?*  
+* **10% Formal:** Complete a module on zero-based budgeting principles for prudent resource investment. *Reflection: If you had to rebuild your team's tool stack from scratch today, what would you cut?*  
+* **Leader Unblocker:** Ask the manager to present a “tool rationalization” proposal based on their research, either 1:1 or to the entire team.
+
+**Resource Optimization: Capacity Forecasting**
+
+* **70% Experiential:** Review your team’s project timelines over one to six months to realistically size your team's bandwidth against next quarter's project loads. *Reflection: Where was the largest gap between your intuitive capacity estimate and the historical data?*  
+* **20% Social:** Meet with a project management office (PMO) lead to discuss techniques for factoring paid time off and administrative overhead into forecasts. *Reflection: What buffer percentage should you start standardizing in your models?*  
+* **10% Formal:** Review resource management literature on sizing commitments and avoiding the "planning fallacy." *Reflection: Which stakeholder do you consistently over-promise capacity to out of a desire to please?*  
+* **Leader Unblocker:** Defend the manager's data-backed capacity forecast when senior leadership requests additional scope.
+
+**Resource Optimization: Workload Balancing**
+
+* **70% Experiential:** Audit team capacity weekly and redistribute work to spread responsibilities fairly and prevent burnout. *Reflection: How did high performers react to having work redistributed, and how did you frame it?*  
+* **20% Social:** Pair a perpetually overloaded senior IC with a junior team member for a major deliverable, transferring the responsibility via mentorship. *Reflection: What tactical bottleneck did this pairing reveal in the senior IC's workflow?*  
+* **10% Formal:** Study organizational design principles regarding the "hero culture" trap and sustaining peak team energy. *Reflection: Are you currently rewarding fire-fighting behavior instead of sustainable fire-prevention?*  
+* **Leader Unblocker:** Consider approving temporary contractor support or extended deadlines if the manager requests breathing room to accurately rebalance the team.
+
+**Empathetic Leadership: Empathetic Attunement**
+
+* **70% Experiential:** Begin all 1:1s for the next month with a personal temperature check to demonstrate genuine care for well-being before diving into project statuses. *Reflection: What critical context about an employee's performance did you uncover through this check-in?*  
+* **20% Social:** Ask a highly empathetic peer manager how they maintain emotional boundaries while remaining deeply attuned to personal situations. *Reflection: What is your personal threshold for emotional fatigue, and how do you reset?*  
+* **10% Formal:** Complete a module on trauma-informed leadership and recognizing signs of severe burnout versus everyday stress. *Reflection: Which team member's recent drop in performance might be rooted in an undisclosed personal situation?*  
+* **Leader Unblocker:** Model this behavior by dedicating the first 10 minutes of your 1:1 with this manager strictly to their own well-being.
+
+**Empathetic Leadership: Inclusive Decisions**
+
+* **70% Experiential:** Invite input from quieter team members by soliciting thoughts asynchronously to ensure all voices are actively considered in decisions. *Reflection: How did separating the ideation from the live debate change the diversity of perspectives considered?*  
+* **20% Social:** Have a trusted direct report act as an "inclusion observer" during a team sync and give you feedback on who dominated the airtime. *Reflection: Whose voice was unintentionally marginalized during the live decision-making process?*  
+* **10% Formal:** Read research on the "loudest voice in the room" bias and asynchronous decision-making models. *Reflection: How often do you mistake quick consensus for total agreement?*  
+* **Leader Unblocker:** Visibly champion a solution that originated from a quiet team member to reinforce the value of the manager's inclusive process.
+
+**Empathetic Leadership: Psychological Safety**
+
+* **70% Experiential:** Discuss and celebrate what the team learned from a well-intentioned failed experiment to build an environment where team members share bold ideas without fear. *Reflection: Did the team's willingness to brainstorm risky ideas increase in the subsequent weeks?*  
+* **20% Social:** Facilitate a cross-functional "failure swap" with a small group of team leads, where you mutually share recent missteps to normalize vulnerability. *Reflection: How did hearing another leader's failure reduce your own fear of making mistakes?*  
+* **10% Formal:** Review Amy Edmondson's foundational work on building psychological safety in the workplace. *Reflection: In what subtle ways might your current reaction to bad news be silencing your team?*  
+* **Leader Unblocker:** Share one of your own recent executive-level failures with the manager's team to normalize risk-taking without fear from the top down.
+
+**Operational Execution: Execution Cadence**
+
+* **70% Experiential:** Keep daily standups under 15 minutes for one month by strictly deferring deep-dives to parking-lot chats, running syncs that sustain steady velocity. *Reflection: What time-wasting update habit did you have to aggressively break the team out of?*  
+* **20% Social:** Attend the syncs of a highly productive engineering or product team to observe their facilitation rhythm. *Reflection: What facilitation constraint (e.g., a physical timer) can you adopt immediately?*  
+* **10% Formal:** Study Scrum principles regarding the purpose of running productive, time-boxed daily rituals. *Reflection: Are your current check-ins serving as true blockers-removal sessions, or just status reporting?*  
+* **Leader Unblocker:** Decline to attend the team's daily standup, signaling trust in the manager's cadence and reducing the temptation for the team to status-report to the skip-level.
+
+**Operational Execution: Metric Alignment**
+
+* **70% Experiential:** Review leading and lagging KPIs with the team bi-weekly to calibrate focus and establish unambiguous progress indicators. *Reflection: Which metric did the team struggle most to connect to their daily tasks?*  
+* **20% Social:** Partner with a data analyst or operations peer to audit your current dashboard and identify vanity metrics that should be removed. *Reflection: What metric were you tracking simply because it was easy to measure, rather than impactful?*  
+* **10% Formal:** Read John Doerr's "Measure What Matters" to differentiate between establishing KPIs and driving outcomes. *Reflection: Are you currently managing your team toward effort (hours worked) or outcomes (value created)?*  
+* **Leader Unblocker:** Align the manager's departmental KPIs explicitly with the broader executive scorecard during the quarterly review.
+
+**Operational Execution: Milestone Translation**
+
+* **70% Experiential:** Map every team task back to a key company strategic objective during sprint kickoffs to deconstruct vision into trackable deliverables. *Reflection: Which legacy project could you no longer justify when forced to tie it to the current company vision?*  
+* **20% Social:** Present your deconstructed milestones to a peer manager in a different department and ask if the through-line makes sense to an outsider. *Reflection: Where was your narrative relying on team-specific jargon rather than clear business value?*  
+* **10% Formal:** Complete a strategic alignment module on cascading goals and translating high-level vision into concrete tasks. *Reflection: At what layer in the organization does the strategic vision currently get lost in translation?*  
+* **Leader Unblocker:** Provide the manager with an embargoed preview of upcoming strategic pivots so they can begin translating milestones before the public announcement.
 
 &nbsp;
 

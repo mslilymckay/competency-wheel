@@ -468,7 +468,8 @@ export async function fetchInterventions(tier = 'ic', competency = null) {
       let query = supabase
         .from('interventions')
         .select('*')
-        .eq('tier', tier);
+        .eq('tier', tier)
+        .order('sort_order', { ascending: true });
 
       if (competency) {
         query = query.eq('competency', competency);
@@ -481,6 +482,28 @@ export async function fetchInterventions(tier = 'ic', competency = null) {
       console.warn('Supabase interventions query returned empty or error:', error);
     } catch (err) {
       console.warn('Error querying Supabase interventions:', err);
+    }
+  }
+  return null;
+}
+
+/**
+ * Fetch all learning interventions across all tiers for dynamic hydration
+ */
+export async function fetchAllInterventions() {
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('interventions')
+        .select('*')
+        .order('sort_order', { ascending: true });
+
+      if (!error && data && data.length > 0) {
+        return data;
+      }
+      console.warn('Supabase fetchAllInterventions returned empty or error:', error);
+    } catch (err) {
+      console.warn('Error querying Supabase all interventions:', err);
     }
   }
   return null;

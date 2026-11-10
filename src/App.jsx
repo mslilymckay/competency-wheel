@@ -13,12 +13,14 @@ import { SignOutModal } from './components/SignOutModal.jsx';
 import { BrandFooter } from './components/BrandFooter.jsx';
 import { NarrowViewportNotice } from './components/NarrowViewportNotice.jsx';
 import { getPathForCompetency, applyHydratedFramework } from './lib/wheelTheme.js';
+import { applyHydratedInterventions } from './data/interventionsData.js';
 import { 
   getCurrentUser, 
   signOutUser, 
   deleteUserData,
   saveAssessmentResult, 
   fetchAllFrameworks, 
+  fetchAllInterventions,
   fetchLatestAssessmentResult 
 } from './lib/supabaseClient.js';
 
@@ -67,15 +69,24 @@ export default function App() {
   // 1. Dynamic Framework Hydration & 2. Active Session / Option A Latest Assessment
   useEffect(() => {
     async function initApp() {
-      // 1. Dynamic Hydration of Framework from Supabase
+      // 1. Dynamic Hydration of Framework & Interventions from Supabase
       try {
-        const rows = await fetchAllFrameworks();
-        if (rows && rows.length > 0) {
-          applyHydratedFramework(rows);
+        const [frameworkRows, interventionRows] = await Promise.all([
+          fetchAllFrameworks(),
+          fetchAllInterventions()
+        ]);
+        let didHydrate = false;
+        if (frameworkRows && frameworkRows.length > 0) {
+          didHydrate = applyHydratedFramework(frameworkRows) || didHydrate;
+        }
+        if (interventionRows && interventionRows.length > 0) {
+          didHydrate = applyHydratedInterventions(interventionRows) || didHydrate;
+        }
+        if (didHydrate) {
           setFrameworkVersion(v => v + 1);
         }
       } catch (err) {
-        console.warn('Framework hydration error:', err);
+        console.warn('Framework/Interventions hydration error:', err);
       }
 
       // 2. Check active user session & load Option A latest assessment
@@ -448,6 +459,7 @@ export default function App() {
         {/* STATE 6: 70-20-10 LEARNING PATH VIEW */}
         {screen === 'LEARNING_PATH' && (
           <LearningPathView
+            key={`learning-path-${selectedTier}-${frameworkVersion}`}
             competencies={competencyPaths}
             values={valuesPaths}
             assessmentResults={assessmentResults}

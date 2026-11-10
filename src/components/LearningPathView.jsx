@@ -104,6 +104,13 @@ export function LearningPathView({
 
     // Default sample fallback if completely blank
     if (list.length === 0) {
+      if (selectedTier === 'manager') {
+        return [
+          { name: "Actionable Feedback", type: 'competency', tier: 'manager' },
+          { name: "Developmental Coaching", type: 'competency', tier: 'manager' },
+          { name: "Workload Balancing", type: 'competency', tier: 'manager' }
+        ];
+      }
       return [
         { name: "Timeline Reliability", type: 'competency', tier: 'ic' },
         { name: "Active Listening", type: 'competency', tier: 'ic' },
@@ -135,6 +142,11 @@ export function LearningPathView({
     return 'Individual Contributor';
   }, [effectiveTier]);
 
+  // Tier-aware unblocker role ("Leader" for Manager/Director tiers, "Manager" for IC/Values tiers)
+  const unblockerRoleTitle = useMemo(() => {
+    return (effectiveTier === 'manager' || effectiveTier === 'director') ? 'Leader' : 'Manager';
+  }, [effectiveTier]);
+
   // Retrieve full blueprint for each focus item
   const blueprints = useMemo(() => {
     return focusItems
@@ -144,8 +156,8 @@ export function LearningPathView({
 
   // Generate dynamic Gemini prompt
   const initialPrompt = useMemo(() => {
-    return buildTailoredPrompt({ level: levelTitle, blueprints });
-  }, [levelTitle, blueprints]);
+    return buildTailoredPrompt({ level: levelTitle, tier: effectiveTier, blueprints });
+  }, [levelTitle, effectiveTier, blueprints]);
 
   const [promptText, setPromptText] = useState(initialPrompt);
 
@@ -203,7 +215,7 @@ export function LearningPathView({
             )}
           </div>
 
-          {/* Center: View Switcher (Employee Blueprint vs Manager Playbook) */}
+          {/* Center: View Switcher (Employee Blueprint vs Manager/Leader Playbook) */}
           <div className="inline-flex rounded-2xl p-1 bg-white border border-slate-200 shadow-sm">
             <button
               onClick={() => setViewMode('employee')}
@@ -217,7 +229,7 @@ export function LearningPathView({
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${viewMode === 'manager' ? 'bg-[#B23267] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
             >
               <ShieldCheck size={14} />
-              <span>Manager View</span>
+              <span>{unblockerRoleTitle} View</span>
             </button>
           </div>
 
@@ -228,7 +240,7 @@ export function LearningPathView({
               className="btn-primary py-2 px-4 rounded-xl font-bold text-xs shadow-sm flex items-center gap-1.5"
             >
               <FileText size={14} />
-              <span>Export {viewMode === 'manager' ? 'Manager PDF' : 'Employee PDF'}</span>
+              <span>Export {viewMode === 'manager' ? `${unblockerRoleTitle} PDF` : 'Employee PDF'}</span>
             </button>
           </div>
 
@@ -256,7 +268,7 @@ export function LearningPathView({
                   {user?.displayName
                     ? `Created for ${user.displayName} • ${levelTitle} Focus`
                     : (viewMode === 'manager' 
-                        ? `Manager Coaching & Unblocking Playbook • ${levelTitle} Focus`
+                        ? `${unblockerRoleTitle} Coaching & Unblocking Playbook • ${levelTitle} Focus`
                         : `70-20-10 Professional Growth Blueprint • ${levelTitle} Focus`)}
                 </p>
               </div>
@@ -272,7 +284,7 @@ export function LearningPathView({
                   }
                 >
                   {viewMode === 'manager' ? <ShieldCheck size={13} /> : <User size={13} />}
-                  <span>{viewMode === 'manager' ? 'Manager Coaching Mode' : 'Self-Directed Growth Mode'}</span>
+                  <span>{viewMode === 'manager' ? `${unblockerRoleTitle} Coaching Mode` : 'Self-Directed Growth Mode'}</span>
                 </span>
               </div>
             </div>
@@ -437,14 +449,14 @@ export function LearningPathView({
 
                 </div>
 
-                {/* 3. MANAGER UNBLOCKER & COACHING SECTION */}
+                {/* 3. MANAGER / LEADER UNBLOCKER & COACHING SECTION */}
                 {viewMode === 'manager' ? (
                   <div className="p-4 sm:p-5 rounded-2xl bg-[#FFFBEB] border-2 border-[#F59E0B]/60 shadow-2xs flex flex-col gap-3 print:p-2.5 print:gap-1.5 print:rounded-xl animate-in fade-in duration-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-[#B45309]">
                         <ShieldCheck size={18} className="print:w-4 print:h-4" />
                         <h4 className="font-bold text-xs uppercase tracking-wider print:text-[10px]">
-                          Manager Commitment & Unblocking Action
+                          {unblockerRoleTitle} Commitment & Unblocking Action
                         </h4>
                       </div>
                       <span className="text-[10px] font-bold bg-white text-[#B45309] px-2.5 py-0.5 rounded-md border border-[#F59E0B]/30 print:text-[9px] print:px-1.5 print:py-0">
@@ -474,7 +486,7 @@ export function LearningPathView({
                       style={{ color: theme.primary }}
                     >
                       <ShieldCheck size={12} />
-                      <span>View Manager Unblocking Script for this skill →</span>
+                      <span>View {unblockerRoleTitle} Unblocking Script for this skill →</span>
                     </button>
                   </div>
                 )}
@@ -507,7 +519,7 @@ export function LearningPathView({
                   <span>Executive AI Coaching Prompt</span>
                 </h3>
                 <p className="text-xs text-slate-600 mt-0.5">
-                  Dynamic synthesis of your micro-habits, 70-20-10 milestones, and manager alignment questions.
+                  Dynamic synthesis of your micro-habits, 70-20-10 milestones, and {unblockerRoleTitle.toLowerCase()} alignment questions.
                 </p>
               </div>
 
@@ -585,7 +597,7 @@ export function LearningPathView({
             className="btn-primary py-2.5 px-5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-1.5"
           >
             <FileText size={14} />
-            <span>Export {viewMode === 'manager' ? 'Manager PDF' : 'Employee PDF'}</span>
+            <span>Export {viewMode === 'manager' ? `${unblockerRoleTitle} PDF` : 'Employee PDF'}</span>
           </button>
         </div>
 

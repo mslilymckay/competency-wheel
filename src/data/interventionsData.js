@@ -3,7 +3,7 @@
  * Mapped to Competency & Values Framework with dynamic procedural fallbacks.
  */
 
-import { allMicroHabits, allDefinitions, canonicalizeCompetency, getCategoryForCompetency } from '../lib/wheelTheme.js';
+import { allMicroHabits, allDefinitions, canonicalizeCompetency, getCategoryForCompetency, COMPETENCY_ALIASES } from '../lib/wheelTheme.js';
 
 export const curatedInterventions = {
   // =========================================================================
@@ -414,12 +414,490 @@ export const curatedInterventions = {
     },
     managerUnblocker: "Dedicate a full 1-on-1 exclusively to reviewing the employee's self-directed project ideas and connecting them with relevant cross-departmental mentors.",
     managerCoachingQuestion: "Which insights from your cross-departmental coffee chat resonated most with where you want your career to head over the next 12 to 18 months?"
+  },
+
+  // =========================================================================
+  // MANAGER TIER: PERFORMANCE ENABLEMENT
+  // =========================================================================
+
+  "Actionable Feedback": {
+    experiential: {
+      title: "24-Hour SBI Feedback Cadence",
+      action: "Practice delivering constructive feedback within 24 hours of an event for the next month. Use the Situation-Behavior-Impact model to make feedback timely, growth-oriented, and performance-focused.",
+      reflection: "How did delivering feedback promptly change the recipient's defensiveness compared to waiting for a formal check-in?",
+      tag: "SBI Model",
+      context: "24-Hour Turnaround"
+    },
+    social: {
+      title: "Difficult Conversation Peer Role-Play",
+      action: "Role-play a difficult performance conversation with a peer manager, asking them to push back on your framing and listen for explicit actionable guidance.",
+      reflection: "What ambiguous phrasing did your peer help you improve?",
+      tag: "Peer Role-Play",
+      context: "Manager Calibration"
+    },
+    formal: {
+      title: "Overcoming Ruinous Empathy",
+      action: "Complete a micro-learning module on overcoming the \"ruinous empathy\" trap in performance evaluations.",
+      reflection: "In what area are you currently withholding necessary feedback to preserve comfort?",
+      tag: "Performance Study",
+      context: "Micro-Learning"
+    },
+    managerUnblocker: "Review the manager's written feedback for a direct report before it is delivered to ensure the SBI model is applied objectively.",
+    managerCoachingQuestion: "Which upcoming performance conversation feels most delicate right now, and how can we pressure-test your SBI framing before you deliver it?"
+  },
+
+  "Career Pathway Unblocking": {
+    experiential: {
+      title: "Dedicated Career Mapping 1:1s",
+      action: "Dedicate one 1:1 for each direct report this month exclusively to mapping long-term career aspirations and creating visibility opportunities.",
+      reflection: "Which employee's career goals surprised you, and why?",
+      tag: "Career Mapping",
+      context: "Monthly 1-on-1"
+    },
+    social: {
+      title: "Internal Talent Sponsorship Observation",
+      action: "Observe a senior leader in another department sourcing and advocating for internal talent. The best leaders don’t wait until the performance cycle.",
+      reflection: "What internal networking channel are you underutilizing for your team's advancement?",
+      tag: "Leader Shadowing",
+      context: "Talent Advocacy"
+    },
+    formal: {
+      title: "Succession & Internal Mobility Case Studies",
+      action: "Study organizational case studies on succession planning and internal talent mobility.",
+      reflection: "Who is the immediate successor for your most critical team member, and are they ready?",
+      tag: "Case Study",
+      context: "Succession Planning"
+    },
+    managerUnblocker: "Facilitate an introduction between the manager's high-performing direct report and a cross-functional director to aid their sponsorship efforts.",
+    managerCoachingQuestion: "Which high-performing team member is ready for broader cross-functional visibility, and which senior leader should we introduce them to this quarter?"
+  },
+
+  "Developmental Coaching": {
+    experiential: {
+      title: "Open-Ended Inquiry Coaching 1:1s",
+      action: "In your next three 1:1s, guide team members by asking open-ended questions like \"What would you try first?\" instead of proposing direct solutions.",
+      reflection: "How did shifting from a 'fixer' to a 'coach' impact the employee's problem-solving ownership?",
+      tag: "Coaching Practice",
+      context: "1-on-1 Cadence"
+    },
+    social: {
+      title: "Coaching Leader Observation & Feedback",
+      action: "Ask a leader known for strong coaching skills to give you feedback so you can observe how they guide discussions without dictating outcomes.",
+      reflection: "What conversational pivot did they use when you asked for the answer directly?",
+      tag: "Mentorship",
+      context: "Leader Observation"
+    },
+    formal: {
+      title: "The GROW Coaching Model",
+      action: "Review literature on the GROW model (Goal, Reality, Options, Will) for coaching direct reports.",
+      reflection: "Which stage of the GROW model do you typically rush through?",
+      tag: "Coaching Framework",
+      context: "Literature Review"
+    },
+    managerUnblocker: "Brainstorm with the manager in your next 1:1 about how to prioritize long-term capability building over quick, short-term commands.",
+    managerCoachingQuestion: "Where did you feel the strongest urge to jump in and solve a problem for a direct report this week, and what happened when you asked a question instead?"
+  },
+
+  // =========================================================================
+  // MANAGER TIER: CONFLICT RESOLUTION
+  // =========================================================================
+
+  "Agreement Alignment": {
+    experiential: {
+      title: "Codified Post-Conflict Working Agreements",
+      action: "Document shared team working agreements in writing immediately following the resolution of a disagreement to secure durable commitments.",
+      reflection: "Which working norm required the most debate to secure shared ground?",
+      tag: "Team Governance",
+      context: "Working Norms"
+    },
+    social: {
+      title: "Peer Review for Inclusion Blind Spots",
+      action: "Partner with a peer manager to review your team's documented working norms and identify potential inclusion blind spots.",
+      reflection: "What assumption about working styles was embedded in your initial agreements?",
+      tag: "Peer Audit",
+      context: "Norms Calibration"
+    },
+    formal: {
+      title: "Consensus Building & Psychological Contracts",
+      action: "Complete a course on consensus-building techniques and establishing psychological contracts.",
+      reflection: "How often do you currently revisit working agreements once they are established?",
+      tag: "Formal Course",
+      context: "Team Alignment"
+    },
+    managerUnblocker: "Formally endorse the new team working agreements in a broader department setting to provide the manager with structural backing.",
+    managerCoachingQuestion: "How are the new documented working agreements holding up under sprint pressure, and how can I visibly reinforce them across the wider department?"
+  },
+
+  "Friction Detection": {
+    experiential: {
+      title: "Non-Verbal Cue Radar & Rapid 1:1 Check-In",
+      action: "Observe non-verbal engagement cues in meetings for two weeks, immediately scheduling a 1:1 check-in when you sense early interpersonal tension.",
+      reflection: "Did the immediate check-in prevent a larger productivity loss, or was it a false alarm?",
+      tag: "Early Detection",
+      context: "Team Meetings"
+    },
+    social: {
+      title: "Conflict Timeline Reverse-Engineering",
+      action: "Discuss a recent team conflict with a mentor, reverse-engineering the timeline to identify missed warning signs.",
+      reflection: "What specific non-verbal indicator did you dismiss as temporary stress?",
+      tag: "Mentor Debrief",
+      context: "Retrospective Analysis"
+    },
+    formal: {
+      title: "Emotional Intelligence (EQ) & Team Dynamics",
+      action: "Study emotional intelligence (EQ) models focused on reading team dynamics before they escalate.",
+      reflection: "Which team member's communication style is hardest for you to read accurately?",
+      tag: "EQ Framework",
+      context: "Behavioral Study"
+    },
+    managerUnblocker: "Share observations with the manager about team dynamics they might miss when facilitating, acting as a secondary radar.",
+    managerCoachingQuestion: "What subtle friction signals have you picked up in recent team syncs, and where would a second set of eyes from me be helpful?"
+  },
+
+  "Neutral Mediation": {
+    experiential: {
+      title: "Reciprocal Perspective-Taking Mediation",
+      action: "Mediate a resolution to build mutual understanding, requiring both parties to articulate each other's perspective before choosing a way forward.",
+      reflection: "How did the act of stating the opposing view change the emotional temperature of the dialogue?",
+      tag: "Live Mediation",
+      context: "Conflict Resolution"
+    },
+    social: {
+      title: "Peer Manager Mediation Deconstruction",
+      action: "Interview a peer manager about a recent mediation they facilitated, focusing on how they used neutrality and diverse questioning techniques.",
+      reflection: "Where can you apply these skills to uncover implicit bias or a tendency to “leak” into the resolution?",
+      tag: "Peer Interview",
+      context: "Neutrality Practice"
+    },
+    formal: {
+      title: "Alternative Dispute Resolution Principles",
+      action: "Read foundational principles of alternative dispute resolution and open dialogue.",
+      reflection: "Do you currently mediate to find the best solution, or simply the fastest compromise?",
+      tag: "Dispute Resolution",
+      context: "Foundational Reading"
+    },
+    managerUnblocker: "Step in to mediate if the conflict involves a systemic issue that surpasses the manager's span of control, preserving their neutrality.",
+    managerCoachingQuestion: "Are any current team disagreements rooted in cross-departmental or systemic constraints where I should step in so you can preserve your neutrality?"
+  },
+
+  // =========================================================================
+  // MANAGER TIER: RESOURCE OPTIMIZATION
+  // =========================================================================
+
+  "Budget & Tool Stewardship": {
+    experiential: {
+      title: "Quarterly Shelfware Audit & Reinvestment",
+      action: "Review software licenses this quarter to eliminate shelfware, proactively investing those resources into high-leverage tools and processes.",
+      reflection: "What emotional or structural resistance did you face when sunsetting the unused tool?",
+      tag: "Resource Audit",
+      context: "Quarterly Review"
+    },
+    social: {
+      title: "IT & Procurement Redundancy Consultation",
+      action: "Consult with the IT or Procurement team to understand the hidden administrative costs of maintaining multiple redundant processes.",
+      reflection: "How much time is your team losing to context-switching between poorly integrated platforms?",
+      tag: "Cross-Functional Sync",
+      context: "Operational Cost"
+    },
+    formal: {
+      title: "Zero-Based Budgeting Principles",
+      action: "Complete a module on zero-based budgeting principles for prudent resource investment.",
+      reflection: "If you had to rebuild your team's tool stack from scratch today, what would you cut?",
+      tag: "Fiscal Discipline",
+      context: "Self-Paced Module"
+    },
+    managerUnblocker: "Ask the manager to present a “tool rationalization” proposal based on their research, either 1:1 or to the entire team.",
+    managerCoachingQuestion: "Based on your license and workflow audit, which low-value tool should we sunset this quarter and where should we reinvest those savings?"
+  },
+
+  "Capacity Forecasting": {
+    experiential: {
+      title: "Multi-Month Historical Bandwidth Sizing",
+      action: "Review your team’s project timelines over one to six months to realistically size your team's bandwidth against next quarter's project loads.",
+      reflection: "Where was the largest gap between your intuitive capacity estimate and the historical data?",
+      tag: "Capacity Modeling",
+      context: "Quarterly Planning"
+    },
+    social: {
+      title: "PMO Overhead & Buffer Calibration",
+      action: "Meet with a project management office (PMO) lead to discuss techniques for factoring paid time off and administrative overhead into forecasts.",
+      reflection: "What buffer percentage should you start standardizing in your models?",
+      tag: "PMO Consultation",
+      context: "Forecasting Rigor"
+    },
+    formal: {
+      title: "Overcoming the Planning Fallacy",
+      action: "Review resource management literature on sizing commitments and avoiding the \"planning fallacy.\"",
+      reflection: "Which stakeholder do you consistently over-promise capacity to out of a desire to please?",
+      tag: "Resource Literature",
+      context: "Decision Science"
+    },
+    managerUnblocker: "Defend the manager's data-backed capacity forecast when senior leadership requests additional scope.",
+    managerCoachingQuestion: "What does your historical velocity data say about our true bandwidth for next quarter, and what scope trade-offs do you need me to back in leadership reviews?"
+  },
+
+  "Workload Balancing": {
+    experiential: {
+      title: "Weekly Capacity Audit & Load Redistribution",
+      action: "Audit team capacity weekly and redistribute work to spread responsibilities fairly and prevent burnout.",
+      reflection: "How did high performers react to having work redistributed, and how did you frame it?",
+      tag: "Load Balancing",
+      context: "Weekly Sprint Audit"
+    },
+    social: {
+      title: "Senior-to-Junior Mentorship Load Transfer",
+      action: "Pair a perpetually overloaded senior IC with a junior team member for a major deliverable, transferring the responsibility via mentorship.",
+      reflection: "What tactical bottleneck did this pairing reveal in the senior IC's workflow?",
+      tag: "Mentorship Pairing",
+      context: "Delegation Practice"
+    },
+    formal: {
+      title: "Dismantling the Hero Culture Trap",
+      action: "Study organizational design principles regarding the \"hero culture\" trap and sustaining peak team energy.",
+      reflection: "Are you currently rewarding fire-fighting behavior instead of sustainable fire-prevention?",
+      tag: "Org Design",
+      context: "Burnout Prevention"
+    },
+    managerUnblocker: "Consider approving temporary contractor support or extended deadlines if the manager requests breathing room to accurately rebalance the team.",
+    managerCoachingQuestion: "Where is single-point-of-failure overload concentrated on your team right now, and do we need timeline relief or temporary support while you rebalance?"
+  },
+
+  // =========================================================================
+  // MANAGER TIER: EMPATHETIC LEADERSHIP
+  // =========================================================================
+
+  "Empathetic Attunement": {
+    experiential: {
+      title: "1:1 Personal Temperature Check Ritual",
+      action: "Begin all 1:1s for the next month with a personal temperature check to demonstrate genuine care for well-being before diving into project statuses.",
+      reflection: "What critical context about an employee's performance did you uncover through this check-in?",
+      tag: "Well-Being Ritual",
+      context: "1-on-1 Cadence"
+    },
+    social: {
+      title: "Empathetic Boundaries Peer Exchange",
+      action: "Ask a highly empathetic peer manager how they maintain emotional boundaries while remaining deeply attuned to personal situations.",
+      reflection: "What is your personal threshold for emotional fatigue, and how do you reset?",
+      tag: "Peer Coaching",
+      context: "Emotional Resilience"
+    },
+    formal: {
+      title: "Trauma-Informed Leadership & Burnout Signals",
+      action: "Complete a module on trauma-informed leadership and recognizing signs of severe burnout versus everyday stress.",
+      reflection: "Which team member's recent drop in performance might be rooted in an undisclosed personal situation?",
+      tag: "Leadership Module",
+      context: "Well-Being Literacy"
+    },
+    managerUnblocker: "Model this behavior by dedicating the first 10 minutes of your 1:1 with this manager strictly to their own well-being.",
+    managerCoachingQuestion: "Before we dive into metrics today, how are your own energy levels holding up as you support your team through their current workload?"
+  },
+
+  "Inclusive Decisions": {
+    experiential: {
+      title: "Asynchronous Pre-Meeting Ideation",
+      action: "Invite input from quieter team members by soliciting thoughts asynchronously to ensure all voices are actively considered in decisions.",
+      reflection: "How did separating the ideation from the live debate change the diversity of perspectives considered?",
+      tag: "Inclusive Facilitation",
+      context: "Async Ideation"
+    },
+    social: {
+      title: "Live Sync Airtime & Inclusion Observer",
+      action: "Have a trusted direct report act as an \"inclusion observer\" during a team sync and give you feedback on who dominated the airtime.",
+      reflection: "Whose voice was unintentionally marginalized during the live decision-making process?",
+      tag: "Upward Feedback",
+      context: "Meeting Observation"
+    },
+    formal: {
+      title: "Loudest-Voice Bias & Async Decision Models",
+      action: "Read research on the \"loudest voice in the room\" bias and asynchronous decision-making models.",
+      reflection: "How often do you mistake quick consensus for total agreement?",
+      tag: "Decision Research",
+      context: "Bias Mitigation"
+    },
+    managerUnblocker: "Visibly champion a solution that originated from a quiet team member to reinforce the value of the manager's inclusive process.",
+    managerCoachingQuestion: "What insightful perspective surfaced through your asynchronous input process recently that we can spotlight and credit at the department level?"
+  },
+
+  "Psychological Safety": {
+    experiential: {
+      title: "Celebrating Learning from Failed Experiments",
+      action: "Discuss and celebrate what the team learned from a well-intentioned failed experiment to build an environment where team members share bold ideas without fear.",
+      reflection: "Did the team's willingness to brainstorm risky ideas increase in the subsequent weeks?",
+      tag: "Culture Ritual",
+      context: "Team Retrospective"
+    },
+    social: {
+      title: "Cross-Functional Leader \"Failure Swap\"",
+      action: "Facilitate a cross-functional \"failure swap\" with a small group of team leads, where you mutually share recent missteps to normalize vulnerability.",
+      reflection: "How did hearing another leader's failure reduce your own fear of making mistakes?",
+      tag: "Peer Vulnerability",
+      context: "Leader Roundtable"
+    },
+    formal: {
+      title: "Amy Edmondson's Psychological Safety Framework",
+      action: "Review Amy Edmondson's foundational work on building psychological safety in the workplace.",
+      reflection: "In what subtle ways might your current reaction to bad news be silencing your team?",
+      tag: "Foundational Research",
+      context: "Organizational Safety"
+    },
+    managerUnblocker: "Share one of your own recent executive-level failures with the manager's team to normalize risk-taking without fear from the top down.",
+    managerCoachingQuestion: "What well-intentioned experiment on your team didn't pan out recently, and how can I join you in celebrating the learning with the group?"
+  },
+
+  // =========================================================================
+  // MANAGER TIER: OPERATIONAL EXECUTION
+  // =========================================================================
+
+  "Execution Cadence": {
+    experiential: {
+      title: "15-Minute Time-Boxed Standup Discipline",
+      action: "Keep daily standups under 15 minutes for one month by strictly deferring deep-dives to parking-lot chats, running syncs that sustain steady velocity.",
+      reflection: "What time-wasting update habit did you have to aggressively break the team out of?",
+      tag: "Ritual Discipline",
+      context: "Daily Standups"
+    },
+    social: {
+      title: "High-Velocity Team Sync Observation",
+      action: "Attend the syncs of a highly productive engineering or product team to observe their facilitation rhythm.",
+      reflection: "What facilitation constraint (e.g., a physical timer) can you adopt immediately?",
+      tag: "Cross-Team Shadowing",
+      context: "Facilitation Rhythm"
+    },
+    formal: {
+      title: "Scrum Rituals & Blocker-Removal Principles",
+      action: "Study Scrum principles regarding the purpose of running productive, time-boxed daily rituals.",
+      reflection: "Are your current check-ins serving as true blockers-removal sessions, or just status reporting?",
+      tag: "Agile Rituals",
+      context: "Process Study"
+    },
+    managerUnblocker: "Decline to attend the team's daily standup, signaling trust in the manager's cadence and reducing the temptation for the team to status-report to the skip-level.",
+    managerCoachingQuestion: "How has tightening your standup cadence affected daily team momentum, and what async summary format works best to keep me informed without attending?"
+  },
+
+  "Metric Alignment": {
+    experiential: {
+      title: "Bi-Weekly Leading & Lagging KPI Calibration",
+      action: "Review leading and lagging KPIs with the team bi-weekly to calibrate focus and establish unambiguous progress indicators.",
+      reflection: "Which metric did the team struggle most to connect to their daily tasks?",
+      tag: "KPI Calibration",
+      context: "Bi-Weekly Review"
+    },
+    social: {
+      title: "Dashboard Audit for Vanity Metrics",
+      action: "Partner with a data analyst or operations peer to audit your current dashboard and identify vanity metrics that should be removed.",
+      reflection: "What metric were you tracking simply because it was easy to measure, rather than impactful?",
+      tag: "Analytics Partnership",
+      context: "Dashboard Audit"
+    },
+    formal: {
+      title: "Outcome-Driven OKRs (\"Measure What Matters\")",
+      action: "Read John Doerr's \"Measure What Matters\" to differentiate between establishing KPIs and driving outcomes.",
+      reflection: "Are you currently managing your team toward effort (hours worked) or outcomes (value created)?",
+      tag: "OKR Literature",
+      context: "Outcome Management"
+    },
+    managerUnblocker: "Align the manager's departmental KPIs explicitly with the broader executive scorecard during the quarterly review.",
+    managerCoachingQuestion: "Which vanity metrics did you strip from your dashboard, and how can we tighten the link between your team's leading indicators and the executive scorecard?"
+  },
+
+  "Milestone Translation": {
+    experiential: {
+      title: "Strategic Objective Sprint Kickoff Mapping",
+      action: "Map every team task back to a key company strategic objective during sprint kickoffs to deconstruct vision into trackable deliverables.",
+      reflection: "Which legacy project could you no longer justify when forced to tie it to the current company vision?",
+      tag: "Strategic Mapping",
+      context: "Sprint Kickoffs"
+    },
+    social: {
+      title: "Cross-Departmental Milestone Through-Line Test",
+      action: "Present your deconstructed milestones to a peer manager in a different department and ask if the through-line makes sense to an outsider.",
+      reflection: "Where was your narrative relying on team-specific jargon rather than clear business value?",
+      tag: "Peer Calibration",
+      context: "Narrative Clarity"
+    },
+    formal: {
+      title: "Cascading Goals & Strategic Alignment",
+      action: "Complete a strategic alignment module on cascading goals and translating high-level vision into concrete tasks.",
+      reflection: "At what layer in the organization does the strategic vision currently get lost in translation?",
+      tag: "Strategy Module",
+      context: "Goal Cascading"
+    },
+    managerUnblocker: "Provide the manager with an embargoed preview of upcoming strategic pivots so they can begin translating milestones before the public announcement.",
+    managerCoachingQuestion: "As you mapped sprint deliverables to company objectives, which legacy work surfaced as misaligned that we should formally sunset?"
   }
 };
 
-// Aliases matching canonical names in competencyData.js and assessmentData.js
-curatedInterventions["Skill Continuous Learning"] = curatedInterventions["Continuous Learning"];
-curatedInterventions["Constructive Self-Correction"] = curatedInterventions["Constructive Correction"];
+function syncInterventionAliases() {
+  curatedInterventions["Skill Continuous Learning"] = curatedInterventions["Continuous Learning"];
+  curatedInterventions["Constructive Self-Correction"] = curatedInterventions["Constructive Correction"];
+  Object.entries(COMPETENCY_ALIASES).forEach(([alias, canonical]) => {
+    if (curatedInterventions[canonical] && !curatedInterventions[alias]) {
+      curatedInterventions[alias] = curatedInterventions[canonical];
+    } else if (curatedInterventions[alias] && !curatedInterventions[canonical]) {
+      curatedInterventions[canonical] = curatedInterventions[alias];
+    }
+  });
+}
+
+syncInterventionAliases();
+
+/**
+ * Dynamically hydrate the in-memory interventions catalog with real-time rows from public.interventions
+ */
+export function applyHydratedInterventions(rows) {
+  if (!rows || rows.length === 0) return false;
+
+  try {
+    const grouped = {};
+    rows.forEach(row => {
+      const compName = row.competency?.trim();
+      if (!compName) return;
+
+      if (!grouped[compName]) {
+        grouped[compName] = {
+          category: row.category,
+          tier: row.tier,
+          managerUnblocker: row.manager_unblocker,
+          managerCoachingQuestion: row.manager_coaching_question
+        };
+      }
+
+      const bucketKey = (row.bucket || '').toLowerCase();
+      if (bucketKey === 'experiential' || bucketKey === 'social' || bucketKey === 'formal') {
+        grouped[compName][bucketKey] = {
+          title: row.title,
+          action: row.action,
+          reflection: row.reflection,
+          tag: row.tag,
+          context: row.context_modifier || row.context || ''
+        };
+      }
+
+      if (row.manager_unblocker) {
+        grouped[compName].managerUnblocker = row.manager_unblocker;
+      }
+      if (row.manager_coaching_question) {
+        grouped[compName].managerCoachingQuestion = row.manager_coaching_question;
+      }
+    });
+
+    Object.entries(grouped).forEach(([compName, entry]) => {
+      if (entry.experiential && entry.social && entry.formal) {
+        curatedInterventions[compName] = entry;
+        const canonical = canonicalizeCompetency(compName);
+        if (canonical && canonical !== compName) {
+          curatedInterventions[canonical] = entry;
+        }
+      }
+    });
+
+    syncInterventionAliases();
+    return true;
+  } catch (err) {
+    console.error('Error applying hydrated interventions:', err);
+    return false;
+  }
+}
 
 /**
  * Builds a complete blueprint object for any competency or value behavior,
@@ -439,7 +917,7 @@ export function getBlueprintForCompetency(competencyName, tier = 'ic') {
   if (curated) {
     return {
       name: canonical,
-      category,
+      category: curated.category || category,
       definition,
       microHabit,
       ...curated
@@ -448,6 +926,7 @@ export function getBlueprintForCompetency(competencyName, tier = 'ic') {
 
   // 3. Fallback Generation for other skills/values
   const isValues = tier === 'values';
+  const isLeaderUnblockerTier = tier === 'manager' || tier === 'director';
   return {
     name: canonical,
     category,
@@ -476,7 +955,9 @@ export function getBlueprintForCompetency(competencyName, tier = 'ic') {
       tag: "Formal Study",
       context: "Framework Analysis"
     },
-    managerUnblocker: `Protect 2 hours of focused schedule bandwidth this sprint for the employee's development, and provide feedback on their initial experiment.`,
+    managerUnblocker: isLeaderUnblockerTier
+      ? `Protect 2 hours of strategic bandwidth this sprint for the leader's development, and provide executive sponsorship on their initial experiment.`
+      : `Protect 2 hours of focused schedule bandwidth this sprint for the employee's development, and provide feedback on their initial experiment.`,
     managerCoachingQuestion: `What specific roadblock can I help clear so you have the authority and time to execute on this growth objective?`
   };
 }
@@ -484,14 +965,19 @@ export function getBlueprintForCompetency(competencyName, tier = 'ic') {
 /**
  * Builds the comprehensive AI Coaching Prompt (Google Gemini Ready)
  */
-export function buildTailoredPrompt({ level = "Professional", blueprints = [] }) {
+export function buildTailoredPrompt({ level = "Professional", tier = "ic", blueprints = [] }) {
+  const isLeaderUnblockerTier = tier === 'manager' || tier === 'director' || level === 'Manager' || level === 'Director';
+  const unblockerLabel = isLeaderUnblockerTier ? 'Leader Alignment' : 'Manager Alignment';
+  const scriptLabel = isLeaderUnblockerTier ? 'Leader 1-on-1 Alignment Script' : 'Manager 1-on-1 Alignment Script';
+  const partnerNoun = isLeaderUnblockerTier ? 'senior leader' : 'manager';
+
   const compLines = blueprints.map(bp => {
     return `• ${bp.name} (${bp.category})
     - Daily Micro-Habit: "${bp.microHabit}"
     - 70% Experiential Target: ${bp.experiential.action}
     - 20% Social Mentorship: ${bp.social.action}
     - 10% Formal Study: ${bp.formal.action}
-    - Manager Alignment: ${bp.managerUnblocker}`;
+    - ${unblockerLabel}: ${bp.managerUnblocker}`;
   }).join('\n\n');
 
   return `I am currently working as a ${level} looking to accelerate my leadership growth and alignment with our organizational values.
@@ -502,6 +988,6 @@ ${compLines}
 
 Please act as an executive leadership coach and generate:
 1. A 30-Day Milestone Sprint Roadmap breaking down the experiential assignments above into week-by-week deliverables.
-2. A Manager 1-on-1 Alignment Script: 3 targeted questions I can bring to my manager to secure their sponsorship and unblocking commitments.
+2. A ${scriptLabel}: 3 targeted questions I can bring to my ${partnerNoun} to secure their sponsorship and unblocking commitments.
 3. 3 Reflective Journaling Prompts for my 30-day self-evaluation to measure behavioral change.`;
 }

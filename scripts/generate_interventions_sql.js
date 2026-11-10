@@ -5,7 +5,7 @@ function esc(s) {
   return (s || '').replace(/'/g, "''");
 }
 
-const competencies = [
+const icCompetencies = [
   "Timeline Reliability",
   "High-Quality Delivery",
   "Execution Efficiency",
@@ -23,21 +23,45 @@ const competencies = [
   "Growth Proactivity"
 ];
 
+const managerCompetencies = [
+  "Actionable Feedback",
+  "Career Pathway Unblocking",
+  "Developmental Coaching",
+  "Agreement Alignment",
+  "Friction Detection",
+  "Neutral Mediation",
+  "Budget & Tool Stewardship",
+  "Capacity Forecasting",
+  "Workload Balancing",
+  "Empathetic Attunement",
+  "Inclusive Decisions",
+  "Psychological Safety",
+  "Execution Cadence",
+  "Metric Alignment",
+  "Milestone Translation"
+];
+
 const inserts = [];
 let sort = 0;
-competencies.forEach(comp => {
-  const bp = getBlueprintForCompetency(comp, "ic");
-  const baseId = "ic_" + comp.toLowerCase().replace(/[^a-z0-9]+/g, "_");
 
-  // Experiential (70%)
-  inserts.push(`('${baseId}_70', 'ic', '${esc(bp.category)}', '${esc(comp)}', 'experiential', 70, '${esc(bp.experiential.title)}', '${esc(bp.experiential.action)}', '${esc(bp.experiential.reflection)}', '${esc(bp.experiential.tag)}', '${esc(bp.experiential.context)}', '${esc(bp.managerUnblocker)}', '${esc(bp.managerCoachingQuestion)}', ${++sort})`);
+function addTierInserts(competencies, tier) {
+  competencies.forEach(comp => {
+    const bp = getBlueprintForCompetency(comp, tier);
+    const baseId = tier + "_" + comp.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
 
-  // Social (20%)
-  inserts.push(`('${baseId}_20', 'ic', '${esc(bp.category)}', '${esc(comp)}', 'social', 20, '${esc(bp.social.title)}', '${esc(bp.social.action)}', '${esc(bp.social.reflection)}', '${esc(bp.social.tag)}', '${esc(bp.social.context)}', '${esc(bp.managerUnblocker)}', '${esc(bp.managerCoachingQuestion)}', ${++sort})`);
+    // Experiential (70%)
+    inserts.push(`('${baseId}_70', '${tier}', '${esc(bp.category)}', '${esc(comp)}', 'experiential', 70, '${esc(bp.experiential.title)}', '${esc(bp.experiential.action)}', '${esc(bp.experiential.reflection)}', '${esc(bp.experiential.tag)}', '${esc(bp.experiential.context)}', '${esc(bp.managerUnblocker)}', '${esc(bp.managerCoachingQuestion)}', ${++sort})`);
 
-  // Formal (10%)
-  inserts.push(`('${baseId}_10', 'ic', '${esc(bp.category)}', '${esc(comp)}', 'formal', 10, '${esc(bp.formal.title)}', '${esc(bp.formal.action)}', '${esc(bp.formal.reflection)}', '${esc(bp.formal.tag)}', '${esc(bp.formal.context)}', '${esc(bp.managerUnblocker)}', '${esc(bp.managerCoachingQuestion)}', ${++sort})`);
-});
+    // Social (20%)
+    inserts.push(`('${baseId}_20', '${tier}', '${esc(bp.category)}', '${esc(comp)}', 'social', 20, '${esc(bp.social.title)}', '${esc(bp.social.action)}', '${esc(bp.social.reflection)}', '${esc(bp.social.tag)}', '${esc(bp.social.context)}', '${esc(bp.managerUnblocker)}', '${esc(bp.managerCoachingQuestion)}', ${++sort})`);
+
+    // Formal (10%)
+    inserts.push(`('${baseId}_10', '${tier}', '${esc(bp.category)}', '${esc(comp)}', 'formal', 10, '${esc(bp.formal.title)}', '${esc(bp.formal.action)}', '${esc(bp.formal.reflection)}', '${esc(bp.formal.tag)}', '${esc(bp.formal.context)}', '${esc(bp.managerUnblocker)}', '${esc(bp.managerCoachingQuestion)}', ${++sort})`);
+  });
+}
+
+addTierInserts(icCompetencies, "ic");
+addTierInserts(managerCompetencies, "manager");
 
 const sql = `-- =========================================================================
 -- Supabase Schema & Seed Migration: 70-20-10 Learning Interventions Table
@@ -88,7 +112,7 @@ BEGIN
     END IF;
 END $$;
 
--- 5. Seed all 15 IC Learning Interventions (45 rows: 70%, 20%, 10%)
+-- 5. Seed all 30 Learning Interventions (90 rows: 45 IC + 45 Manager across 70%, 20%, 10%)
 INSERT INTO public.interventions (
     id, tier, category, competency, bucket, bucket_percentage,
     title, action, reflection, tag, context_modifier,
@@ -97,6 +121,11 @@ INSERT INTO public.interventions (
 VALUES
 ` + inserts.join(",\n") + `
 ON CONFLICT (id) DO UPDATE SET
+    tier = EXCLUDED.tier,
+    category = EXCLUDED.category,
+    competency = EXCLUDED.competency,
+    bucket = EXCLUDED.bucket,
+    bucket_percentage = EXCLUDED.bucket_percentage,
     title = EXCLUDED.title,
     action = EXCLUDED.action,
     reflection = EXCLUDED.reflection,
