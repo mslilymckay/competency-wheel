@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
-  Award, Heart, ArrowLeft, ArrowUp, FileText, Zap, ShieldCheck, User, 
-  Copy, Check, ExternalLink, Sparkles, Route, RotateCcw
+  Award, ArrowUp, FileText, Zap, ShieldCheck, User, 
+  Copy, Check, ExternalLink, Sparkles
 } from 'lucide-react';
 import { getBlueprintForCompetency, buildTailoredPrompt } from '../data/interventionsData.js';
 
@@ -29,26 +29,16 @@ const TIER_THEMES = {
     aiBorder: 'rgba(178, 50, 103, 0.3)',
     pillBg: '#B23267',
     badgeText: '#B23267',
-  },
-  values: {
-    primary: '#B45309',
-    lightBg: '#FFFBEB',
-    borderLight: 'rgba(180, 83, 9, 0.2)',
-    aiBorder: 'rgba(180, 83, 9, 0.3)',
-    pillBg: '#B45309',
-    badgeText: '#B45309',
   }
 };
 
 export function LearningPathView({
   competencies = [],
-  values = [],
   assessmentResults = null,
   selectedTier = 'ic',
   user = null,
   onBackToWheel,
-  onBackToResults,
-  onRetakeAssessment
+  onBackToResults
 }) {
   const [viewMode, setViewMode] = useState('employee'); // 'employee' | 'manager'
   const [hasCopiedPrompt, setHasCopiedPrompt] = useState(false);
@@ -71,11 +61,32 @@ export function LearningPathView({
     });
   };
 
-  // Extract focus area leaf names and their corresponding tier
+  // Phase 6.1: Strictly respect the user's baseline tier (selectedTier)
+  const baseTier = selectedTier || "ic";
+  const tierDisplayTitle = baseTier === "manager"
+    ? "Manager"
+    : baseTier === "director"
+      ? "Director"
+      : "Individual Contributor";
+
+  const theme = useMemo(() => {
+    return TIER_THEMES[baseTier] || TIER_THEMES.ic;
+  }, [baseTier]);
+
+  const selfViewRoleTitle = useMemo(() => {
+    if (baseTier === 'manager') return 'Manager';
+    if (baseTier === 'director') return 'Director';
+    return 'Employee';
+  }, [baseTier]);
+
+  const unblockerRoleTitle = useMemo(() => {
+    return (baseTier === 'manager' || baseTier === 'director') ? 'Leader' : 'Manager';
+  }, [baseTier]);
+
+  // Extract focus area leaf names and their corresponding item tier
   const focusItems = useMemo(() => {
     const list = [];
     
-    // Add from selected wheel paths
     competencies.forEach(path => {
       const leaf = path[path.length - 1];
       if (leaf && !list.some(item => item.name === leaf)) {
@@ -84,31 +95,30 @@ export function LearningPathView({
         list.push({ name: leaf, type: 'competency', tier: itemTier });
       }
     });
-    values.forEach(path => {
-      const leaf = path[path.length - 1];
-      if (leaf && !list.some(item => item.name === leaf)) {
-        list.push({ name: leaf, type: 'value', tier: 'values' });
-      }
-    });
 
-    // If no wheel paths selected, check assessment focus areas
     if (list.length === 0 && assessmentResults?.focusAreas) {
       assessmentResults.focusAreas.forEach(area => {
         list.push({ 
           name: area, 
-          type: selectedTier === 'values' ? 'value' : 'competency',
-          tier: selectedTier
+          type: 'competency',
+          tier: baseTier
         });
       });
     }
 
-    // Default sample fallback if completely blank
     if (list.length === 0) {
-      if (selectedTier === 'manager') {
+      if (baseTier === 'manager') {
         return [
           { name: "Actionable Feedback", type: 'competency', tier: 'manager' },
           { name: "Developmental Coaching", type: 'competency', tier: 'manager' },
           { name: "Workload Balancing", type: 'competency', tier: 'manager' }
+        ];
+      }
+      if (baseTier === 'director') {
+        return [
+          { name: "Strategic Prioritization", type: 'competency', tier: 'director' },
+          { name: "Cross-Silo Coalition", type: 'competency', tier: 'director' },
+          { name: "Transformation Architecture", type: 'competency', tier: 'director' }
         ];
       }
       return [
@@ -119,49 +129,22 @@ export function LearningPathView({
     }
 
     return list;
-  }, [competencies, values, assessmentResults, selectedTier]);
+  }, [competencies, assessmentResults, baseTier]);
 
-  // Determine effective tier from active selections or selectedTier prop
-  const effectiveTier = useMemo(() => {
-    if (focusItems.length > 0 && focusItems[0].tier) {
-      return focusItems[0].tier;
-    }
-    return selectedTier || 'ic';
-  }, [focusItems, selectedTier]);
-
-  // Dynamic tier theme matching assessment & wheel
-  const theme = useMemo(() => {
-    return TIER_THEMES[effectiveTier] || TIER_THEMES.ic;
-  }, [effectiveTier]);
-
-  // Determine Primary Tier / Level Name
-  const levelTitle = useMemo(() => {
-    if (effectiveTier === 'values') return 'Core Values';
-    if (effectiveTier === 'manager') return 'Manager';
-    if (effectiveTier === 'director') return 'Director';
-    return 'Individual Contributor';
-  }, [effectiveTier]);
-
-  // Tier-aware unblocker role ("Leader" for Manager/Director tiers, "Manager" for IC/Values tiers)
-  const unblockerRoleTitle = useMemo(() => {
-    return (effectiveTier === 'manager' || effectiveTier === 'director') ? 'Leader' : 'Manager';
-  }, [effectiveTier]);
-
-  // Retrieve full blueprint for each focus item
+  // Retrieve full blueprint for each focus item across all tiers
   const blueprints = useMemo(() => {
     return focusItems
-      .map(item => getBlueprintForCompetency(item.name, item.tier || effectiveTier))
+      .map(item => getBlueprintForCompetency(item.name, item.tier || baseTier))
       .filter(Boolean);
-  }, [focusItems, effectiveTier]);
+  }, [focusItems, baseTier]);
 
   // Generate dynamic Gemini prompt
   const initialPrompt = useMemo(() => {
-    return buildTailoredPrompt({ level: levelTitle, tier: effectiveTier, blueprints });
-  }, [levelTitle, effectiveTier, blueprints]);
+    return buildTailoredPrompt({ level: tierDisplayTitle, tier: baseTier, blueprints });
+  }, [tierDisplayTitle, baseTier, blueprints]);
 
   const [promptText, setPromptText] = useState(initialPrompt);
 
-  // Keep promptText synchronized whenever initialPrompt changes
   useEffect(() => {
     setPromptText(initialPrompt);
   }, [initialPrompt]);
@@ -194,53 +177,35 @@ export function LearningPathView({
         {/* ============================================================= */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-1 no-print">
           
-          {/* Back Navigation */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onBackToWheel}
-              className="btn-secondary py-2 px-3.5 text-xs flex items-center gap-1.5 shadow-2xs"
-            >
-              <ArrowLeft size={14} />
-              <span>Back to Wheel</span>
-            </button>
-
-            {onBackToResults && (
-              <button
-                onClick={onBackToResults}
-                className="btn-secondary py-2 px-3 text-xs flex items-center gap-1"
-                title="Back to Assessment Results"
-              >
-                <span>Results</span>
-              </button>
-            )}
-          </div>
-
-          {/* Center: View Switcher (Employee Blueprint vs Manager/Leader Playbook) */}
+          {/* Left: Dynamic Tier-Aware View Switcher */}
           <div className="inline-flex rounded-2xl p-1 bg-white border border-slate-200 shadow-sm">
             <button
+              type="button"
               onClick={() => setViewMode('employee')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${viewMode === 'employee' ? 'bg-[#B23267] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B23267] ${viewMode === 'employee' ? 'bg-[#B23267] text-white shadow-sm' : 'text-slate-700 hover:text-slate-900'}`}
             >
               <User size={14} />
-              <span>Employee View</span>
+              <span>{selfViewRoleTitle} View</span>
             </button>
             <button
+              type="button"
               onClick={() => setViewMode('manager')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${viewMode === 'manager' ? 'bg-[#B23267] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B23267] ${viewMode === 'manager' ? 'bg-[#B23267] text-white shadow-sm' : 'text-slate-700 hover:text-slate-900'}`}
             >
               <ShieldCheck size={14} />
               <span>{unblockerRoleTitle} View</span>
             </button>
           </div>
 
-          {/* Action Button: Export PDF (Primary CTA) */}
+          {/* Right: Export PDF */}
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => handlePrint()}
-              className="btn-primary py-2 px-4 rounded-xl font-bold text-xs shadow-sm flex items-center gap-1.5"
+              className="btn-primary py-2 px-4 rounded-xl font-bold text-xs shadow-sm flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#B23267]"
             >
               <FileText size={14} />
-              <span>Export {viewMode === 'manager' ? `${unblockerRoleTitle} PDF` : 'Employee PDF'}</span>
+              <span>Export {viewMode === 'manager' ? `${unblockerRoleTitle} PDF` : `${selfViewRoleTitle} PDF`}</span>
             </button>
           </div>
 
@@ -265,18 +230,16 @@ export function LearningPathView({
                   className="text-xs sm:text-sm font-bold uppercase tracking-widest transition-colors print:text-xs print:mb-0"
                   style={{ color: theme.primary }}
                 >
-                  {user?.displayName
-                    ? `Created for ${user.displayName} • ${levelTitle} Focus`
-                    : (viewMode === 'manager' 
-                        ? `${unblockerRoleTitle} Coaching & Unblocking Playbook • ${levelTitle} Focus`
-                        : `70-20-10 Professional Growth Blueprint • ${levelTitle} Focus`)}
+                  {viewMode === 'manager'
+                    ? `${unblockerRoleTitle} Coaching & Unblocking Playbook • ${tierDisplayTitle} Focus`
+                    : `Professional Growth Blueprint • ${tierDisplayTitle} Focus`}
                 </p>
               </div>
 
               {/* View Mode Watermark Pill in Screen View */}
               <div className="no-print self-start sm:self-center">
                 <span 
-                  className="px-3 py-1 rounded-full text-[11px] font-bold flex items-center gap-1.5 border transition-all"
+                  className="px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 border transition-all"
                   style={
                     viewMode === 'manager'
                       ? { backgroundColor: '#FFFBEB', color: '#B45309', borderColor: 'rgba(245, 158, 11, 0.3)' }
@@ -289,14 +252,14 @@ export function LearningPathView({
               </div>
             </div>
 
-            <p className="text-xs text-slate-500 mt-2 print:text-[10px] print:mt-1">
-              Presented by Lily McKay, Transformation Architect • Career Navigation Framework
+            <p className="text-xs text-slate-600 mt-2 print:text-[10px] print:mt-1">
+              {user?.displayName ? `Prepared for ${user.displayName} • ` : ''}Presented by Lily McKay, Transformation Architect • Career Navigation Framework
             </p>
           </header>
 
           {/* Focus Areas Overview Badges */}
           <div className="page-break-avoid flex flex-col gap-2.5 mb-6 sm:mb-8 print:mb-3 print:gap-1.5">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 print:text-[9.5px]">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-600 print:text-[9.5px]">
               Identified Priority Focus Areas ({blueprints.length})
             </span>
             <div className="flex flex-wrap gap-2 print:gap-1.5">
@@ -331,14 +294,14 @@ export function LearningPathView({
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-3 print:pb-1.5">
                   <div>
                     <span 
-                      className="text-[10px] font-extrabold uppercase tracking-widest transition-colors print:text-[9px]"
+                      className="text-xs font-extrabold uppercase tracking-widest transition-colors print:text-[9px]"
                       style={{ color: theme.primary }}
                     >
                       Focus Area #{index + 1} • {bp.category}
                     </span>
                     <h2 className="text-2xl font-heading text-[#2A2A2A] print:text-lg">{bp.name}</h2>
                   </div>
-                  <p className="text-xs text-slate-500 max-w-md italic print:text-[10px] print:max-w-xs">
+                  <p className="text-xs text-slate-600 max-w-md italic print:text-[10px] print:max-w-xs">
                     "{bp.definition}"
                   </p>
                 </div>
@@ -350,10 +313,10 @@ export function LearningPathView({
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#B45309] print:text-[9px]">
+                      <span className="text-xs font-extrabold uppercase tracking-wider text-[#B45309] print:text-[9px]">
                         Daily Micro-Habit (Day 1 Ritual)
                       </span>
-                      <span className="text-[10px] text-slate-400 font-semibold print:text-[9px]">
+                      <span className="text-xs text-slate-600 font-semibold print:text-[9px]">
                         &lt; 2 mins / day • Starts Today
                       </span>
                     </div>
@@ -363,21 +326,18 @@ export function LearningPathView({
                   </div>
                 </div>
 
-                {/* 2. 70-20-10 STRATEGIC ACTION GRID */}
+                {/* 2. STRATEGIC ACTION GRID */}
                 <div className="grid grid-cols-1 md:grid-cols-3 print:grid-cols-3 gap-3.5 print:gap-2">
                   
-                  {/* 70% Experiential */}
+                  {/* Experiential */}
                   <div className="p-4 print:p-2.5 rounded-2xl bg-white border border-slate-200/90 flex flex-col justify-between gap-3 print:gap-1.5 shadow-2xs print:rounded-xl">
                     <div className="flex flex-col gap-2 print:gap-1">
-                      <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-slate-100/90 print:pb-1">
+                      <div className="flex items-center justify-start pb-1.5 border-b border-slate-100/90 print:pb-1">
                         <span 
-                          className="inline-flex items-center px-2 py-0.5 rounded-md text-white text-[10px] font-bold tracking-wide uppercase whitespace-nowrap shrink-0 shadow-2xs print:text-[9px] print:px-1.5"
+                          className="inline-flex items-center px-2 py-0.5 rounded-md text-white text-xs font-bold tracking-wide uppercase whitespace-nowrap shrink-0 shadow-2xs print:text-[9px] print:px-1.5"
                           style={{ backgroundColor: theme.primary }}
                         >
-                          70% Experiential
-                        </span>
-                        <span className="text-[9.5px] font-extrabold text-slate-400 uppercase tracking-wider whitespace-nowrap shrink-0 text-right truncate print:text-[8.5px]">
-                          {bp.experiential.tag}
+                          Experiential
                         </span>
                       </div>
                       <h4 className="text-xs font-bold text-[#2A2A2A] leading-snug print:text-[11px] print:leading-tight">
@@ -388,22 +348,18 @@ export function LearningPathView({
                       </p>
                     </div>
 
-                    {/* Reflection Box */}
-                    <div className="p-2.5 print:p-1.5 rounded-xl bg-slate-50 border border-slate-200/70 text-[11px] text-slate-600 print:text-[9.5px] print:rounded-lg">
+                    <div className="p-2.5 print:p-1.5 rounded-xl bg-slate-50 border border-slate-200/70 text-xs text-slate-600 print:text-[9.5px] print:rounded-lg">
                       <span className="font-bold text-slate-700 block mb-0.5 print:text-[9px]">Coaching Reflection:</span>
                       <p className="italic leading-relaxed print:leading-snug">{bp.experiential.reflection}</p>
                     </div>
                   </div>
 
-                  {/* 20% Social */}
+                  {/* Social */}
                   <div className="p-4 print:p-2.5 rounded-2xl bg-white border border-slate-200/90 flex flex-col justify-between gap-3 print:gap-1.5 shadow-2xs print:rounded-xl">
                     <div className="flex flex-col gap-2 print:gap-1">
-                      <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-slate-100/90 print:pb-1">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#2A2A2A] text-white text-[10px] font-bold tracking-wide uppercase whitespace-nowrap shrink-0 shadow-2xs print:text-[9px] print:px-1.5">
-                          20% Social
-                        </span>
-                        <span className="text-[9.5px] font-extrabold text-slate-400 uppercase tracking-wider whitespace-nowrap shrink-0 text-right truncate print:text-[8.5px]">
-                          {bp.social.tag}
+                      <div className="flex items-center justify-start pb-1.5 border-b border-slate-100/90 print:pb-1">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#2A2A2A] text-white text-xs font-bold tracking-wide uppercase whitespace-nowrap shrink-0 shadow-2xs print:text-[9px] print:px-1.5">
+                          Social
                         </span>
                       </div>
                       <h4 className="text-xs font-bold text-[#2A2A2A] leading-snug print:text-[11px] print:leading-tight">
@@ -414,22 +370,18 @@ export function LearningPathView({
                       </p>
                     </div>
 
-                    {/* Reflection Box */}
-                    <div className="p-2.5 print:p-1.5 rounded-xl bg-slate-50 border border-slate-200/70 text-[11px] text-slate-600 print:text-[9.5px] print:rounded-lg">
+                    <div className="p-2.5 print:p-1.5 rounded-xl bg-slate-50 border border-slate-200/70 text-xs text-slate-600 print:text-[9.5px] print:rounded-lg">
                       <span className="font-bold text-slate-700 block mb-0.5 print:text-[9px]">Coaching Reflection:</span>
                       <p className="italic leading-relaxed print:leading-snug">{bp.social.reflection}</p>
                     </div>
                   </div>
 
-                  {/* 10% Formal */}
+                  {/* Formal */}
                   <div className="p-4 print:p-2.5 rounded-2xl bg-white border border-slate-200/90 flex flex-col justify-between gap-3 print:gap-1.5 shadow-2xs print:rounded-xl">
                     <div className="flex flex-col gap-2 print:gap-1">
-                      <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-slate-100/90 print:pb-1">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-200 text-slate-800 text-[10px] font-bold tracking-wide uppercase whitespace-nowrap shrink-0 print:text-[9px] print:px-1.5">
-                          10% Formal
-                        </span>
-                        <span className="text-[9.5px] font-extrabold text-slate-400 uppercase tracking-wider whitespace-nowrap shrink-0 text-right truncate print:text-[8.5px]">
-                          {bp.formal.tag}
+                      <div className="flex items-center justify-start pb-1.5 border-b border-slate-100/90 print:pb-1">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-200 text-slate-800 text-xs font-bold tracking-wide uppercase whitespace-nowrap shrink-0 print:text-[9px] print:px-1.5">
+                          Formal
                         </span>
                       </div>
                       <h4 className="text-xs font-bold text-[#2A2A2A] leading-snug print:text-[11px] print:leading-tight">
@@ -440,8 +392,7 @@ export function LearningPathView({
                       </p>
                     </div>
 
-                    {/* Reflection Box */}
-                    <div className="p-2.5 print:p-1.5 rounded-xl bg-slate-50 border border-slate-200/70 text-[11px] text-slate-600 print:text-[9.5px] print:rounded-lg">
+                    <div className="p-2.5 print:p-1.5 rounded-xl bg-slate-50 border border-slate-200/70 text-xs text-slate-600 print:text-[9.5px] print:rounded-lg">
                       <span className="font-bold text-slate-700 block mb-0.5 print:text-[9px]">Coaching Reflection:</span>
                       <p className="italic leading-relaxed print:leading-snug">{bp.formal.reflection}</p>
                     </div>
@@ -456,10 +407,10 @@ export function LearningPathView({
                       <div className="flex items-center gap-2 text-[#B45309]">
                         <ShieldCheck size={18} className="print:w-4 print:h-4" />
                         <h4 className="font-bold text-xs uppercase tracking-wider print:text-[10px]">
-                          {unblockerRoleTitle} Commitment & Unblocking Action
+                          {unblockerRoleTitle} Commitment &amp; Unblocking Action
                         </h4>
                       </div>
-                      <span className="text-[10px] font-bold bg-white text-[#B45309] px-2.5 py-0.5 rounded-md border border-[#F59E0B]/30 print:text-[9px] print:px-1.5 print:py-0">
+                      <span className="text-xs font-bold bg-white text-[#B45309] px-2.5 py-0.5 rounded-md border border-[#F59E0B]/30 print:text-[9px] print:px-1.5 print:py-0">
                         1-on-1 Action Item
                       </span>
                     </div>
@@ -469,7 +420,7 @@ export function LearningPathView({
                     </p>
 
                     <div className="pt-2 border-t border-[#F59E0B]/30 flex flex-col gap-1 print:pt-1 print:gap-0.5">
-                      <span className="text-[11px] font-bold text-[#B45309] print:text-[9.5px]">
+                      <span className="text-xs font-bold text-[#B45309] print:text-[9.5px]">
                         Suggested 1-on-1 Discussion Starter:
                       </span>
                       <p className="text-xs text-slate-700 italic print:text-[10px] print:leading-snug">
@@ -478,11 +429,11 @@ export function LearningPathView({
                     </div>
                   </div>
                 ) : (
-                  /* Employee View Subtle Hint */
                   <div className="no-print text-right">
                     <button
+                      type="button"
                       onClick={() => setViewMode('manager')}
-                      className="text-[11px] font-bold hover:underline inline-flex items-center gap-1 transition-colors"
+                      className="text-xs font-bold hover:underline inline-flex items-center gap-1 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B23267] rounded"
                       style={{ color: theme.primary }}
                     >
                       <ShieldCheck size={12} />
@@ -496,7 +447,7 @@ export function LearningPathView({
           </div>
 
           {/* ============================================================= */}
-          {/* AI COACHING PROMPT SECTION (PRINTED ON EMPLOYEE EXPORT)       */}
+          {/* AI COACHING PROMPT SECTION                                    */}
           {/* ============================================================= */}
           <div 
             className={`page-break-avoid p-6 sm:p-8 rounded-3xl border-2 flex flex-col gap-4 transition-colors ${
@@ -519,53 +470,53 @@ export function LearningPathView({
                   <span>Executive AI Coaching Prompt</span>
                 </h3>
                 <p className="text-xs text-slate-600 mt-0.5">
-                  Dynamic synthesis of your micro-habits, 70-20-10 milestones, and {unblockerRoleTitle.toLowerCase()} alignment questions.
+                  Dynamic synthesis of your micro-habits, developmental milestones, and {unblockerRoleTitle.toLowerCase()} alignment questions.
                 </p>
               </div>
 
               <span 
-                className="text-[10px] font-bold bg-white px-3 py-1 rounded-full border shadow-2xs transition-colors"
+                className="text-xs font-bold bg-white px-3 py-1 rounded-full border shadow-2xs transition-colors"
                 style={{ color: theme.primary, borderColor: theme.borderLight }}
               >
                 Google Gemini Ready
               </span>
             </div>
 
-            {/* Editable on Screen */}
             <textarea
               value={promptText}
               onChange={(e) => setPromptText(e.target.value)}
               rows={8}
-              className="print:hidden w-full p-4 rounded-2xl bg-white border border-slate-200/90 text-xs font-mono text-[#2A2A2A] outline-none resize-y leading-relaxed shadow-inner select-text"
+              aria-label="Editable AI Coaching Prompt"
+              className="print:hidden w-full p-4 rounded-2xl bg-white border border-slate-200/90 text-xs font-mono text-[#2A2A2A] outline-none resize-y leading-relaxed shadow-inner select-text focus:ring-2 focus:ring-[#B23267]"
             />
 
-            {/* Formatted Clean Text in Print View */}
             <div className="hidden print:block p-3.5 rounded-xl bg-white border border-slate-200 text-[10.5px] font-mono text-slate-800 whitespace-pre-wrap leading-snug select-text">
               {promptText}
             </div>
 
-            {/* Prompt Action Buttons (Interactive only, hidden in print) */}
             <div className="no-print flex flex-wrap items-center justify-between gap-3 pt-1">
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-600">
                 💡 Tip: Copy the prompt and paste it into Google Gemini or ChatGPT to generate your 30-day coaching sprint.
               </p>
 
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={handleCopyPrompt}
-                  className="flex items-center gap-1.5 py-2 px-4 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition-colors"
+                  className="flex items-center gap-1.5 py-2 px-4 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B23267]"
                 >
                   {hasCopiedPrompt ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
                   <span>{hasCopiedPrompt ? 'Prompt Copied!' : 'Copy Prompt'}</span>
                 </button>
 
                 <button
+                  type="button"
                   disabled={!hasCopiedPrompt}
                   onClick={handleOpenGemini}
-                  className={`flex items-center gap-1.5 py-2 px-4 rounded-xl font-bold text-xs transition-all shadow-sm ${
+                  className={`flex items-center gap-1.5 py-2 px-4 rounded-xl font-bold text-xs transition-all shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#B23267] ${
                     hasCopiedPrompt 
                       ? 'cursor-pointer text-white' 
-                      : 'bg-slate-200 text-slate-400 cursor-not-allowed opacity-60'
+                      : 'bg-slate-200 text-slate-500 cursor-not-allowed opacity-60'
                   }`}
                   style={hasCopiedPrompt ? { backgroundColor: theme.primary } : {}}
                   title={hasCopiedPrompt ? 'Open Gemini in new tab' : 'Click Copy Prompt first to activate'}
@@ -581,35 +532,29 @@ export function LearningPathView({
         </div>
 
         {/* ============================================================= */}
-        {/* BOTTOM ACTION BAR (DUPLICATE EXPORT - HIDDEN IN PRINT)        */}
+        {/* BOTTOM ACTION BAR (HIDDEN IN PRINT)                           */}
         {/* ============================================================= */}
-        <div className="no-print flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-200/80">
+        <div className="no-print flex items-center justify-end gap-3 pt-1">
           <button
-            onClick={onBackToWheel}
-            className="btn-secondary py-2 px-3.5 text-xs flex items-center gap-1.5 shadow-2xs"
-          >
-            <ArrowLeft size={14} />
-            <span>Back to Wheel</span>
-          </button>
-
-          <button
+            type="button"
             onClick={() => handlePrint()}
-            className="btn-primary py-2.5 px-5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-1.5"
+            className="btn-primary py-2.5 px-5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#B23267]"
           >
             <FileText size={14} />
-            <span>Export {viewMode === 'manager' ? `${unblockerRoleTitle} PDF` : 'Employee PDF'}</span>
+            <span>Export {viewMode === 'manager' ? `${unblockerRoleTitle} PDF` : `${selfViewRoleTitle} PDF`}</span>
           </button>
         </div>
 
       </div>
 
-      {/* Floating Action Button: Back to Top (main page brand rose, outside intervention container, hidden in print) */}
+      {/* Floating Action Button: Back to Top */}
       {showScrollTop && (
         <button
+          type="button"
           onClick={scrollToTop}
           aria-label="Back to Top"
           title="Back to Top"
-          className="fixed bottom-6 right-6 z-50 p-3.5 rounded-full shadow-lg hover:shadow-xl bg-[#B23267] hover:bg-[#942854] text-white transition-all transform hover:-translate-y-1 active:translate-y-0 no-print flex items-center justify-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B23267] focus:ring-offset-2"
+          className="fixed bottom-6 right-6 z-50 p-3.5 rounded-full shadow-lg hover:shadow-xl bg-[#B23267] hover:bg-[#942854] text-white transition-all transform hover:-translate-y-1 active:translate-y-0 no-print flex items-center justify-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B23267] focus-visible:ring-offset-2"
         >
           <ArrowUp size={20} />
         </button>

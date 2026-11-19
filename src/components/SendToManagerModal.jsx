@@ -57,7 +57,7 @@ Thank you!`;
 ${items}
 
 ---
-*Created via Competency & Values Wheel Framework • Lily McKay*`;
+*Created via Competency Wheel Framework • Lily McKay*`;
   }, [blueprints, level]);
 
   if (!isOpen) return null;

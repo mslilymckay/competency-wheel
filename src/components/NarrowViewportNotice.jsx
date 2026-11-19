@@ -10,7 +10,7 @@ export function NarrowViewportNotice({ onDismiss }) {
         {/* Brand badge */}
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FCE7F3] text-[#B23267] text-xs font-bold border border-[#B23267]/20">
           <ThreeColorPieIcon size={16} />
-          <span>Competency & Values Explorer</span>
+          <span>Competency Explorer</span>
         </div>
 
         {/* Icon */}
@@ -35,8 +35,9 @@ export function NarrowViewportNotice({ onDismiss }) {
         {onDismiss && (
           <div className="pt-2 border-t border-slate-100 w-full flex justify-center">
             <button
+              type="button"
               onClick={onDismiss}
-              className="text-xs text-slate-400 hover:text-[#B23267] hover:underline transition-colors py-1 px-3"
+              className="text-xs text-slate-600 hover:text-[#B23267] hover:underline transition-colors py-1 px-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B23267] rounded"
             >
               Continue anyway on small screen
             </button>

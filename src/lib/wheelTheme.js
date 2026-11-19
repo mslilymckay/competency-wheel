@@ -1,5 +1,4 @@
 import { competencyFramework } from '../data/competencyData.js';
-import { valuesFramework } from '../data/valuesData.js';
 
 /**
  * Extended Brand Color Palette Reference
@@ -53,29 +52,6 @@ export const defaultCompetencyFramework = [
   }
 ];
 
-export const defaultValuesFramework = [
-  {
-    name: "Teamwork",
-    palette: PALETTES.yellow,
-    children: valuesFramework[0].children
-  },
-  {
-    name: "Empathy",
-    palette: PALETTES.pink,
-    children: valuesFramework[1].children
-  },
-  {
-    name: "Agility",
-    palette: PALETTES.blue,
-    children: valuesFramework[2].children
-  },
-  {
-    name: "Integrity",
-    palette: PALETTES.green,
-    children: valuesFramework[3].children
-  }
-];
-
 export const COMPETENCY_ALIASES = {
   // IC
   'Skill Continuous Learning': 'Continuous Learning',
@@ -111,12 +87,6 @@ export function buildDefinitionMap() {
       });
     });
   });
-  defaultValuesFramework.forEach(val => {
-    map[val.name] = val.definition || "Core organizational value.";
-    val.children.forEach(beh => {
-      map[beh.name] = beh.definition;
-    });
-  });
   Object.entries(COMPETENCY_ALIASES).forEach(([alias, canonical]) => {
     if (map[canonical]) {
       map[alias] = map[canonical];
@@ -136,13 +106,6 @@ export function buildMicroHabitsMap() {
           map[sub.name] = sub.microHabit;
         }
       });
-    });
-  });
-  defaultValuesFramework.forEach(val => {
-    val.children.forEach(beh => {
-      if (beh.microHabit) {
-        map[beh.name] = beh.microHabit;
-      }
     });
   });
   Object.entries(COMPETENCY_ALIASES).forEach(([alias, canonical]) => {
@@ -194,20 +157,6 @@ export function applyHydratedFramework(rows) {
       }
     });
 
-    if (byTier['values']) {
-      defaultValuesFramework.forEach(valObj => {
-        const matchingRows = byTier['values'][valObj.name];
-        if (matchingRows && matchingRows.length > 0) {
-          matchingRows.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-          valObj.children = matchingRows.map(r => ({
-            name: r.name,
-            definition: r.definition,
-            microHabit: r.micro_habit || r.microHabit || ''
-          }));
-        }
-      });
-    }
-
     const newDefs = buildDefinitionMap();
     Object.keys(allDefinitions).forEach(k => delete allDefinitions[k]);
     Object.assign(allDefinitions, newDefs);
@@ -235,14 +184,6 @@ export function getCategoryForCompetency(competencyName, tier = 'ic') {
   const canonical = canonicalizeCompetency(competencyName);
   const target = canonical.trim().toLowerCase();
 
-  if (tier === 'values') {
-    for (const val of defaultValuesFramework) {
-      if (val.children.some(c => c.name.toLowerCase() === target)) {
-        return val.name;
-      }
-    }
-  }
-
   const tierName = tier === 'ic' ? 'Individual Contributor' : tier === 'manager' ? 'Manager' : 'Director';
   const tierObj = defaultCompetencyFramework.find(t => t.name === tierName);
   if (tierObj) {
@@ -259,19 +200,13 @@ export function getCategoryForCompetency(competencyName, tier = 'ic') {
       }
     }
   }
-  for (const val of defaultValuesFramework) {
-    if (val.children.some(c => c.name.toLowerCase() === target)) {
-      return val.name;
-    }
-  }
   return null;
 }
 
-export function getSegmentThemeColor(path, levelIndex, isValues) {
+export function getSegmentThemeColor(path, levelIndex) {
   if (!path || path.length === 0) return '#0B538C';
   const rootName = path[0];
-  const framework = isValues ? defaultValuesFramework : defaultCompetencyFramework;
-  const rootNode = framework.find(n => n.name === rootName);
+  const rootNode = defaultCompetencyFramework.find(n => n.name === rootName);
   if (!rootNode) return '#0B538C';
   if (levelIndex === 0) return rootNode.palette.ring1;
   if (levelIndex === 1) return rootNode.palette.ring2;
@@ -286,26 +221,19 @@ export function getPathForCompetency(competencyName, tier = 'ic') {
   const canonical = canonicalizeCompetency(competencyName);
   const target = canonical.trim().toLowerCase();
 
-  if (tier === 'values') {
-    for (const val of defaultValuesFramework) {
-      const match = val.children.find(c => c.name.toLowerCase() === target);
-      if (match) return [val.name, match.name];
+  const tierName = tier === 'ic' ? 'Individual Contributor' : tier === 'manager' ? 'Manager' : 'Director';
+  const tierObj = defaultCompetencyFramework.find(t => t.name === tierName);
+  if (tierObj) {
+    for (const cat of tierObj.categories) {
+      const match = cat.children.find(c => c.name.toLowerCase() === target);
+      if (match) return [tierObj.name, cat.name, match.name];
     }
-  } else {
-    const tierName = tier === 'ic' ? 'Individual Contributor' : tier === 'manager' ? 'Manager' : 'Director';
-    const tierObj = defaultCompetencyFramework.find(t => t.name === tierName);
-    if (tierObj) {
-      for (const cat of tierObj.categories) {
-        const match = cat.children.find(c => c.name.toLowerCase() === target);
-        if (match) return [tierObj.name, cat.name, match.name];
-      }
-    }
-    // Cross-tier fallback if name matched another tier
-    for (const t of defaultCompetencyFramework) {
-      for (const cat of t.categories) {
-        const match = cat.children.find(c => c.name.toLowerCase() === target);
-        if (match) return [t.name, cat.name, match.name];
-      }
+  }
+  // Cross-tier fallback if name matched another tier
+  for (const t of defaultCompetencyFramework) {
+    for (const cat of t.categories) {
+      const match = cat.children.find(c => c.name.toLowerCase() === target);
+      if (match) return [t.name, cat.name, match.name];
     }
   }
   return null;

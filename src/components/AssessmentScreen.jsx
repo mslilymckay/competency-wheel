@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { fetchAssessments } from '../lib/supabaseClient.js';
 
 function shuffleArray(array) {
@@ -11,18 +11,27 @@ function shuffleArray(array) {
   return arr;
 }
 
-export function AssessmentScreen({ tier = 'ic', onComplete, onBack }) {
+const MIN_LOADING_MS = 650;
+
+const TIER_LABELS = {
+  ic: 'Individual Contributor',
+  manager: 'Manager',
+  director: 'Director'
+};
+
+export function AssessmentScreen({ tier = 'ic', onComplete, onBack, onRestart }) {
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [selectedSide, setSelectedSide] = useState(null);
   const [animStage, setAnimStage] = useState('stage-settled');
   const [isAnimating, setIsAnimating] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [showRestartTooltip, setShowRestartTooltip] = useState(false);
   const [answers, setAnswers] = useState({});
   const [bypassedLog, setBypassedLog] = useState([]);
 
-  // Ref to hold latest state for keyboard event handler
   const stateRef = useRef({
     isAnimating: false,
     currentIndex: 0,
@@ -39,12 +48,15 @@ export function AssessmentScreen({ tier = 'ic', onComplete, onBack }) {
     bypassedLog
   };
 
-  // 1. Fetch questions on mount or tier change
+  // 1. Fetch questions on mount or tier change (enforce minimum loading display for consistency)
   useEffect(() => {
     let isMounted = true;
     async function loadData() {
       setLoading(true);
-      const data = await fetchAssessments(tier);
+      const [data] = await Promise.all([
+        fetchAssessments(tier),
+        new Promise(resolve => setTimeout(resolve, MIN_LOADING_MS))
+      ]);
       if (isMounted) {
         if (data && data.length > 0) {
           setQuestions(shuffleArray(data));
@@ -102,7 +114,6 @@ export function AssessmentScreen({ tier = 'ic', onComplete, onBack }) {
           // Step 3: Render new situation centered where cards were
           setAnimStage('stage-center-situation');
 
-          // Hold briefly in center so user registers the new prompt
           setTimeout(() => {
             // Step 4: Glide situation smoothly up to top spot
             setAnimStage('stage-glide-up');
@@ -113,14 +124,13 @@ export function AssessmentScreen({ tier = 'ic', onComplete, onBack }) {
               setIsAnimating(false);
             }, 380);
 
-          }, 240); // 240ms pause in center
+          }, 240);
 
         } else {
-          // Reached question 15! Calculate scoring and hand off to Results
+          // Completed assessment: calculate scoring and hand off to Results
           setAnimStage('stage-settled');
           setIsAnimating(false);
 
-          // Tally 0/1/2 scores from forced choices
           const scores = {};
           const bypassedCounts = {};
 
@@ -141,7 +151,6 @@ export function AssessmentScreen({ tier = 'ic', onComplete, onBack }) {
             ...Object.keys(bypassedCounts)
           ]));
 
-          // Strengths: Highest scores, fewest passed over
           const sortedStrengths = [...allCompetencies].sort((a, b) => {
             const scoreDiff = (scores[b] || 0) - (scores[a] || 0);
             if (scoreDiff !== 0) return scoreDiff;
@@ -149,7 +158,6 @@ export function AssessmentScreen({ tier = 'ic', onComplete, onBack }) {
           });
           const topStrengths = sortedStrengths.slice(0, 3);
 
-          // Focus Areas: Lowest scores (0/2s), most passed over
           const sortedFocus = [...allCompetencies].sort((a, b) => {
             const scoreDiff = (scores[a] || 0) - (scores[b] || 0);
             if (scoreDiff !== 0) return scoreDiff;
@@ -158,21 +166,24 @@ export function AssessmentScreen({ tier = 'ic', onComplete, onBack }) {
           const topFocusAreas = sortedFocus.slice(0, 3);
 
           if (onComplete) {
-            onComplete({
-              tier,
-              answers: nextAnswers,
-              bypassLog: nextBypassed,
-              totalQuestions: qList.length,
-              scores,
-              strengths: topStrengths,
-              focusAreas: topFocusAreas
-            });
+            setIsProcessing(true);
+            setTimeout(() => {
+              onComplete({
+                tier,
+                answers: nextAnswers,
+                bypassLog: nextBypassed,
+                totalQuestions: qList.length,
+                scores,
+                strengths: topStrengths,
+                focusAreas: topFocusAreas
+              });
+            }, 1400);
           }
         }
 
-      }, 220); // Dissolve duration
+      }, 220);
 
-    }, 140); // Active selection flash
+    }, 140);
 
   }, [tier, onComplete]);
 
@@ -193,18 +204,26 @@ export function AssessmentScreen({ tier = 'ic', onComplete, onBack }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleChoice]);
 
-  // Loading State
+  const tierClass = tier === 'ic' ? 'tier-ic' : tier === 'manager' ? 'tier-manager' : 'tier-director';
+  const tierColorHex = tier === 'ic' ? '#0B538C' : tier === 'manager' ? '#1E5C32' : '#B23267';
+  const tierLabel = TIER_LABELS[tier] || 'Competency';
+
   if (loading) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-in fade-in">
-        <div className="w-10 h-10 border-4 border-rose-200 border-t-[#B23267] rounded-full animate-spin mb-4" />
-        <h3 className="font-heading text-xl text-[#2A2A2A]">Loading {tier.toUpperCase()} Assessment...</h3>
-        <p className="text-xs text-slate-400 mt-1">Retrieving balanced ipsative pairings</p>
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-200">
+        <div
+          className="w-10 h-10 border-4 rounded-full animate-spin mb-4"
+          style={{
+            borderColor: `${tierColorHex}25`,
+            borderTopColor: tierColorHex
+          }}
+        />
+        <h3 className="font-heading text-xl text-[#2A2A2A]">Loading {tierLabel} Assessment...</h3>
+        <p className="text-xs text-slate-600 mt-1">Retrieving balanced ipsative pairings</p>
       </div>
     );
   }
 
-  // Fallback if no questions loaded
   if (!questions || questions.length === 0) {
     return (
       <div className="max-w-xl mx-auto my-auto p-8 bg-white rounded-3xl border border-slate-200 text-center">
@@ -212,41 +231,51 @@ export function AssessmentScreen({ tier = 'ic', onComplete, onBack }) {
         <p className="text-xs text-slate-600 mb-6">
           Unable to load pairings for tier "{tier}".
         </p>
-        <button onClick={onBack} className="btn-primary py-2.5 px-6">
-          Back to Tier Select
+        <button type="button" onClick={onBack} className="btn-primary py-2.5 px-6">
+          Back to Welcome
         </button>
       </div>
     );
   }
 
   const currentQ = questions[currentIndex];
-  const tierClass = tier === 'ic' ? 'tier-ic' : tier === 'manager' ? 'tier-manager' : tier === 'values' ? 'tier-values' : 'tier-director';
-  const tierColorHex = tier === 'ic' ? '#0B538C' : tier === 'manager' ? '#1E5C32' : tier === 'values' ? '#B45309' : '#B23267';
+
+  if (isProcessing) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-300">
+        <div
+          className="w-12 h-12 border-4 rounded-full animate-spin mb-5"
+          style={{
+            borderColor: `${tierColorHex}25`,
+            borderTopColor: tierColorHex
+          }}
+        />
+        <h3 className="font-heading text-2xl text-[#2A2A2A]">
+          Processing Your Assessment...
+        </h3>
+        <p className="text-xs sm:text-sm text-slate-600 mt-1.5 max-w-md">
+          Synthesizing competency trade-offs and building your personalized diagnostic profile.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full flex flex-col items-center flex-1 min-h-0 justify-center animate-in fade-in duration-300">
       
-      {/* Assessment Stage: Open canvas with Viewport Fit & Dynamic Transition Class */}
+      {/* Assessment Stage */}
       <div className={`w-full max-w-5xl flex flex-col justify-between flex-1 min-h-0 py-3 sm:py-6 px-4 sm:px-8 relative ${animStage}`}>
 
-        {/* 1. Header: Back Navigation & Question Counter (Progress bar removed, text preserved) */}
-        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-slate-200/60 shrink-0">
-          <button
-            onClick={onBack}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-[#2A2A2A] transition-colors"
-          >
-            <ArrowLeft size={14} />
-            <span>Back to Tier Select</span>
-          </button>
-
-          <span className="text-xs font-bold text-slate-500 tracking-wider uppercase">
+        {/* 1. Header: Question Counter (Back link removed; Step 1 in stepper handles Select Assessment) */}
+        <div className="flex items-center justify-end pb-3 sm:pb-4 shrink-0">
+          <span className="text-xs font-bold text-slate-600 tracking-wider uppercase">
             Question {currentIndex + 1} of {questions.length}
           </span>
         </div>
 
-        {/* 2. Prompt Box with Generous Breathing Room */}
+        {/* 2. Prompt Box */}
         <div className="prompt-box text-center max-w-3xl mx-auto pt-4 sm:pt-8 pb-3 sm:pb-6 shrink-0">
-          <p className="text-xs font-semibold text-slate-400 tracking-wider uppercase mb-2">
+          <p className="text-xs font-semibold text-slate-600 tracking-wider uppercase mb-2">
             Select the option that's most like you. Choose quickly for the best results.
           </p>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-heading text-[#2A2A2A] leading-snug">
@@ -254,62 +283,86 @@ export function AssessmentScreen({ tier = 'ic', onComplete, onBack }) {
           </h2>
         </div>
 
-        {/* 3. Cards Box (Tier-Themed, Generous Spacing, Fixed Dimensions, Centered Text) */}
+        {/* 3. Cards Box (Semantic <button> Cards with Keyboard Focus Rings) */}
         <div className="cards-box flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12 md:gap-16 my-auto w-full max-w-4xl mx-auto py-4 sm:py-6 flex-1 min-h-0">
 
           {/* Option Card A (Left) */}
-          <div
+          <button
+            type="button"
             onClick={() => handleChoice('A')}
-            className={`assessment-card ${tierClass} rounded-3xl p-6 sm:p-8 cursor-pointer flex flex-col justify-center items-center text-center w-full sm:w-[340px] md:w-[350px] h-[250px] sm:h-[300px] md:h-[320px] shrink-0 shadow-sm ${selectedSide === 'A' ? 'active-state' : ''}`}
+            aria-label={`Option A: ${currentQ.option_a_text}`}
+            className={`assessment-card ${tierClass} rounded-3xl p-6 sm:p-8 cursor-pointer flex flex-col justify-center items-center text-center w-full sm:w-[340px] md:w-[350px] h-[250px] sm:h-[300px] md:h-[320px] shrink-0 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#B23267] ${selectedSide === 'A' ? 'active-state' : ''}`}
           >
-            <p className="behavior-text text-lg sm:text-xl md:text-2xl font-medium leading-relaxed transition-colors">
+            <span className="behavior-text text-lg sm:text-xl md:text-2xl font-medium leading-relaxed transition-colors">
               {currentQ.option_a_text}
-            </p>
-          </div>
+            </span>
+          </button>
 
           {/* Option Card B (Right) */}
-          <div
+          <button
+            type="button"
             onClick={() => handleChoice('B')}
-            className={`assessment-card ${tierClass} rounded-3xl p-6 sm:p-8 cursor-pointer flex flex-col justify-center items-center text-center w-full sm:w-[340px] md:w-[350px] h-[250px] sm:h-[300px] md:h-[320px] shrink-0 shadow-sm ${selectedSide === 'B' ? 'active-state' : ''}`}
+            aria-label={`Option B: ${currentQ.option_b_text}`}
+            className={`assessment-card ${tierClass} rounded-3xl p-6 sm:p-8 cursor-pointer flex flex-col justify-center items-center text-center w-full sm:w-[340px] md:w-[350px] h-[250px] sm:h-[300px] md:h-[320px] shrink-0 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#B23267] ${selectedSide === 'B' ? 'active-state' : ''}`}
           >
-            <p className="behavior-text text-lg sm:text-xl md:text-2xl font-medium leading-relaxed transition-colors">
+            <span className="behavior-text text-lg sm:text-xl md:text-2xl font-medium leading-relaxed transition-colors">
               {currentQ.option_b_text}
-            </p>
-          </div>
+            </span>
+          </button>
 
         </div>
 
-        {/* 4. Bottom Row: ONLY the [i] Button by Default */}
-        <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-slate-200/60 shrink-0 relative min-h-[40px]">
-          
+        {/* 4. Bottom Row: [i] Keyboard Help Button (left) & Restart Icon+Tooltip (right) */}
+        <div className="flex items-center justify-between pt-3 sm:pt-4 shrink-0 relative min-h-[40px]">
           <div className="relative flex items-center">
             <button
               type="button"
               onClick={() => setShowTooltip(prev => !prev)}
               onMouseEnter={() => setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}
-              className="w-7 h-7 rounded-full border border-slate-300 text-slate-500 flex items-center justify-center font-serif text-xs font-bold transition-all focus:outline-none"
+              className="w-7 h-7 rounded-full border border-slate-300 text-slate-600 flex items-center justify-center font-serif text-xs font-bold transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B23267]"
               style={{
                 borderColor: showTooltip ? tierColorHex : undefined,
                 color: showTooltip ? tierColorHex : undefined
               }}
-              title="Keyboard shortcut help"
               aria-label="Instructions"
             >
               i
             </button>
 
-            {/* Minimal Tooltip */}
             {showTooltip && (
               <div className="absolute left-9 bottom-0 bg-[#2A2A2A] text-white text-xs px-3.5 py-2 rounded-xl shadow-xl whitespace-nowrap z-30">
-                Click, tap, or press <kbd className="px-1.5 py-0.5 bg-slate-700 rounded border border-slate-600 font-mono text-[11px]">←</kbd> / <kbd className="px-1.5 py-0.5 bg-slate-700 rounded border border-slate-600 font-mono text-[11px]">→</kbd> to make your selection.
+                Click, tap, or press <kbd className="px-1.5 py-0.5 bg-slate-700 rounded border border-slate-600 font-mono text-xs">←</kbd> / <kbd className="px-1.5 py-0.5 bg-slate-700 rounded border border-slate-600 font-mono text-xs">→</kbd> to make your selection.
               </div>
             )}
           </div>
 
-          {/* Right side is intentionally empty */}
-          <div />
+          {onRestart && (
+            <div className="relative flex items-center">
+              {showRestartTooltip && (
+                <div className="absolute right-9 bottom-0 bg-[#2A2A2A] text-white text-xs px-3.5 py-2 rounded-xl shadow-xl whitespace-nowrap z-30">
+                  Restart Assessment
+                </div>
+              )}
 
+              <button
+                type="button"
+                onClick={onRestart}
+                onMouseEnter={() => setShowRestartTooltip(true)}
+                onMouseLeave={() => setShowRestartTooltip(false)}
+                onFocus={() => setShowRestartTooltip(true)}
+                onBlur={() => setShowRestartTooltip(false)}
+                className="w-7 h-7 rounded-full border border-slate-300 text-slate-600 flex items-center justify-center transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B23267]"
+                style={{
+                  borderColor: showRestartTooltip ? tierColorHex : undefined,
+                  color: showRestartTooltip ? tierColorHex : undefined
+                }}
+                aria-label="Restart Assessment"
+              >
+                <RotateCcw size={13} />
+              </button>
+            </div>
+          )}
         </div>
 
       </div>

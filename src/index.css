@@ -55,15 +55,21 @@ html, body {
   scrollbar-color: #cbd5e1 #f1f5f9 !important;
 }
 
-/* Learning Path Mode: unconstrain html & body to allow natural full-document scrolling */
-html.screen-learning-path,
-body.screen-learning-path {
-  overflow: visible !important;
+/* Learning Path Mode: unconstrain html & body to allow natural full-document scrolling while preserving sticky header */
+html.screen-learning-path {
+  overflow-x: hidden !important;
   overflow-y: auto !important;
   height: auto !important;
   min-height: 100% !important;
   scrollbar-width: thin !important;
   -ms-overflow-style: auto !important;
+  background-color: #f8fafc !important;
+}
+
+body.screen-learning-path {
+  overflow: visible !important;
+  height: auto !important;
+  min-height: 100vh !important;
   background-color: #f8fafc !important;
 }
 
@@ -256,23 +262,6 @@ input, textarea {
   box-shadow: 0 16px 28px -6px rgba(178, 50, 103, 0.3);
 }
 .tier-director:hover .behavior-text, .tier-director.active-state .behavior-text {
-  color: #ffffff !important;
-}
-
-/* Tier: Values (Golden / Amber #B45309) */
-.tier-values {
-  border: 1.5px solid rgba(180, 83, 9, 0.2);
-}
-.tier-values .behavior-text {
-  color: #B45309;
-}
-.tier-values:hover, .tier-values.active-state {
-  background-color: #B45309 !important;
-  border-color: #B45309 !important;
-  transform: translateY(-3px);
-  box-shadow: 0 16px 28px -6px rgba(180, 83, 9, 0.3);
-}
-.tier-values:hover .behavior-text, .tier-values.active-state .behavior-text {
   color: #ffffff !important;
 }
 

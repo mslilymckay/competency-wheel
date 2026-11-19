@@ -21,9 +21,9 @@ export const localStore = {
   getSelections() {
     try {
       const data = localStorage.getItem(STORAGE_KEY_SELECTIONS);
-      return data ? JSON.parse(data) : { competencies: [], values: [] };
+      return data ? JSON.parse(data) : { competencies: [] };
     } catch {
-      return { competencies: [], values: [] };
+      return { competencies: [] };
     }
   },
 
@@ -77,7 +77,7 @@ export const localStore = {
 import { assessmentData } from '../data/assessmentData.js';
 
 /**
- * Fetch assessment questions by tier ('ic', 'manager', 'director', 'values')
+ * Fetch assessment questions by tier ('ic', 'manager', 'director')
  */
 export async function fetchAssessments(tier = 'ic') {
   if (supabase) {
@@ -100,7 +100,7 @@ export async function fetchAssessments(tier = 'ic') {
 }
 
 /**
- * Fetch framework definitions by tier ('ic', 'manager', 'director', 'values')
+ * Fetch framework definitions by tier ('ic', 'manager', 'director')
  */
 export async function fetchFramework(tier = 'ic') {
   if (supabase) {

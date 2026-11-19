@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Award, Heart } from 'lucide-react';
 import { describeArc, describeCurvedTextArc, polarToCartesian } from '../lib/wheelMath.js';
-import { defaultCompetencyFramework, defaultValuesFramework } from '../lib/wheelTheme.js';
+import { defaultCompetencyFramework } from '../lib/wheelTheme.js';
 
 function wrapSliceLabel(name, maxChars = 14) {
   if (!name) return [''];
@@ -25,20 +24,37 @@ function wrapSliceLabel(name, maxChars = 14) {
   return lines;
 }
 
+const QUICK_JUMP_OPTIONS = [
+  { id: 'all', label: 'All Tiers', activeColor: '#2A2A2A' },
+  { id: 'ic', label: 'Individual Contributor', activeColor: '#0B538C' },
+  { id: 'manager', label: 'Manager', activeColor: '#1E5C32' },
+  { id: 'director', label: 'Director', activeColor: '#B23267' }
+];
+
+function getTierMidAngle(tierId) {
+  const sectorAngle = 360 / defaultCompetencyFramework.length;
+  const tierIndex = tierId === 'manager' ? 1 : tierId === 'director' ? 2 : 0;
+  return (tierIndex * sectorAngle) + (sectorAngle / 2);
+}
+
+function normalizeInitialRotation(targetDeg) {
+  let r = ((targetDeg % 360) + 360) % 360;
+  if (r > 180) r -= 360;
+  return r;
+}
+
 export function Wheel({
-  activeMode,
-  setActiveMode,
   competencyPaths,
   setCompetencyPaths,
-  valuesPaths,
-  setValuesPaths,
   isMultiSelect,
-  initialFocusAreas,
-  selectedTier,
-  onSelectTier
+  selectedTier
 }) {
-  const [isZoomedOut, setIsZoomedOut] = useState(() => !(selectedTier || (initialFocusAreas && initialFocusAreas.length > 0)));
-  const [rotation, setRotation] = useState(0);
+  const initialTier = selectedTier || 'ic';
+  const [isFullView, setIsFullView] = useState(() => !selectedTier);
+  const [activeJumpTier, setActiveJumpTier] = useState(() => selectedTier || 'all');
+  const [rotation, setRotation] = useState(() =>
+    selectedTier ? normalizeInitialRotation(90 - getTierMidAngle(initialTier)) : 0
+  );
   const [isManual, setIsManual] = useState(false);
 
   const viewBoxSize = 1000;
@@ -50,199 +66,117 @@ export function Wheel({
   const rRing2_Full = 465;
 
   const rRing1_Focus = 215;
-  const rRing2_Focus = activeMode === 'values' ? 465 : 340;
+  const rRing2_Focus = 340;
   const rRing3_Focus = 465;
 
   const baseSlices = useMemo(() => {
     const result = [];
+    const sectorAngle = 360 / defaultCompetencyFramework.length;
 
-    if (activeMode === 'competencies') {
-      const sectorAngle = 360 / defaultCompetencyFramework.length;
+    defaultCompetencyFramework.forEach((lvl, lvlIdx) => {
+      const lvlStart = lvlIdx * sectorAngle;
+      const lvlEnd = lvlStart + sectorAngle;
+      const lvlPath = [lvl.name];
 
-      defaultCompetencyFramework.forEach((lvl, lvlIdx) => {
-        const lvlStart = lvlIdx * sectorAngle;
-        const lvlEnd = lvlStart + sectorAngle;
-        const lvlPath = [lvl.name];
+      // RING 1: Core Leadership Level
+      result.push({
+        id: lvlPath.join('---'),
+        name: lvl.name,
+        level: 0,
+        path: lvlPath,
+        startAngle: lvlStart,
+        endAngle: lvlEnd,
+        innerRadius: centerRadius,
+        outerRadius: isFullView ? rRing1_Full : rRing1_Focus,
+        color: lvl.palette.ring1
+      });
 
-        // RING 1: Core Leadership Level
+      const catSpan = sectorAngle / lvl.categories.length;
+      lvl.categories.forEach((cat, catIdx) => {
+        const catStart = lvlStart + (catIdx * catSpan);
+        const catEnd = catStart + catSpan;
+        const catPath = [...lvlPath, cat.name];
+
+        // RING 2: Competency Category
         result.push({
-          id: lvlPath.join('---'),
-          name: lvl.name,
-          level: 0,
-          path: lvlPath,
-          startAngle: lvlStart,
-          endAngle: lvlEnd,
-          innerRadius: centerRadius,
-          outerRadius: isZoomedOut ? rRing1_Full : rRing1_Focus,
-          color: lvl.palette.ring1
+          id: catPath.join('---'),
+          name: cat.name,
+          level: 1,
+          path: catPath,
+          startAngle: catStart,
+          endAngle: catEnd,
+          innerRadius: isFullView ? rRing1_Full : rRing1_Focus,
+          outerRadius: isFullView ? rRing2_Full : rRing2_Focus,
+          color: lvl.palette.ring2
         });
 
-        const catSpan = sectorAngle / lvl.categories.length;
-        lvl.categories.forEach((cat, catIdx) => {
-          const catStart = lvlStart + (catIdx * catSpan);
-          const catEnd = catStart + catSpan;
-          const catPath = [...lvlPath, cat.name];
+        // RING 3: Sub-competencies (ONLY IN FOCUSED VIEW)
+        if (!isFullView) {
+          const subSpan = catSpan / cat.children.length;
+          cat.children.forEach((sub, subIdx) => {
+            const subStart = catStart + (subIdx * subSpan);
+            const subEnd = subStart + subSpan;
+            const subPath = [...catPath, sub.name];
 
-          // RING 2: Competency Category
-          result.push({
-            id: catPath.join('---'),
-            name: cat.name,
-            level: 1,
-            path: catPath,
-            startAngle: catStart,
-            endAngle: catEnd,
-            innerRadius: isZoomedOut ? rRing1_Full : rRing1_Focus,
-            outerRadius: isZoomedOut ? rRing2_Full : rRing2_Focus,
-            color: lvl.palette.ring2
-          });
-
-          // RING 3: Sub-competencies (ONLY IN FOCUSED VIEW!)
-          if (!isZoomedOut) {
-            const subSpan = catSpan / cat.children.length;
-            cat.children.forEach((sub, subIdx) => {
-              const subStart = catStart + (subIdx * subSpan);
-              const subEnd = subStart + subSpan;
-              const subPath = [...catPath, sub.name];
-
-              result.push({
-                id: subPath.join('---'),
-                name: sub.name,
-                level: 2,
-                path: subPath,
-                startAngle: subStart,
-                endAngle: subEnd,
-                innerRadius: rRing2_Focus,
-                outerRadius: rRing3_Focus,
-                color: lvl.palette.ring3
-              });
+            result.push({
+              id: subPath.join('---'),
+              name: sub.name,
+              level: 2,
+              path: subPath,
+              startAngle: subStart,
+              endAngle: subEnd,
+              innerRadius: rRing2_Focus,
+              outerRadius: rRing3_Focus,
+              color: lvl.palette.ring3
             });
-          }
-        });
-      });
-    } else {
-      // VALUES: 2 Rings for both Full View and Focused View
-      const sectorAngle = 360 / defaultValuesFramework.length;
-      defaultValuesFramework.forEach((val, valIdx) => {
-        const valStart = valIdx * sectorAngle;
-        const valEnd = valStart + sectorAngle;
-        const valPath = [val.name];
-
-        // RING 1: Core Value
-        result.push({
-          id: valPath.join('---'),
-          name: val.name,
-          level: 0,
-          path: valPath,
-          startAngle: valStart,
-          endAngle: valEnd,
-          innerRadius: centerRadius,
-          outerRadius: isZoomedOut ? rRing1_Full : rRing1_Focus,
-          color: val.palette.ring1
-        });
-
-        const behSpan = sectorAngle / val.children.length;
-        val.children.forEach((beh, behIdx) => {
-          const behStart = valStart + (behIdx * behSpan);
-          const behEnd = behStart + behSpan;
-          const behPath = [...valPath, beh.name];
-
-          // RING 2: Behavior
-          result.push({
-            id: behPath.join('---'),
-            name: beh.name,
-            level: 1,
-            path: behPath,
-            startAngle: behStart,
-            endAngle: behEnd,
-            innerRadius: isZoomedOut ? rRing1_Full : rRing1_Focus,
-            outerRadius: isZoomedOut ? rRing2_Full : rRing2_Focus,
-            color: val.palette.ring2
           });
-        });
+        }
       });
-    }
+    });
 
     return result;
-  }, [activeMode, isZoomedOut]);
+  }, [isFullView]);
 
-  const autoRotateKeyRef = useRef(null);
+  const rotateToTargetRotation = (targetRotation) => {
+    setIsManual(false);
+    setRotation(prev => {
+      const currentMod = ((prev % 360) + 360) % 360;
+      const targetMod = ((targetRotation % 360) + 360) % 360;
+      let delta = targetMod - currentMod;
+      if (delta > 180) delta -= 360;
+      if (delta < -180) delta += 360;
+      return prev + delta;
+    });
+  };
 
-  // Auto-focus and zoom to focused view when focus areas are ported from assessment OR when exploring a selected tier directly
+  const rotateToAngle = (midAngle) => {
+    rotateToTargetRotation(90 - midAngle);
+  };
+
+  // Re-center on selectedTier midpoint only when selectedTier prop actually changes
+  const prevTierRef = useRef(selectedTier);
   useEffect(() => {
-    if ((initialFocusAreas && initialFocusAreas.length > 0) || selectedTier) {
-      setIsZoomedOut(false);
+    if (selectedTier && prevTierRef.current !== selectedTier) {
+      prevTierRef.current = selectedTier;
+      setIsFullView(false);
+      setActiveJumpTier(selectedTier);
+      rotateToAngle(getTierMidAngle(selectedTier));
     }
-  }, [initialFocusAreas, selectedTier]);
+  }, [selectedTier]);
 
-  // Rotate wheel to appropriate position (focus areas cluster or selected tier)
-  useEffect(() => {
-    const hasFocusAreas = initialFocusAreas && initialFocusAreas.length > 0;
-    
-    // When focus areas are ported, wait until Focused View slices (Ring 3) are rendered
-    if (hasFocusAreas && isZoomedOut) return;
+  // Quick-Jump Tier Bar Handler
+  const handleQuickJump = (targetId) => {
+    setActiveJumpTier(targetId);
 
-    const currentKey = hasFocusAreas
-      ? `focus:${initialFocusAreas.join(',')}`
-      : `tier:${selectedTier || 'ic'}:${activeMode}`;
-
-    if (autoRotateKeyRef.current === currentKey) return;
-    autoRotateKeyRef.current = currentKey;
-
-    if (hasFocusAreas) {
-      // Find matching slices in baseSlices for the ported focus areas
-      const matched = [];
-      initialFocusAreas.forEach(areaName => {
-        const s = baseSlices.find(slice => 
-          slice.name.toLowerCase() === areaName.toLowerCase() ||
-          (slice.path && slice.path[slice.path.length - 1].toLowerCase() === areaName.toLowerCase())
-        );
-        if (s) matched.push(s);
-      });
-
-      if (matched.length > 0) {
-        const midAngles = matched.map(s => s.startAngle + (s.endAngle - s.startAngle) / 2);
-        const avgAngle = midAngles.reduce((a, b) => a + b, 0) / midAngles.length;
-
-        // Rotate so the focus cluster centers at 3 o'clock (90 deg, facing Definitions panel)
-        let targetRotation = 90 - avgAngle;
-        let delta = targetRotation - (rotation % 360);
-        delta = ((delta + 180) % 360 + 360) % 360 - 180;
-
-        setIsManual(false);
-        setRotation(prev => prev + delta);
-      }
-    } else if (selectedTier && activeMode === 'competencies') {
-      // Rotate core tier to 3 o'clock
-      const tierSlice = baseSlices.find(s => 
-        s.level === 0 && (
-          (selectedTier === 'ic' && s.name === 'Individual Contributor') ||
-          (selectedTier === 'manager' && s.name === 'Manager') ||
-          (selectedTier === 'director' && s.name === 'Director')
-        )
-      );
-      if (tierSlice) {
-        const midAngle = tierSlice.startAngle + (tierSlice.endAngle - tierSlice.startAngle) / 2;
-        let targetRotation = 90 - midAngle;
-        let delta = targetRotation - (rotation % 360);
-        delta = ((delta + 180) % 360 + 360) % 360 - 180;
-
-        setIsManual(false);
-        setRotation(prev => prev + delta);
-      }
-    } else if (selectedTier && activeMode === 'values') {
-      // Rotate first value to 3 o'clock
-      const valSlice = baseSlices.find(s => s.level === 0);
-      if (valSlice) {
-        const midAngle = valSlice.startAngle + (valSlice.endAngle - valSlice.startAngle) / 2;
-        let targetRotation = 90 - midAngle;
-        let delta = targetRotation - (rotation % 360);
-        delta = ((delta + 180) % 360 + 360) % 360 - 180;
-
-        setIsManual(false);
-        setRotation(prev => prev + delta);
-      }
+    if (targetId === 'all') {
+      setIsFullView(true);
+      rotateToTargetRotation(0);
+      return;
     }
-  }, [initialFocusAreas, isZoomedOut, baseSlices, selectedTier, activeMode, rotation]);
+
+    setIsFullView(false);
+    rotateToAngle(getTierMidAngle(targetId));
+  };
 
   const dragRef = useRef({ isDown: false, hasMoved: false, lastAtan: 0 });
   const velocityRef = useRef(0);
@@ -254,30 +188,10 @@ export function Wheel({
   const pendingSliceRef = useRef(null);
   const svgRef = useRef(null);
 
-  // Snapping logic
-  const focusOnPath = (path) => {
-    if (!path || path.length === 0) return;
-    const targetName = path[path.length - 1];
-    const activeSlice = baseSlices.find(s => s.name === targetName);
-    if (!activeSlice) return;
-
-    const midAngle = activeSlice.startAngle + (activeSlice.endAngle - activeSlice.startAngle) / 2;
-    let targetRotation = 90 - midAngle;
-    let delta = targetRotation - rotation;
-    delta = ((delta + 180) % 360 + 360) % 360 - 180;
-
-    setIsManual(false);
-    setRotation(rotation + delta);
-  };
-
   const handleSliceClick = (slice) => {
-    const isValues = activeMode === 'values';
-    const selectedPaths = isValues ? valuesPaths : competencyPaths;
-    const setSelectedPaths = isValues ? setValuesPaths : setCompetencyPaths;
-
     const sliceKey = slice.path.join('---');
-    const existingIdx = selectedPaths.findIndex(p => p.join('---') === sliceKey);
-    let updated = [...selectedPaths];
+    const existingIdx = competencyPaths.findIndex(p => p.join('---') === sliceKey);
+    let updated = [...competencyPaths];
 
     if (isMultiSelect) {
       if (existingIdx !== -1) {
@@ -290,23 +204,20 @@ export function Wheel({
       updated = existingIdx !== -1 ? [] : [slice.path];
     }
 
-    setSelectedPaths(updated);
+    setCompetencyPaths(updated);
 
-    if (onSelectTier) {
-      if (isValues) {
-        autoRotateKeyRef.current = `tier:values:${activeMode}`;
-        onSelectTier('values', false);
-      } else if (slice.path && slice.path.length > 0) {
-        const root = slice.path[0];
-        const nextTier = root === 'Individual Contributor' ? 'ic' : (root === 'Manager' ? 'manager' : (root === 'Director' ? 'director' : 'ic'));
-        autoRotateKeyRef.current = `tier:${nextTier}:${activeMode}`;
-        onSelectTier(nextTier, false);
-      }
+    // Update quick-jump pill highlight to reflect the clicked slice's tier
+    let sliceTier = 'ic';
+    if (slice.path && slice.path.length > 0) {
+      const root = slice.path[0];
+      sliceTier = root === 'Manager' ? 'manager' : (root === 'Director' ? 'director' : 'ic');
+      setActiveJumpTier(sliceTier);
     }
 
-    if (updated.length > 0) {
-      if (isZoomedOut) setIsZoomedOut(false);
-      setTimeout(() => focusOnPath(slice.path), 40);
+    // If clicking a slice from All Tiers, smoothly zoom and center on that slice's tier
+    if (updated.length > 0 && isFullView) {
+      setIsFullView(false);
+      rotateToAngle(getTierMidAngle(sliceTier));
     }
   };
 
@@ -394,19 +305,19 @@ export function Wheel({
     pendingSliceRef.current = null;
   };
 
-  const currentSelected = activeMode === 'values' ? valuesPaths : competencyPaths;
+  const currentSelected = competencyPaths;
 
-  const handleFullView = () => {
-    setIsZoomedOut(true);
-    setRotation(0);
+  const isSliceSelected = (slice) => {
+    const sliceKey = slice.path.join('---');
+    return currentSelected.some(
+      p => p.join('---') === sliceKey || p.join('---').startsWith(sliceKey + '---')
+    );
   };
 
-  const handleFocusedView = () => {
-    setIsZoomedOut(false);
-    if (currentSelected.length > 0) {
-      focusOnPath(currentSelected[currentSelected.length - 1]);
-    }
-  };
+  // Render unselected slices first, then selected slices on top so their 3.5px white stroke & shadow are never clipped
+  const orderedSlices = useMemo(() => {
+    return [...baseSlices].sort((a, b) => Number(isSliceSelected(a)) - Number(isSliceSelected(b)));
+  }, [baseSlices, currentSelected]);
 
   return (
     <div 
@@ -418,28 +329,46 @@ export function Wheel({
       style={{ touchAction: 'none' }}
     >
       
-      {/* OVERLAY: Upper-Right (Mode Toggle) */}
-      <div className="absolute top-4 right-4 z-20" onPointerDown={(e) => e.stopPropagation()}>
-        <div className="inline-flex rounded-xl p-1 bg-white/95 border border-slate-200 shadow-md backdrop-blur-md">
-          <button
-            onClick={() => setActiveMode('competencies')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeMode === 'competencies' ? 'bg-[#B23267] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
-          >
-            <Award size={14} /> Competencies
-          </button>
-          <button
-            onClick={() => setActiveMode('values')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeMode === 'values' ? 'bg-[#B23267] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
-          >
-            <Heart size={14} /> Values
-          </button>
+      {/* TOP QUICK-JUMP TIER BAR (PHASE 5.2: Replaces duplicate mode and view toggles) */}
+      <div
+        className="absolute top-3 left-3 right-3 z-20 flex justify-center pointer-events-none"
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        <div
+          role="toolbar"
+          aria-label="Quick-jump tier navigation"
+          className="pointer-events-auto inline-flex flex-wrap items-center justify-center gap-1 rounded-2xl p-1 bg-white/95 border border-slate-200 shadow-md backdrop-blur-md"
+        >
+          {QUICK_JUMP_OPTIONS.map((opt) => {
+            const isActive =
+              (opt.id === 'all' && isFullView) ||
+              (opt.id !== 'all' && !isFullView && activeJumpTier === opt.id);
+
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                aria-pressed={isActive}
+                onClick={() => handleQuickJump(opt.id)}
+                style={isActive ? { backgroundColor: opt.activeColor } : undefined}
+                className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B23267] ${
+                  isActive
+                    ? 'text-white shadow-xs'
+                    : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                }`}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* OVERLAY: Mid-Right Rotary Dial Affordance (Compact, Centered in Open Space, Subtle True Double Arrow) */}
+      {/* OVERLAY: Mid-Right Rotary Dial Affordance */}
       <div 
         className="absolute right-6 sm:right-10 lg:right-12 top-1/2 -translate-y-1/2 z-20 pointer-events-none select-none flex items-center justify-center animate-in fade-in duration-300"
         title="Rotary dial - click & drag to rotate"
+        aria-hidden="true"
       >
         <svg
           width="24"
@@ -450,35 +379,12 @@ export function Wheel({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-slate-400/80 hover:text-slate-600 transition-colors"
+          className="text-slate-600/80 transition-colors"
         >
-          {/* Top Arrowhead (pointing counter-clockwise / upward along curve) */}
           <path d="M 18.6 8.3 L 11 5 L 11.1 13.3" />
-          {/* Curved Stem (matching rotary dial radius curvature) */}
           <path d="M 11 5 A 45 45 0 0 1 11 55" />
-          {/* Bottom Arrowhead (pointing clockwise / downward along curve) */}
           <path d="M 18.6 51.7 L 11 55 L 11.1 46.7" />
         </svg>
-      </div>
-
-      {/* OVERLAY: Lower-Right (Full View & Focused View Only) */}
-      <div className="absolute bottom-4 right-4 z-20 flex items-center gap-2" onPointerDown={(e) => e.stopPropagation()}>
-        <div className="inline-flex rounded-xl p-1 bg-white/95 border border-slate-200 shadow-md backdrop-blur-md">
-          <button
-            onClick={handleFullView}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isZoomedOut ? 'bg-[#2A2A2A] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
-            title="Full View (Resets Rotation)"
-          >
-            Full View
-          </button>
-          <button
-            onClick={handleFocusedView}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${!isZoomedOut ? 'bg-[#2A2A2A] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
-            title="Focused View (Snaps to Selection)"
-          >
-            Focused View
-          </button>
-        </div>
       </div>
 
       {/* THE SVG WHEEL */}
@@ -486,8 +392,8 @@ export function Wheel({
         ref={svgRef}
         viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}
         className={`drop-shadow-xl transition-all duration-700 ease-in-out select-none ${
-          isZoomedOut 
-            ? 'relative mx-auto w-full h-full max-h-[96%] p-2' 
+          isFullView 
+            ? 'relative mx-auto w-full h-full max-h-[88%] mt-8 p-2' 
             : 'absolute left-0 top-1/2 -translate-y-1/2 -translate-x-[48%] h-[125%] sm:h-[135%] w-auto max-w-none'
         }`}
         onPointerDown={handlePointerDown}
@@ -497,6 +403,16 @@ export function Wheel({
         style={{ touchAction: 'none' }}
       >
         <defs>
+          {/* High-contrast drop shadow for selected wheel slices */}
+          <filter id="selected-slice-shadow" x="-15%" y="-15%" width="130%" height="130%">
+            <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#0f172a" floodOpacity="0.5" />
+          </filter>
+
+          {/* Subtle diagonal shading pattern for selected slices */}
+          <pattern id="selected-slice-hatch" width="10" height="10" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+            <line x1="0" y1="0" x2="0" y2="10" stroke="#0f172a" strokeWidth="2.5" strokeOpacity="0.16" />
+          </pattern>
+
           {baseSlices.filter(s => s.level === 0).map(slice => {
             const textRadius = slice.innerRadius + (slice.outerRadius - slice.innerRadius) / 2;
             return (
@@ -515,16 +431,16 @@ export function Wheel({
           transformOrigin: `${center}px ${center}px`,
           transition: isManual ? 'none' : 'transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1)'
         }}>
-          {baseSlices.map(slice => {
-            const isSelected = currentSelected.some(p => 
-              p.join('---') === slice.path.join('---') || p.join('---').startsWith(slice.path.join('---') + '---')
-            );
+          {orderedSlices.map(slice => {
+            const isSelected = isSliceSelected(slice);
 
-            const fill = isSelected ? "#ffffff" : slice.color;
-            const isLightBg = isSelected || fill === '#00CCFF' || fill === '#FFAEC9' || fill === '#82D18D' || fill === '#FFCC00';
+            // Preserve native ring palette color; never fill selected slices with blank white
+            const fill = slice.color;
+            const isLightBg = fill === '#00CCFF' || fill === '#FFAEC9' || fill === '#82D18D' || fill === '#FFCC00';
             const textFill = isLightBg ? "#2A2A2A" : "#ffffff";
             const strokeColor = "#ffffff";
-            const strokeWidth = "1.5";
+            const strokeWidth = isSelected ? "3.5" : "1.5";
+            const arcD = describeArc(center, center, slice.innerRadius, slice.outerRadius, slice.startAngle, slice.endAngle);
 
             const midAngle = slice.startAngle + (slice.endAngle - slice.startAngle) / 2;
             const textPos = polarToCartesian(
@@ -534,31 +450,74 @@ export function Wheel({
             );
             const textRotation = midAngle - 90;
 
-            const shouldShowLabel = slice.level === 0 || !isZoomedOut || isSelected;
+            const shouldShowLabel = slice.level === 0 || !isFullView || isSelected;
 
             return (
               <g
                 key={slice.id}
-                className="cursor-pointer"
+                role="button"
+                tabIndex={0}
+                aria-label={`${slice.path.join(' - ')}`}
+                aria-pressed={isSelected}
+                className="cursor-pointer focus:outline-none"
                 onPointerDown={() => { pendingSliceRef.current = slice; }}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (dragRef.current && dragRef.current.hasMoved) return;
                   selectSlice(slice);
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    selectSlice(slice);
+                  }
+                }}
               >
+                {/* Selected outer contrast ring + pure white 3.5px stroke */}
+                {isSelected && (
+                  <path
+                    d={arcD}
+                    fill="none"
+                    stroke="#2A2A2A"
+                    strokeWidth="7"
+                    className="pointer-events-none"
+                  />
+                )}
+
                 <path
-                  d={describeArc(center, center, slice.innerRadius, slice.outerRadius, slice.startAngle, slice.endAngle)}
+                  d={arcD}
                   fill={fill}
+                  fillOpacity={isSelected ? 1 : (currentSelected.length > 0 ? 0.72 : 1)}
                   stroke={strokeColor}
                   strokeWidth={strokeWidth}
-                  className="transition-colors duration-200 pointer-events-auto"
+                  filter={isSelected ? "url(#selected-slice-shadow)" : undefined}
+                  className="transition-all duration-200 pointer-events-auto"
                 />
+
+                {/* Shading overlays for selected slices */}
+                {isSelected && (
+                  <>
+                    <path
+                      d={arcD}
+                      fill={isLightBg ? "rgba(15, 23, 42, 0.16)" : "rgba(0, 0, 0, 0.24)"}
+                      stroke="none"
+                      className="pointer-events-none"
+                    />
+                    <path
+                      d={arcD}
+                      fill="url(#selected-slice-hatch)"
+                      stroke="#ffffff"
+                      strokeWidth="3.5"
+                      className="pointer-events-none"
+                    />
+                  </>
+                )}
 
                 {slice.level === 0 ? (
                   <text
                     fill={textFill}
-                    fontSize={isZoomedOut ? "24" : "19"}
+                    fontSize={isFullView ? "24" : "19"}
                     fontFamily="Tenor Sans, Georgia, serif"
                     fontWeight="normal"
                     className="pointer-events-none select-none transition-colors"
@@ -574,7 +533,7 @@ export function Wheel({
                 ) : (
                   shouldShowLabel && (() => {
                     const lines = wrapSliceLabel(slice.name, slice.level === 1 ? 13 : 10);
-                    const fontSize = slice.level === 1 ? (isZoomedOut ? "12" : "10.5") : "8";
+                    const fontSize = slice.level === 1 ? (isFullView ? "12" : "10.5") : "8.5";
                     return (
                       <text
                         x={textPos.x}
@@ -611,7 +570,7 @@ export function Wheel({
             );
           })}
 
-          {/* Center Hollow Donut Hub (No Icon) */}
+          {/* Center Hollow Donut Hub */}
           <circle
             cx={center}
             cy={center}

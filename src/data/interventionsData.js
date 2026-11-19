@@ -1320,7 +1320,7 @@ export function getBlueprintForCompetency(competencyName, tier = 'ic') {
   // 1. Daily Micro-Habit (Day 1 Ritual)
   const microHabit = allMicroHabits[canonical] || allMicroHabits[competencyName] || "Practice daily behavioral consistency in this domain.";
   const definition = allDefinitions[canonical] || allDefinitions[competencyName] || "Core organizational competency benchmark.";
-  const category = getCategoryForCompetency(canonical, tier) || getCategoryForCompetency(competencyName, tier) || (tier === 'values' ? 'Core Value' : 'Competency Area');
+  const category = getCategoryForCompetency(canonical, tier) || getCategoryForCompetency(competencyName, tier) || 'Competency Area';
 
   // 2. Check Curated Interventions (checks canonical, original name, and aliases)
   const curated = curatedInterventions[canonical] || curatedInterventions[competencyName] || curatedInterventions[competencyName?.trim()];
@@ -1334,8 +1334,7 @@ export function getBlueprintForCompetency(competencyName, tier = 'ic') {
     };
   }
 
-  // 3. Fallback Generation for other skills/values
-  const isValues = tier === 'values';
+  // 3. Fallback Generation for other competencies
   const isLeaderUnblockerTier = tier === 'manager' || tier === 'director';
   return {
     name: canonical,
@@ -1343,10 +1342,8 @@ export function getBlueprintForCompetency(competencyName, tier = 'ic') {
     definition,
     microHabit,
     experiential: {
-      title: isValues ? `${canonical} in Action` : `${canonical} Stretch Initiative`,
-      action: isValues
-        ? `Lead a bounded 2-week team experiment actively modeling '${canonical}' during daily project deliverables and team interactions.`
-        : `Take ownership of a bounded 2-week stretch assignment focused on elevating your '${canonical}' performance.`,
+      title: `${canonical} Stretch Initiative`,
+      action: `Take ownership of a bounded 2-week stretch assignment focused on elevating your '${canonical}' performance.`,
       reflection: `What operational or communication friction did you encounter, and how did you navigate it?`,
       tag: "Experiential Lead",
       context: "On-the-Job Practice"
@@ -1390,7 +1387,7 @@ export function buildTailoredPrompt({ level = "Professional", tier = "ic", bluep
     - ${unblockerLabel}: ${bp.managerUnblocker || ''}`;
   }).join('\n\n');
 
-  return `I am currently working as a ${level} looking to accelerate my leadership growth and alignment with our organizational values.
+  return `I am currently working as a ${level} looking to accelerate my leadership growth and alignment with our organizational competencies.
 
 Here are my selected target focus areas and professional growth blueprint:
 
