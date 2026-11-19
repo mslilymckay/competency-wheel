@@ -824,6 +824,416 @@ export const curatedInterventions = {
     },
     managerUnblocker: "Provide the manager with an embargoed preview of upcoming strategic pivots so they can begin translating milestones before the public announcement.",
     managerCoachingQuestion: "As you mapped sprint deliverables to company objectives, which legacy work surfaced as misaligned that we should formally sunset?"
+  },
+
+  // =========================================================================
+  // DIRECTOR TIER: STRATEGIC FORESIGHT
+  // =========================================================================
+
+  "Horizon Scanning": {
+    experiential: {
+      title: "Macro-Trend Strategic Impact Memo",
+      action: "Map out three macro-economic or industry trends. Draft a one-page memo on how they could impact your department's strategy.",
+      reflection: "Which external trend poses the highest existential risk to your current operating model if ignored?",
+      tag: "Trend Analysis",
+      context: "Executive Memo"
+    },
+    social: {
+      title: "External Industry Peer Roundtable",
+      action: "Host a quarterly external networking dinner or roundtable with industry peers strictly to discuss emerging disruptive technologies.",
+      reflection: "What assumption about your current market position did an external peer unintentionally challenge?",
+      tag: "Peer Roundtable",
+      context: "External Network"
+    },
+    formal: {
+      title: "Blue Ocean Strategy & Market Disruption",
+      action: "Study a masterclass or case study on \"Blue Ocean Strategy\" and market disruption.",
+      reflection: "How much of your current strategy is fighting for existing market share versus creating new demand?",
+      tag: "Strategy Study",
+      context: "Executive Masterclass"
+    },
+    managerUnblocker: "Provide the director with access to premium enterprise research reports (e.g., Gartner, Forrester) or budget for a senior advisory network membership.",
+    managerCoachingQuestion: "Which external trend in your memo poses the biggest risk to our current operating model, and what research or advisory access would help sharpen your forecast?"
+  },
+
+  "Strategic Prioritization": {
+    experiential: {
+      title: "Legacy Initiative Sunset Strategy",
+      action: "Rewrite your department's annual strategy to begin to sunset one profitable but strategically misaligned legacy initiative.",
+      reflection: "What was the hidden organizational cost of sustaining that legacy initiative until now?",
+      tag: "Portfolio Pruning",
+      context: "Annual Strategy"
+    },
+    social: {
+      title: "Cross-Functional Strategic Bet Stress-Test",
+      action: "Pitch your top three strategic bets for the upcoming fiscal year to a non-expert leadership peer, asking them to identify any conflicting priorities.",
+      reflection: "Which of your \"top priorities\" actually dilutes your primary strategic goal?",
+      tag: "Peer Stress-Test",
+      context: "Fiscal Planning"
+    },
+    formal: {
+      title: "Scenario Planning & Future-Proofing Models",
+      action: "Read literature on scenario planning and \"future-proofing\" organizational models.",
+      reflection: "Are you optimizing for the single most likely future, or building structural resilience for multiple possible futures?",
+      tag: "Strategic Literature",
+      context: "Scenario Modeling"
+    },
+    managerUnblocker: "Defend the director's decision to reevaluate a popular legacy initiative during the next executive board review.",
+    managerCoachingQuestion: "Which profitable legacy initiative is quietly diluting your top strategic bets, and how can I best back your recommendation at the next executive review?"
+  },
+
+  "Vision Articulation": {
+    experiential: {
+      title: "One-Page Vision Narrative & All-Hands Cadence",
+      action: "Draft a single-page \"vision narrative\" for the department and weave its core thesis into every all-hands opening remarks for a quarter.",
+      reflection: "How did repeating a consistent, simplified narrative change the types of questions the team asked?",
+      tag: "Executive Narrative",
+      context: "Quarterly All-Hands"
+    },
+    social: {
+      title: "3-Year Vision Echo-Back Calibration",
+      action: "Ask a mid-level manager in your department to explain your 3-year vision back to you in their own words. Ask questions to redirect as needed.",
+      reflection: "Where did your vision rely on executive jargon instead of clear strategic value?",
+      tag: "Alignment Check",
+      context: "Manager Calibration"
+    },
+    formal: {
+      title: "Commander's Intent & Executive Communications",
+      action: "Study executive communications and the framework of the \"Commander's Intent.\"",
+      reflection: "If your team lost all contact with you for a month, is your vision clear enough for them to make the right trade-offs?",
+      tag: "Leadership Framework",
+      context: "Strategic Comms"
+    },
+    managerUnblocker: "Invite the director to present their 3-year vision at the next C-suite or board-level strategic offsite.",
+    managerCoachingQuestion: "What shifted in the questions your team asked once you repeated your one-page vision consistently, and how can we refine it ahead of the C-suite offsite?"
+  },
+
+  // =========================================================================
+  // DIRECTOR TIER: STAKEHOLDER INFLUENCE
+  // =========================================================================
+
+  "Cross-Silo Coalition": {
+    experiential: {
+      title: "Cross-Departmental Resource Coalition",
+      action: "Sponsor a high-stakes, cross-departmental project by securing budget and headcount commitments from at least two other department heads.",
+      reflection: "What specific departmental currency (time, data, budget) was most effective in securing their buy-in?",
+      tag: "Coalition Building",
+      context: "Enterprise Initiative"
+    },
+    social: {
+      title: "Joint Recommendation Memo with Opposing Peer",
+      action: "Partner with a peer director who holds opposing views on a structural change, and co-author a single joint recommendation memo.",
+      reflection: "What concession did you have to make to secure their support, and was it worth the alignment?",
+      tag: "Peer Co-Authoring",
+      context: "Stakeholder Alignment"
+    },
+    formal: {
+      title: "Interest-Based Negotiation (\"Getting to Yes\")",
+      action: "Review advanced negotiation frameworks focusing on interests rather than positions (e.g., \"Getting to Yes\").",
+      reflection: "In recent conflicts, have you been arguing over structural positions or underlying business interests?",
+      tag: "Negotiation Framework",
+      context: "Executive Study"
+    },
+    managerUnblocker: "Publicly attribute the successful launch of a cross-functional initiative to the director's behind-the-scenes negotiation and advocacy.",
+    managerCoachingQuestion: "Which cross-functional trade-offs were hardest to negotiate in securing peer headcount and budget, and where can I publicly spotlight your coalition work?"
+  },
+
+  "Executive Consensus": {
+    experiential: {
+      title: "1-on-1 Executive Pre-Wire Campaign",
+      action: "Identify a major organizational initiative where buy-in is stalled, and conduct one-on-one \"pre-wire\" meetings with key executives to align priorities before the next live meeting.",
+      reflection: "Which executive's underlying motivation differed most from their publicly stated position?",
+      tag: "Executive Pre-Wire",
+      context: "Stakeholder Alignment"
+    },
+    social: {
+      title: "Steering Committee Executive Presence Debrief",
+      action: "Ask a trusted executive sponsor for feedback on your presence and persuasiveness during a recent steering committee meeting.",
+      reflection: "Which communication style—operational detail or strategic command—could help you grow in this area?",
+      tag: "Sponsor Feedback",
+      context: "Executive Presence"
+    },
+    formal: {
+      title: "Organizational Power Dynamics & Stakeholder Mapping",
+      action: "Complete an executive education module on organizational power dynamics and stakeholder mapping.",
+      reflection: "Who holds informal veto power in your organization without holding the formal title?",
+      tag: "Executive Education",
+      context: "Power Dynamics"
+    },
+    managerUnblocker: "Step back from a tied executive decision and explicitly delegate the final consensus-building authority to this director.",
+    managerCoachingQuestion: "What unspoken executive priorities surfaced during your pre-wire meetings, and where would stepping back to give you formal consensus authority help most?"
+  },
+
+  "Narrative Framing": {
+    experiential: {
+      title: "Business-Impact C-Suite Reframe",
+      action: "Take a highly technical or operational update and completely reframe it as a business-impact narrative before presenting it to your team or the C-suite.",
+      reflection: "How did removing the operational \"how\" change the audience’s reaction to the \"what\"?",
+      tag: "Executive Framing",
+      context: "C-Suite Briefing"
+    },
+    social: {
+      title: "Marketing & Comms Story Arc Rehearsal",
+      action: "Practice your next high-stakes pitch with a Marketing or Communications leader to refine its story arc and emotional resonance.",
+      reflection: "Which data point were you over-emphasizing at the expense of the core story?",
+      tag: "Pitch Calibration",
+      context: "Cross-Functional Coaching"
+    },
+    formal: {
+      title: "Persuasive Executive Storytelling Principles",
+      action: "Study principles of persuasive presentations and executive storytelling.",
+      reflection: "Does your current executive reporting format inspire action or just transfer information?",
+      tag: "Storytelling Study",
+      context: "Executive Comms"
+    },
+    managerUnblocker: "Block time to review the director's narrative structure before their next major stakeholder presentation, focusing strictly on framing rather than facts.",
+    managerCoachingQuestion: "As you reframed your operational update into business impact, what detail was hardest to cut, and let's review the narrative arc together before your next pitch?"
+  },
+
+  // =========================================================================
+  // DIRECTOR TIER: CHANGE MANAGEMENT
+  // =========================================================================
+
+  "Change Communication": {
+    experiential: {
+      title: "90-Day Post-Restructure Transparency Cadence",
+      action: "Following a major organizational restructure, redesign your department’s communication cadence to over-index on stability and transparent Q&A for 90 days.",
+      reflection: "What recurring question indicated a persistent lack of trust in the new structural model?",
+      tag: "Change Cadence",
+      context: "90-Day Transition"
+    },
+    social: {
+      title: "Critical Mid-Level Manager Advisory Council",
+      action: "Form an advisory council of mid-level managers who are critical of an upcoming change, and listen strictly to understand their operational friction points.",
+      reflection: "What valid operational concern was hiding beneath their resistance to change?",
+      tag: "Listening Council",
+      context: "Manager Feedback"
+    },
+    formal: {
+      title: "Kotter's 8-Step Change Leadership Process",
+      action: "Study the Kotter 8-Step Process for Leading Change.",
+      reflection: "In your last major rollout, which of Kotter's steps did the organization skip, resulting in friction?",
+      tag: "Change Framework",
+      context: "Methodology Study"
+    },
+    managerUnblocker: "Brainstorm ways the director could orchestrate an immediate, localized team-building or offsite events during a heavy organizational transition.",
+    managerCoachingQuestion: "What recurring Q&A themes are signaling lingering uncertainty on your team, and how can we design a localized offsite to rebuild stability and trust?"
+  },
+
+  "Cultural Stewardship": {
+    experiential: {
+      title: "Systemic Cultural Norm Redesign",
+      action: "Identify one embedded team norm that is slowing the department down, and implement a systemic structural change that’s better aligned to your ideal working culture.",
+      reflection: "Which team members resisted the disruption most, and what incentive were they protecting?",
+      tag: "Culture Redesign",
+      context: "Structural Change"
+    },
+    social: {
+      title: "Post-Pivot Morale Leadership Shadowing",
+      action: "Shadow a leader who recently guided their team through a difficult merger or pivot, focusing on how they maintained team morale.",
+      reflection: "How did they balance acknowledging the difficulty of the change while insisting on forward momentum?",
+      tag: "Executive Shadowing",
+      context: "Morale Stewardship"
+    },
+    formal: {
+      title: "Change Fatigue & the Valley of Despair",
+      action: "Read organizational psychology research on change fatigue and the \"valley of despair.\"",
+      reflection: "Is your current communication plan demanding enthusiasm when the team is still processing the loss of the old system?",
+      tag: "Org Psychology",
+      context: "Research Study"
+    },
+    managerUnblocker: "Visibly adopt the new cultural norm yourself, ensuring the C-suite mirrors the behavior the director is trying to instill.",
+    managerCoachingQuestion: "Which embedded norm are you targeting to shift, and what specific behavior do you need me to visibly model at the executive level to reinforce it?"
+  },
+
+  "Transformation Architecture": {
+    experiential: {
+      title: "Active Executive Sponsorship in Weekly Town Halls",
+      action: "Sponsor a major technical or structural rollout, actively participating in weekly town halls rather than delegating the messaging to managers.",
+      reflection: "How did your visible, continued presence alter the pace of team adoption?",
+      tag: "Active Sponsorship",
+      context: "Weekly Town Halls"
+    },
+    social: {
+      title: "External Change Expert Rollout Audit",
+      action: "Connect with an external consultant or change management expert to audit your transformation rollout plan for blind spots.",
+      reflection: "Where did your timeline underestimate the human capacity to absorb new processes?",
+      tag: "External Audit",
+      context: "Rollout Calibration"
+    },
+    formal: {
+      title: "Enterprise Transformation: Installation vs. Adoption",
+      action: "Review case studies of failed enterprise transformations to understand the difference between installing a system and achieving adoption.",
+      reflection: "Which metric are you currently using that measures installation rather than real behavioral change?",
+      tag: "Case Study",
+      context: "Adoption Metrics"
+    },
+    managerUnblocker: "Align the director’s bonus or OKRs directly to the successful, sustained adoption of an important transformation, not just its initial launch date.",
+    managerCoachingQuestion: "What leading indicators show true behavioral adoption beyond launch day, and how should we align your quarterly OKRs to reflect sustained transformation?"
+  },
+
+  // =========================================================================
+  // DIRECTOR TIER: TALENT ARCHITECTURE
+  // =========================================================================
+
+  "Capability Modeling": {
+    experiential: {
+      title: "24-Month Strategic Capability Gap Map",
+      action: "Map the department's current skill sets against the 3-year strategic roadmap to identify specific capabilities to hire or cultivate in the next 24 months.",
+      reflection: "What current capability will become obsolete first, and what is the transition plan to cultivate its alternative?",
+      tag: "Capability Mapping",
+      context: "3-Year Roadmap"
+    },
+    social: {
+      title: "HR & Talent Acquisition Future-Skills Review",
+      action: "Meet with the head of HR or Talent Acquisition to evaluate the gap between your leadership team's current capabilities and the skills required for the future.",
+      reflection: "Are you over-valuing historical tenure over future-ready skill sets?",
+      tag: "Talent Partnership",
+      context: "Leadership Audit"
+    },
+    formal: {
+      title: "Enterprise Workforce Planning Case Studies",
+      action: "Review case studies on workforce planning and closing enterprise talent gaps.",
+      reflection: "How much of your hiring budget is currently reactive backfilling versus proactive capability building?",
+      tag: "Workforce Planning",
+      context: "Case Study"
+    },
+    managerUnblocker: "Critically discuss headcount requests that are specifically earmarked for future capabilities rather than immediate operational relief.",
+    managerCoachingQuestion: "Which emerging capability on your 24-month map carries the highest strategic risk if we delay hiring, and how should we ring-fence headcount for it now?"
+  },
+
+  "Org Design": {
+    experiential: {
+      title: "Anti-Silo Departmental Restructure Proposal",
+      action: "Draft a proposal to restructure a sub-set of your department to eliminate systemic silos or rethink historical reporting preferences.",
+      reflection: "How much of your current org chart is built around legacy personalities rather than business logic?",
+      tag: "Org Restructuring",
+      context: "Structural Proposal"
+    },
+    social: {
+      title: "Unbiased Talent Gap Mentoring with HiPo Manager",
+      action: "Mentor a high-potential manager on how to evaluate their own team's talent gaps without bias, considering what it may take to reset.",
+      reflection: "What blind spots did the manager have about their team that you might also implicitly have about yours?",
+      tag: "Talent Mentorship",
+      context: "Leadership Calibration"
+    },
+    formal: {
+      title: "Organizational Design & Spans of Control",
+      action: "Complete a masterclass on organizational design and spans of control.",
+      reflection: "Where in your department is the organizational structure enabling bottlenecks rather than empowering fast decisions?",
+      tag: "Org Design Study",
+      context: "Executive Masterclass"
+    },
+    managerUnblocker: "Protect the director from political blowback when they propose structural changes that will improve the health of the broader enterprise.",
+    managerCoachingQuestion: "Where is our current reporting structure reflecting legacy habits instead of business logic, and what political friction should I prepare to absorb as you propose changes?"
+  },
+
+  "Succession Pipeline": {
+    experiential: {
+      title: "Leadership Bench 9-Box & Ready-Now Successors",
+      action: "Build a formal 9-box grid for your entire leadership bench, explicitly identifying at least two immediate \"ready now\" successors for your own role.",
+      reflection: "If you had to take a 3-month leave tomorrow, where would the leadership structure fracture first?",
+      tag: "Succession Grid",
+      context: "Bench Planning"
+    },
+    social: {
+      title: "Executive Leadership Stay Interviews",
+      action: "Conduct \"stay interviews\" with three leaders to understand what structural changes would guarantee their retention.",
+      reflection: "Which retention factor was completely outside of financial compensation?",
+      tag: "Retention Inquiry",
+      context: "Leader 1-on-1s"
+    },
+    formal: {
+      title: "Enterprise Succession & Key-Person Risk Mitigation",
+      action: "Study best practices in enterprise succession planning and mitigating key-person risk.",
+      reflection: "Is your current successor being actively groomed, or just assumed?",
+      tag: "Succession Study",
+      context: "Risk Mitigation"
+    },
+    managerUnblocker: "Facilitate executive exposure for the director’s identified successors by inviting them to present at a senior leadership sync.",
+    managerCoachingQuestion: "Who are your two ready-now successors from the 9-box exercise, and which upcoming senior leadership sync should we invite them to present at?"
+  },
+
+  // =========================================================================
+  // DIRECTOR TIER: FISCAL GOVERNANCE
+  // =========================================================================
+
+  "Macro Budget Control": {
+    experiential: {
+      title: "Bottom-Up Zero-Based Departmental Budget",
+      action: "Build a zero-based budget for your department for the upcoming fiscal year, justifying every expense from the bottom up rather than carrying over historical baselines.",
+      reflection: "What legacy expense did you discover that was completely misaligned with the current strategy?",
+      tag: "Zero-Based Budget",
+      context: "Annual Fiscal Plan"
+    },
+    social: {
+      title: "Cross-Departmental Cost Consolidation Workshop",
+      action: "Facilitate a cross-departmental workshop with peer directors to identify shared operational redundancies that can be consolidated to save enterprise costs.",
+      reflection: "Where does departmental pride prevent logical financial consolidation?",
+      tag: "Peer Workshop",
+      context: "Cost Optimization"
+    },
+    formal: {
+      title: "Departmental P&Ls, Balance Sheets & EBITDA",
+      action: "Read executive literature on how departmental P&Ls roll up to impact the corporate balance sheet and EBITDA.",
+      reflection: "How do your department's specific spending patterns impact the company's overall cash runway?",
+      tag: "Financial Literacy",
+      context: "Executive Reading"
+    },
+    managerUnblocker: "Grant the director authority to reinvest a portion of the hard savings they generate back into their own department’s innovation fund.",
+    managerCoachingQuestion: "What misaligned legacy spend did your zero-based budget uncover, and how would you reinvest a share of those savings into departmental innovation?"
+  },
+
+  "Risk & Governance": {
+    experiential: {
+      title: "Strategic Bet Leadership Pre-Mortem",
+      action: "Run a \"pre-mortem\" exercise with your leadership team for the department's largest strategic bet this year, mapping all regulatory, financial, and operational failure points.",
+      reflection: "Which identified risk currently has no mitigation owner?",
+      tag: "Risk Pre-Mortem",
+      context: "Strategic Governance"
+    },
+    social: {
+      title: "Legal & Compliance Regulatory Guardrail Audit",
+      action: "Partner with Legal or Compliance to audit your department's current operational guardrails against upcoming industry regulations.",
+      reflection: "Where is the department currently accepting an unacceptable level of informal risk?",
+      tag: "Compliance Audit",
+      context: "Cross-Functional Review"
+    },
+    formal: {
+      title: "Enterprise Risk Management (ERM) & Governance",
+      action: "Complete a module on enterprise risk management (ERM) and corporate governance.",
+      reflection: "Does your culture reward hiding risks or surfacing them early?",
+      tag: "ERM Framework",
+      context: "Governance Module"
+    },
+    managerUnblocker: "Actively support the director in slowing down a major launch if the pre-mortem uncovers a severe, unmitigated compliance or financial risk.",
+    managerCoachingQuestion: "What unowned failure point surfaced in your pre-mortem that worries you most, and do we need to pause or re-sequence any launch timelines to mitigate it?"
+  },
+
+  "ROI Evaluation": {
+    experiential: {
+      title: "Portfolio ROI Audit & Low-Return Sunset",
+      action: "Audit the three most expensive initiatives in your portfolio and formally propose killing the one with the lowest projected long-term ROI, regardless of sunk costs.",
+      reflection: "What emotional or political attachment made it difficult to recommend sunsetting this investment?",
+      tag: "Portfolio Audit",
+      context: "Capital Discipline"
+    },
+    social: {
+      title: "CFO / VP Finance Capital Allocation Deconstruction",
+      action: "Partner with the CFO or a VP of Finance to deconstruct the capital allocation model used at the enterprise level.",
+      reflection: "How does the enterprise definition of capital efficiency differ from your localized departmental view?",
+      tag: "Finance Partnership",
+      context: "Capital Allocation"
+    },
+    formal: {
+      title: "Advanced Financial Modeling (NPV & IRR)",
+      action: "Study advanced financial modeling and the nuances of calculating NPV (Net Present Value) and IRR (Internal Rate of Return) for large strategic bets.",
+      reflection: "Are you currently justifying investments using hard financial returns or vague strategic benefits?",
+      tag: "Financial Modeling",
+      context: "Quantitative Study"
+    },
+    managerUnblocker: "Publicly support the director's decision to kill a popular but low-ROI \"pet project,\" absorbing some of the resulting organizational friction.",
+    managerCoachingQuestion: "Which high-cost initiative failed your long-term ROI audit, and how can I publicly back your sunsetting decision to absorb stakeholder friction?"
   }
 };
 
@@ -974,15 +1384,15 @@ export function buildTailoredPrompt({ level = "Professional", tier = "ic", bluep
   const compLines = blueprints.map(bp => {
     return `• ${bp.name} (${bp.category})
     - Daily Micro-Habit: "${bp.microHabit}"
-    - 70% Experiential Target: ${bp.experiential.action}
-    - 20% Social Mentorship: ${bp.social.action}
-    - 10% Formal Study: ${bp.formal.action}
-    - ${unblockerLabel}: ${bp.managerUnblocker}`;
+    - Experiential Target: ${bp.experiential?.action || ''}
+    - Social Mentorship: ${bp.social?.action || ''}
+    - Formal Study: ${bp.formal?.action || ''}
+    - ${unblockerLabel}: ${bp.managerUnblocker || ''}`;
   }).join('\n\n');
 
   return `I am currently working as a ${level} looking to accelerate my leadership growth and alignment with our organizational values.
 
-Here are my selected target focus areas and 70-20-10 growth blueprint:
+Here are my selected target focus areas and professional growth blueprint:
 
 ${compLines}
 
@@ -991,3 +1401,5 @@ Please act as an executive leadership coach and generate:
 2. A ${scriptLabel}: 3 targeted questions I can bring to my ${partnerNoun} to secure their sponsorship and unblocking commitments.
 3. 3 Reflective Journaling Prompts for my 30-day self-evaluation to measure behavioral change.`;
 }
+
+export const generateCoachingPrompt = buildTailoredPrompt;

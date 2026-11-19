@@ -41,6 +41,24 @@ const managerCompetencies = [
   "Milestone Translation"
 ];
 
+const directorCompetencies = [
+  "Horizon Scanning",
+  "Strategic Prioritization",
+  "Vision Articulation",
+  "Cross-Silo Coalition",
+  "Executive Consensus",
+  "Narrative Framing",
+  "Change Communication",
+  "Cultural Stewardship",
+  "Transformation Architecture",
+  "Capability Modeling",
+  "Org Design",
+  "Succession Pipeline",
+  "Macro Budget Control",
+  "Risk & Governance",
+  "ROI Evaluation"
+];
+
 const inserts = [];
 let sort = 0;
 
@@ -62,6 +80,7 @@ function addTierInserts(competencies, tier) {
 
 addTierInserts(icCompetencies, "ic");
 addTierInserts(managerCompetencies, "manager");
+addTierInserts(directorCompetencies, "director");
 
 const sql = `-- =========================================================================
 -- Supabase Schema & Seed Migration: 70-20-10 Learning Interventions Table
@@ -112,7 +131,7 @@ BEGIN
     END IF;
 END $$;
 
--- 5. Seed all 30 Learning Interventions (90 rows: 45 IC + 45 Manager across 70%, 20%, 10%)
+-- 5. Seed all 45 Learning Interventions (135 rows: 45 IC + 45 Manager + 45 Director across 70%, 20%, 10%)
 INSERT INTO public.interventions (
     id, tier, category, competency, bucket, bucket_percentage,
     title, action, reflection, tag, context_modifier,
